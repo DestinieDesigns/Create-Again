@@ -162,21 +162,35 @@ export const CreativeThemesSection: React.FC<CreativeThemesSectionProps> = ({
         })}
       </div>
 
-      {/* Active Theme Status & Action Banner if theme selected */}
-      {currentTheme && (
-        <div className="mt-4 p-3.5 rounded-2xl bg-[#FCFAF6] border border-[#E8E0D5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Active Theme Status & Action Banner if theme selected (Point 39) */}
+      {currentTheme && currentTheme.id !== 'none' && (
+        <div className="mt-4 p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs text-[#7A6E63] font-handwriting text-base">
-              Active theme: <strong>{currentTheme.name}</strong> — {currentTheme.description}
-            </span>
+            <span className="w-2 h-2 rounded-full bg-[#E06D53]" />
+            <div className="text-left">
+              <span className="text-xs text-[#7A6E63] font-handwriting text-base block">
+                Last time you explored <strong>{currentTheme.name}</strong>.
+              </span>
+              <span className="text-[11px] text-[#8A7D71]">
+                {currentTheme.description}
+              </span>
+            </div>
           </div>
-          <button
-            onClick={() => onStartWithTheme(currentTheme.id)}
-            className="px-4 py-2 rounded-xl bg-[#E06D53] hover:bg-[#CF5E45] text-white text-xs font-extrabold shrink-0 shadow-xs active:scale-95 transition-all flex items-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>START {currentTheme.name.toUpperCase()} ADVENTURE</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onStartWithTheme(currentTheme.id)}
+              className="px-4 py-2 rounded-xl bg-[#2D2723] hover:bg-[#433B35] text-white text-xs font-extrabold shrink-0 shadow-xs active:scale-95 transition-all flex items-center gap-1.5 min-h-[40px]"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#E5B574]" />
+              <span>USE {currentTheme.name.toUpperCase()} AGAIN</span>
+            </button>
+            <button
+              onClick={onOpenThemeModal}
+              className="px-3.5 py-2 rounded-xl border border-[#D5C9BC] hover:bg-[#EFE9DF] text-xs font-bold text-[#554A40] transition-colors min-h-[40px]"
+            >
+              CHANGE
+            </button>
+          </div>
         </div>
       )}
     </section>

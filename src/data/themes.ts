@@ -295,6 +295,8 @@ export function getRandomTheme(): CreativeTheme {
 
 export const LAST_THEME_STORAGE_KEY = 'create_again_last_theme';
 
+export const THEMES = CREATIVE_THEMES;
+
 export function getLastChosenThemeId(): string | null {
   try {
     return localStorage.getItem(LAST_THEME_STORAGE_KEY);

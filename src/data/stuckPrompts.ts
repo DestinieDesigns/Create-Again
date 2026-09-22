@@ -72,3 +72,11 @@ export const STUCK_SUGGESTIONS: StuckSuggestion[] = [
     subtext: "Let your pen wander without judging where it goes.",
   },
 ];
+
+export type StuckRescueIdea = StuckSuggestion;
+
+export function getStuckRescueIdea(category?: string, themeId?: string): StuckRescueIdea {
+  const index = Math.floor(Math.random() * STUCK_SUGGESTIONS.length);
+  return STUCK_SUGGESTIONS[index];
+}
+

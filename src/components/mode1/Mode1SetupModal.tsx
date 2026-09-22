@@ -3,45 +3,35 @@ import {
   X,
   Clock,
   Sparkles,
-  BookOpen,
-  Compass,
-  Flame,
-  AlertCircle,
-  User,
-  Palette,
-  Leaf,
-  Film,
-  Layers,
-} from 'lucide-react';
-import { AdventureType, CreativePathwayId } from '../../types/prompt';
-import { getPathwayById } from '../../data/pathways';
-import { getThemeById } from '../../data/themes';
-import { ThemeChooserModal } from '../theme/ThemeChooserModal';
-import {
+  ArrowRight,
+  HelpCircle,
   Trees,
   Footprints,
   Coffee,
   Rocket,
   Ghost,
   Gamepad2,
+  BookMarked,
   Shapes,
   MapPin,
   Dices,
   CircleOff,
 } from 'lucide-react';
+import { AdventureType, CreativePathwayId } from '../../types/prompt';
+import { THEMES, getThemeById } from '../../data/themes';
 
 interface Mode1SetupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onStartSession: (
     duration: number | null,
-    difficulty: AdventureType,
+    adventure: AdventureType,
     pathway?: CreativePathwayId,
     themeId?: string
   ) => void;
   pathway?: CreativePathwayId;
-  onChangePathway?: () => void;
   themeId?: string;
+  onChangePathway?: () => void;
 }
 
 export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
@@ -49,21 +39,11 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   onClose,
   onStartSession,
   pathway = 'open',
-  onChangePathway,
   themeId = 'none',
 }) => {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(300); // 5 minutes default
   const [selectedAdventure, setSelectedAdventure] = useState<AdventureType>('full-adventure');
-  const [selectedPathway, setSelectedPathway] = useState<CreativePathwayId>(pathway);
   const [selectedThemeId, setSelectedThemeId] = useState<string>(themeId);
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  const [step, setStep] = useState<'configure' | 'prep'>('configure');
-
-  useEffect(() => {
-    if (pathway) {
-      setSelectedPathway(pathway);
-    }
-  }, [pathway]);
 
   useEffect(() => {
     if (themeId) {
@@ -73,362 +53,174 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
 
   if (!isOpen) return null;
 
-  const currentPathwayInfo = getPathwayById(selectedPathway);
-
-  const getPathwayIcon = (id: CreativePathwayId) => {
-    switch (id) {
-      case 'character-creator':
-        return User;
-      case 'graphic-design':
-        return Palette;
-      case 'nature-study':
-        return Leaf;
-      case 'animation':
-        return Film;
-      case 'world-builder':
-        return Compass;
-      case 'open':
-      default:
-        return Sparkles;
-    }
-  };
-
-  const PathwayIcon = getPathwayIcon(selectedPathway);
-
   const durationOptions = [
-    { label: '2 MINUTES', value: 120, desc: 'Quick spark' },
-    { label: '5 MINUTES', value: 300, desc: 'Sweet spot' },
-    { label: '10 MINUTES', value: 600, desc: 'Good rhythm' },
-    { label: '20 MINUTES', value: 1200, desc: 'Deep flow' },
-    { label: 'NO TIMER', value: null, desc: 'Pure freedom' },
+    { label: '2 MIN', value: 120 },
+    { label: '5 MIN', value: 300 },
+    { label: '10 MIN', value: 600 },
+    { label: '20 MIN', value: 1200 },
+    { label: 'NO TIMER', value: null },
   ];
 
   const adventureOptions: {
     id: AdventureType;
-    title: string;
-    description: string;
-    icon: typeof Sparkles;
+    label: string;
+    desc: string;
   }[] = [
-    {
-      id: 'tiny-mystery',
-      title: 'Tiny Mystery',
-      description: '3–5 gentle shape ideas to get past the blank page.',
-      icon: Sparkles,
-    },
-    {
-      id: 'short-adventure',
-      title: 'Short Adventure',
-      description: '6–8 ideas. A neat, fast creative journey.',
-      icon: Compass,
-    },
-    {
-      id: 'full-adventure',
-      title: 'Full Adventure',
-      description: '10–15 ideas with twists, connections, and surprises.',
-      icon: BookOpen,
-    },
-    {
-      id: 'deep-dive',
-      title: 'Deep Dive',
-      description: '15+ ideas for a densely filled, rich sketchbook page.',
-      icon: Flame,
-    },
-    {
-      id: 'chaos',
-      title: 'Chaos Mode',
-      description: 'High randomness, weird rules, and unexpected collisions.',
-      icon: Sparkles,
-    },
+    { id: 'tiny-mystery', label: 'Tiny Mystery', desc: '3–5 quick steps' },
+    { id: 'short-adventure', label: 'Short Adventure', desc: '6–8 prompts' },
+    { id: 'full-adventure', label: 'Full Adventure', desc: '10–12 prompts' },
+    { id: 'deep-dive', label: 'Deep Dive', desc: '15+ prompts' },
+    { id: 'chaos', label: 'Chaos', desc: 'Wild unexpected twists' },
   ];
 
   const handleStart = () => {
-    onStartSession(selectedDuration, selectedAdventure, selectedPathway, selectedThemeId);
-    setStep('configure');
+    onStartSession(selectedDuration, selectedAdventure, pathway, selectedThemeId);
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-[#FCFAF6] rounded-3xl p-6 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
-        {/* Close Button */}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="What Comes Next setup"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+    >
+      <div className="relative w-full max-w-2xl bg-[#FCFAF6] rounded-3xl p-5 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
         <button
-          onClick={() => {
-            setStep('configure');
-            onClose();
-          }}
-          className="absolute top-6 right-6 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158] transition-colors"
+          onClick={onClose}
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {step === 'configure' ? (
+        {/* Header */}
+        <div className="text-left pb-4 border-b border-[#E8E0D5]">
+          <div className="text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
+            <span>Signature Mode</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight mt-1 font-sans">
+            WHAT COMES NEXT?
+          </h2>
+          <p className="text-sm sm:text-base text-[#5C5249] mt-1 font-medium">
+            You won't know what happens next. Grab your sketchbook or open your drawing tablet, then let the adventure begin.
+          </p>
+        </div>
+
+        {/* Configuration Sections */}
+        <div className="space-y-6 my-6 text-left">
+          {/* 1. TIME */}
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-[#E06D53] font-mono-code mb-1">
-              What Comes Next?
+            <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] mb-2.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              <span>TIME</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight">
-              Set up your drawing adventure
-            </h2>
-            <p className="text-sm font-handwriting text-lg text-[#655A51] mt-1">
-              Choose your time and style. You draw on your paper, one prompt at a time.
-            </p>
-
-            {/* Configuration Row: Pathway & Theme */}
-            <div className="mt-5 space-y-2.5">
-              {/* Selected Pathway Card */}
-              <div className="p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
-                    style={{
-                      backgroundColor: `${currentPathwayInfo.accentColor}18`,
-                      borderColor: `${currentPathwayInfo.accentColor}40`,
-                      color: currentPathwayInfo.accentColor,
-                    }}
-                  >
-                    <PathwayIcon className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
-                        Pathway (How You Practice)
-                      </span>
-                      <span
-                        className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code ${currentPathwayInfo.badgeColor}`}
-                      >
-                        {currentPathwayInfo.badge}
-                      </span>
-                    </div>
-                    <div className="text-sm font-extrabold text-[#2D2723] truncate">
-                      {currentPathwayInfo.name}
-                    </div>
-                    <div className="text-xs text-[#6B6056] truncate">
-                      {currentPathwayInfo.tagline}
-                    </div>
-                  </div>
-                </div>
-
-                {onChangePathway && (
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {durationOptions.map((opt) => {
+                const isSelected = selectedDuration === opt.value;
+                return (
                   <button
-                    type="button"
-                    onClick={onChangePathway}
-                    className="px-3 py-1.5 rounded-xl border border-[#D8CEBE] text-xs font-bold text-[#5C5046] hover:bg-[#EFE9DF] transition-colors shrink-0"
-                  >
-                    CHANGE
-                  </button>
-                )}
-              </div>
-
-              {/* Selected Creative Theme Card */}
-              <div className="p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#EFE9DF] text-[#E06D53]">
-                    {selectedThemeId === 'surprise' ? (
-                      <Dices className="w-5 h-5" />
-                    ) : selectedThemeId === 'none' || !selectedThemeId ? (
-                      <CircleOff className="w-5 h-5 text-[#7A6E63]" />
-                    ) : (
-                      <Sparkles className="w-5 h-5" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
-                        Creative Theme (What You Create)
-                      </span>
-                      <span className="text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code bg-[#E8DDD1] text-[#6E5D4F]">
-                        {selectedThemeId === 'surprise'
-                          ? 'Surprise Me'
-                          : selectedThemeId === 'none' || !selectedThemeId
-                          ? 'Open / None'
-                          : getThemeById(selectedThemeId)?.name || 'Theme'}
-                      </span>
-                    </div>
-                    <div className="text-sm font-extrabold text-[#2D2723] truncate">
-                      {selectedThemeId === 'surprise'
-                        ? 'Surprise Me'
-                        : selectedThemeId === 'none' || !selectedThemeId
-                        ? 'No Specific Theme'
-                        : getThemeById(selectedThemeId)?.name}
-                    </div>
-                    <div className="text-xs text-[#6B6056] truncate">
-                      {selectedThemeId === 'surprise'
-                        ? 'A surprise theme will be selected for this adventure'
-                        : selectedThemeId === 'none' || !selectedThemeId
-                        ? 'Prompts drawn from the complete creative library'
-                        : getThemeById(selectedThemeId)?.description}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsThemeModalOpen(true)}
-                  className="px-3 py-1.5 rounded-xl border border-[#D8CEBE] text-xs font-bold text-[#5C5046] hover:bg-[#EFE9DF] transition-colors shrink-0"
-                >
-                  CHANGE
-                </button>
-              </div>
-            </div>
-
-            {/* Time Selector */}
-            <div className="mt-6">
-              <label className="text-xs font-bold uppercase tracking-wider text-[#7A6D63] block mb-2.5 font-mono-code">
-                Session Duration
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {durationOptions.map((opt, i) => (
-                  <button
-                    key={i}
+                    key={opt.label}
                     onClick={() => setSelectedDuration(opt.value)}
-                    className={`p-3 rounded-xl border-2 text-left transition-all ${
-                      selectedDuration === opt.value
-                        ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-sm'
-                        : 'bg-[#FAF7F2] text-[#4A4037] border-[#E8E0D5] hover:border-[#C4B7A6]'
+                    className={`py-3 px-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[44px] ${
+                      isSelected
+                        ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-xs'
+                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
                     }`}
                   >
-                    <div className="text-xs font-extrabold tracking-wide">{opt.label}</div>
-                    <div
-                      className={`text-[10px] ${
-                        selectedDuration === opt.value ? 'text-[#D5C9BD]' : 'text-[#8C7E72]'
-                      }`}
-                    >
-                      {opt.desc}
-                    </div>
+                    {opt.label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Adventure Style */}
-            <div className="mt-6">
-              <label className="text-xs font-bold uppercase tracking-wider text-[#7A6D63] block mb-2.5 font-mono-code">
-                Adventure Style
-              </label>
-              <div className="space-y-2">
-                {adventureOptions.map((adv) => {
-                  const Icon = adv.icon;
-                  const isSelected = selectedAdventure === adv.id;
-                  return (
-                    <button
-                      key={adv.id}
-                      onClick={() => setSelectedAdventure(adv.id)}
-                      className={`w-full p-3.5 rounded-xl border-2 text-left flex items-center justify-between transition-all ${
-                        isSelected
-                          ? 'bg-[#F2ECE3] border-[#2D2723] shadow-xs'
-                          : 'bg-[#FAF7F2] border-[#E8E0D5] hover:border-[#D5C8B8]'
+          {/* 2. ADVENTURE LENGTH */}
+          <div>
+            <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] mb-2.5">
+              ADVENTURE
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {adventureOptions.map((adv) => {
+                const isSelected = selectedAdventure === adv.id;
+                return (
+                  <button
+                    key={adv.id}
+                    onClick={() => setSelectedAdventure(adv.id)}
+                    className={`p-3 rounded-xl border-2 text-left transition-all min-h-[48px] ${
+                      isSelected
+                        ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-xs'
+                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
+                    }`}
+                  >
+                    <span className="block text-xs font-bold">{adv.label}</span>
+                    <span
+                      className={`block text-[11px] mt-0.5 ${
+                        isSelected ? 'text-[#FAF7F2]/80' : 'text-[#8A7D71]'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                            isSelected
-                              ? 'bg-[#2D2723] text-[#FAF7F2]'
-                              : 'bg-[#EFE9DF] text-[#7A6E63]'
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-extrabold text-[#2D2723]">
-                            {adv.title}
-                          </div>
-                          <div className="text-xs text-[#6B6056]">{adv.description}</div>
-                        </div>
-                      </div>
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                          isSelected ? 'border-[#2D2723] bg-[#2D2723]' : 'border-[#C4B7A6]'
-                        }`}
-                      >
-                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#FAF7F2]" />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                      {adv.desc}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          </div>
 
-            <div className="mt-8 pt-4 border-t border-[#E8E0D5] flex items-center justify-between">
-              <span className="text-xs font-handwriting text-base text-[#7A6E63]">
-                No plan needed.
+          {/* 3. THEME */}
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
+                THEME
+              </div>
+              <span className="text-xs text-[#8A7D71]">
+                Active: {getThemeById(selectedThemeId)?.name || 'Surprise Me'}
               </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {THEMES.slice(0, 8).map((thm) => {
+                const isSelected = selectedThemeId === thm.id;
+                return (
+                  <button
+                    key={thm.id}
+                    onClick={() => setSelectedThemeId(thm.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all min-h-[40px] ${
+                      isSelected
+                        ? 'bg-[#2D2723] text-white border-[#2D2723]'
+                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
+                    }`}
+                  >
+                    {thm.name}
+                  </button>
+                );
+              })}
               <button
-                onClick={() => setStep('prep')}
-                className="px-6 py-3 rounded-xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-sm hover:bg-[#433B35] transition-all shadow-sm active:scale-95"
+                onClick={() => setSelectedThemeId('surprise')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all min-h-[40px] ${
+                  selectedThemeId === 'surprise'
+                    ? 'bg-[#E06D53] text-white border-[#E06D53]'
+                    : 'bg-[#FFF2E6] border-[#F5C7BC] text-[#E06D53] hover:bg-[#FFE6D4]'
+                }`}
               >
-                NEXT: PREPARE PAGE
+                Surprise Me
               </button>
             </div>
           </div>
-        ) : (
-          /* Step 2: Physical Preparation Screen */
-          <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#EFE9DF] text-[#2D2723] flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="w-8 h-8 text-[#E06D53]" />
-            </div>
+        </div>
 
-            <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-              Before You Start
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight mt-1">
-              Grab your physical tools
-            </h2>
-
-            <div className="mt-6 bg-[#FAF7F2] rounded-2xl border-2 border-[#E8E0D5] p-5 text-left space-y-3.5 max-w-md mx-auto">
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#E06D53] text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  1
-                </span>
-                <p className="text-sm text-[#4A4037]">
-                  <strong>Grab something to draw with:</strong> A sketchbook, scrap paper, pen, pencil, marker, or drawing tablet.
-                </p>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#E06D53] text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  2
-                </span>
-                <p className="text-sm text-[#4A4037]">
-                  <strong>Put your drawing surface somewhere comfortable.</strong>
-                </p>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-full bg-[#E06D53] text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                  3
-                </span>
-                <p className="text-sm text-[#4A4037]">
-                  <strong>Tip:</strong> Keep Create Again beside your sketchbook so you can easily check the next instruction.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                onClick={() => setStep('configure')}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl border border-[#D5C8B8] text-xs font-bold text-[#6D6156] hover:bg-[#EFE9DF]"
-              >
-                BACK
-              </button>
-              <button
-                onClick={handleStart}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
-              >
-                READY? START DRAWING
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Start Button */}
+        <div className="pt-4 border-t border-[#E8E0D5]">
+          <button
+            onClick={handleStart}
+            className="w-full py-4 px-6 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-base hover:bg-[#433B35] transition-all shadow-md active:scale-98 flex items-center justify-center gap-2.5 min-h-[52px]"
+          >
+            <Sparkles className="w-4 h-4 text-[#E5B574]" />
+            <span>START MYSTERY</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-
-      {/* Theme Selection Modal */}
-      <ThemeChooserModal
-        isOpen={isThemeModalOpen}
-        onClose={() => setIsThemeModalOpen(false)}
-        selectedThemeId={selectedThemeId}
-        onSelectTheme={(id) => setSelectedThemeId(id)}
-      />
     </div>
   );
 };

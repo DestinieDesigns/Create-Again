@@ -1,12 +1,35 @@
 import React, { useState } from 'react';
-import { BookOpen, Sparkles, Flame, Compass, FolderHeart, BarChart3, Settings, Menu, X, ArrowRight, Palette } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Settings,
+  Home,
+  Sparkles,
+  Flame,
+  Compass,
+  FolderHeart,
+  BarChart3,
+  BookOpen,
+  Palette,
+  ChevronDown,
+  ChevronRight,
+  ArrowRight,
+} from 'lucide-react';
 
 interface HeaderProps {
   currentTab: string;
   onNavigate: (tab: string) => void;
   onOpenCreateChooser: () => void;
   onOpenMasterSheet?: () => void;
+  onOpenSettings?: () => void;
+  onOpenWarmUp?: () => void;
+  onOpenChaos?: () => void;
+  onOpenChallenge?: () => void;
+  onOpenPathways?: () => void;
+  onOpenWhatComesNext?: () => void;
   unfinishedSessionExists: boolean;
+  mobileMenuOpen?: boolean;
+  onToggleMobileMenu?: (open: boolean) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,153 +37,368 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   onOpenCreateChooser,
   onOpenMasterSheet,
+  onOpenSettings,
+  onOpenWarmUp,
+  onOpenChaos,
+  onOpenChallenge,
+  onOpenPathways,
+  onOpenWhatComesNext,
   unfinishedSessionExists,
+  mobileMenuOpen: controlledMobileMenuOpen,
+  onToggleMobileMenu,
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [internalMenuOpen, setInternalMenuOpen] = useState(false);
+  const [createSubmenuExpanded, setCreateSubmenuExpanded] = useState(true);
 
-  const navItems = [
-    { id: 'home', label: 'Home', icon: BookOpen },
-    { id: 'create', label: 'Create', icon: Sparkles, highlight: true },
-    { id: 'master-sheet', label: 'Visual Guide', icon: Palette },
-    { id: 'practice', label: 'Warm Up', icon: Flame },
-    { id: 'challenges', label: 'Chaos', icon: Compass },
-    { id: 'collection', label: 'Collection', icon: FolderHeart },
-    { id: 'progress', label: 'Journey', icon: BarChart3 },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
-
-  const handleNavClick = (id: string) => {
-    if (id === 'create') {
-      onOpenCreateChooser();
-    } else if (id === 'master-sheet') {
-      if (onOpenMasterSheet) onOpenMasterSheet();
+  const isMenuOpen = controlledMobileMenuOpen !== undefined ? controlledMobileMenuOpen : internalMenuOpen;
+  const setMenuOpen = (val: boolean) => {
+    if (onToggleMobileMenu) {
+      onToggleMobileMenu(val);
     } else {
-      onNavigate(id);
+      setInternalMenuOpen(val);
     }
-    setMobileMenuOpen(false);
   };
 
+  const handleNav = (tab: string) => {
+    if (tab === 'settings') {
+      if (onOpenSettings) onOpenSettings();
+    } else if (tab === 'practice') {
+      if (onOpenWarmUp) onOpenWarmUp();
+      else onNavigate('practice');
+    } else if (tab === 'challenges') {
+      if (onOpenChallenge) onOpenChallenge();
+      else if (onOpenChaos) onOpenChaos();
+      else onNavigate('challenges');
+    } else if (tab === 'create') {
+      onOpenCreateChooser();
+    } else if (tab === 'master-sheet') {
+      if (onOpenMasterSheet) onOpenMasterSheet();
+    } else {
+      onNavigate(tab);
+    }
+    setMenuOpen(false);
+  };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#E8E0D5]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        {/* Brand / Logo */}
-        <button
-          onClick={() => onNavigate('home')}
-          className="flex items-center gap-2.5 text-left group transition-transform active:scale-95"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[#2D2723] text-[#FAF7F2] flex items-center justify-center shadow-sm group-hover:bg-[#433B35] transition-colors relative">
-            <BookOpen className="w-5 h-5 text-[#FAF7F2]" />
-            <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-[#E06D53] rounded-full border-2 border-[#FAF7F2]" />
-          </div>
-          <div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-[#2D2723] flex items-center gap-1.5 font-sans">
-              CREATE AGAIN
-            </span>
-            <span className="text-[11px] font-handwriting text-[#7A6F66] hidden sm:block -mt-1">
-              your sketchbook companion
-            </span>
-          </div>
-        </button>
+    <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E0D5]">
+      <div className="app-container h-15 sm:h-16 flex items-center justify-between">
+        {/* Left Slot: Mobile Menu Trigger (Mobile only) / Brand (Tablet & Desktop) */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Mobile Menu Icon (0–767px) */}
+          <button
+            onClick={() => setMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2.5 -ml-2 rounded-xl text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X className="w-5 h-5 stroke-[2.2]" /> : <Menu className="w-5 h-5 stroke-[2.2]" />}
+          </button>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${
-                  isActive
-                    ? 'bg-[#2D2723] text-[#FAF7F2] shadow-sm'
-                    : item.highlight
-                    ? 'bg-[#EFE9DF] text-[#2D2723] hover:bg-[#E4DBCF]'
-                    : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#F2ECE3]'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Desktop Quick Start CTA */}
-        <div className="hidden md:flex items-center gap-2">
-          {unfinishedSessionExists ? (
-            <button
-              onClick={() => onNavigate('what-comes-next')}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#E06D53] text-white text-xs font-bold hover:bg-[#CF5E45] shadow-sm transition-all active:scale-95 animate-pulse"
-            >
-              <span>Continue Mystery</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <button
-              onClick={onOpenCreateChooser}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#2D2723] text-[#FAF7F2] text-xs font-bold hover:bg-[#433B35] shadow-sm transition-all active:scale-95"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#E5B574]" />
-              <span>Start</span>
-            </button>
-          )}
+          {/* Brand Logo & Name */}
+          <button
+            onClick={() => handleNav('home')}
+            className="flex items-center gap-2 text-left group transition-transform active:scale-98"
+          >
+            {/* Small handmade-style icon badge */}
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#2D2723] text-[#FAF7F2] flex items-center justify-center font-bold shadow-xs">
+              <span className="font-handwriting text-lg leading-none -mt-0.5">C</span>
+            </span>
+            <div className="flex flex-col">
+              <span className="font-extrabold text-base sm:text-lg tracking-wider text-[#2D2723] font-sans">
+                CREATE AGAIN
+              </span>
+              <span className="text-[10px] font-handwriting text-[#7A6F66] hidden lg:block -mt-1 font-bold">
+                your sketchbook companion
+              </span>
+            </div>
+          </button>
         </div>
 
-        {/* Mobile menu button */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* Center / Right: Desktop & Tablet Nav */}
+        {/* Desktop Nav (1024px+): Home, Create, Practice, Challenges, Collection, Progress */}
+        <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+          <button
+            onClick={() => handleNav('home')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'home'
+                ? 'bg-[#2D2723] text-[#FAF7F2]'
+                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            Home
+          </button>
+
+          <button
+            onClick={() => handleNav('create')}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#2D2723] bg-[#EFE9DF] hover:bg-[#E5DDCF] transition-all flex items-center gap-1"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
+            <span>Create</span>
+          </button>
+
+          <button
+            onClick={() => handleNav('practice')}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
+          >
+            Practice
+          </button>
+
+          <button
+            onClick={() => handleNav('challenges')}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
+          >
+            Challenges
+          </button>
+
+          <button
+            onClick={() => handleNav('collection')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'collection'
+                ? 'bg-[#2D2723] text-[#FAF7F2]'
+                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            Collection
+          </button>
+
+          <button
+            onClick={() => handleNav('progress')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'progress'
+                ? 'bg-[#2D2723] text-[#FAF7F2]'
+                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            Progress
+          </button>
+        </nav>
+
+        {/* Tablet Nav (768–1023px): Compact horizontal tabs + more menu */}
+        <nav aria-label="Tablet Navigation" className="hidden md:flex lg:hidden items-center gap-1">
+          <button
+            onClick={() => handleNav('home')}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'home'
+                ? 'bg-[#2D2723] text-[#FAF7F2]'
+                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            Home
+          </button>
+          <button
+            onClick={() => handleNav('create')}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#2D2723] bg-[#EFE9DF] hover:bg-[#E5DDCF] transition-all"
+          >
+            Create
+          </button>
+          <button
+            onClick={() => handleNav('practice')}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
+          >
+            Practice
+          </button>
+          <button
+            onClick={() => handleNav('collection')}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'collection'
+                ? 'bg-[#2D2723] text-[#FAF7F2]'
+                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            Collection
+          </button>
+          <button
+            onClick={() => setMenuOpen(!isMenuOpen)}
+            className="p-1.5 rounded-xl text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
+            aria-label="More options"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        </nav>
+
+        {/* Right Slot: Resume button & Settings icon */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {unfinishedSessionExists && (
             <button
-              onClick={() => onNavigate('what-comes-next')}
-              className="px-2.5 py-1 rounded-full bg-[#E06D53] text-white text-[11px] font-bold"
+              onClick={() => handleNav('what-comes-next')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E06D53] text-white text-xs font-bold hover:bg-[#CF5E45] shadow-xs transition-all active:scale-95"
+              title="Resume drawing session"
             >
-              Resume
+              <span>Resume</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
+
+          {/* Settings Trigger (always accessible) */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-[#2D2723] hover:bg-[#EFE9DF] transition-colors"
-            aria-label="Toggle menu"
+            onClick={() => {
+              if (onOpenSettings) onOpenSettings();
+              else handleNav('settings');
+            }}
+            className="p-2 sm:p-2.5 rounded-xl text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Settings"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <Settings className="w-5 h-5 stroke-2" />
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#E8E0D5] bg-[#FAF7F2] px-4 py-3 space-y-1 shadow-lg">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive
-                    ? 'bg-[#2D2723] text-[#FAF7F2]'
-                    : 'text-[#5C5249] hover:bg-[#EFE9DF]'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-          <div className="pt-2">
+      {/* Mobile & Collapsed Tablet Drawer Menu */}
+      {isMenuOpen && (
+        <div
+          role="dialog"
+          aria-label="Full navigation menu"
+          className="border-b border-[#E8E0D5] bg-[#FAF7F2] px-4 py-4 space-y-1.5 shadow-lg animate-fadeIn max-h-[82vh] overflow-y-auto"
+        >
+          <div className="pb-2 mb-2 border-b border-[#E8E0D5] flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
+              Navigation
+            </span>
             <button
-              onClick={() => {
-                onOpenCreateChooser();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#2D2723] text-[#FAF7F2] font-bold text-sm shadow-sm"
+              onClick={() => setMenuOpen(false)}
+              className="text-xs font-semibold text-[#8A7D71] hover:text-[#2D2723]"
             >
-              <Sparkles className="w-4 h-4 text-[#E5B574]" />
-              <span>Choose Creative Mode</span>
+              Close
             </button>
           </div>
+
+          {/* 1. Home */}
+          <button
+            onClick={() => handleNav('home')}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
+              currentTab === 'home' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            <Home className="w-4 h-4 text-[#8A7D71]" />
+            <span>Home</span>
+          </button>
+
+          {/* 2. Create Section with Submenu */}
+          <div className="rounded-xl border border-[#E8E0D5] bg-[#FCFAF6] overflow-hidden">
+            <button
+              onClick={() => setCreateSubmenuExpanded(!createSubmenuExpanded)}
+              className="w-full flex items-center justify-between px-3.5 py-3 text-sm font-bold text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+            >
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-4 h-4 text-[#E06D53]" />
+                <span>Create</span>
+              </div>
+              {createSubmenuExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+
+            {createSubmenuExpanded && (
+              <div className="pl-9 pr-3 pb-2 space-y-1 border-t border-[#EFE9DF] pt-1">
+                <button
+                  onClick={() => {
+                    if (onOpenWhatComesNext) onOpenWhatComesNext();
+                    else handleNav('create');
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px]"
+                >
+                  <span>What Comes Next?</span>
+                  <span className="text-[10px] uppercase font-mono-code text-[#E06D53] font-bold">Mystery</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onOpenWarmUp) onOpenWarmUp();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
+                >
+                  <span>Warm Up</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onOpenChaos) onOpenChaos();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
+                >
+                  <span>Creative Chaos</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleNav('challenges');
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
+                >
+                  <span>Challenge Me</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Practice */}
+          <button
+            onClick={() => handleNav('practice')}
+            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+          >
+            <Flame className="w-4 h-4 text-[#E06D53]" />
+            <span>Practice</span>
+          </button>
+
+          {/* 4. Creative Paths */}
+          <button
+            onClick={() => {
+              if (onOpenPathways) onOpenPathways();
+              setMenuOpen(false);
+            }}
+            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+          >
+            <Compass className="w-4 h-4 text-[#2A9D8F]" />
+            <span>Creative Paths</span>
+          </button>
+
+          {/* 5. Visual Guide */}
+          {onOpenMasterSheet && (
+            <button
+              onClick={() => {
+                onOpenMasterSheet();
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+            >
+              <Palette className="w-4 h-4 text-[#4F46E5]" />
+              <span>Visual Guide (500 Prompts)</span>
+            </button>
+          )}
+
+          {/* 6. Collection */}
+          <button
+            onClick={() => handleNav('collection')}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
+              currentTab === 'collection' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            <FolderHeart className="w-4 h-4 text-[#8A7D71]" />
+            <span>Collection</span>
+          </button>
+
+          {/* 7. Progress */}
+          <button
+            onClick={() => handleNav('progress')}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
+              currentTab === 'progress' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-[#8A7D71]" />
+            <span>Progress</span>
+          </button>
+
+          {/* 8. Settings */}
+          <button
+            onClick={() => {
+              if (onOpenSettings) onOpenSettings();
+              setMenuOpen(false);
+            }}
+            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+          >
+            <Settings className="w-4 h-4 text-[#8A7D71]" />
+            <span>Settings</span>
+          </button>
         </div>
       )}
     </header>

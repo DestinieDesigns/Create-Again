@@ -121,6 +121,8 @@ export interface CreativePathway {
   accentColor: string;
 }
 
+export type Mode1Prompt = Prompt;
+
 export interface Prompt {
   id: string;
   category: PromptCategory;

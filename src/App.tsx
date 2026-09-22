@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
+import { MobileBottomNav } from './components/layout/MobileBottomNav';
 
 // Home sections
 import { HeroSection } from './components/home/HeroSection';
+import { HomeHubCards } from './components/home/HomeHubCards';
 import { CreationChooserModal } from './components/home/CreationChooserModal';
 import { FeaturedWhatComesNextCard } from './components/home/FeaturedWhatComesNextCard';
 import { ContinueSessionCard } from './components/home/ContinueSessionCard';
@@ -14,6 +16,8 @@ import { UnfinishedIdeasSection } from './components/home/UnfinishedIdeasSection
 import { FaithContentCard } from './components/home/FaithContentCard';
 import { CreativeThemesSection } from './components/home/CreativeThemesSection';
 import { ThemeChooserModal } from './components/theme/ThemeChooserModal';
+import { FirstTimeExperienceModal } from './components/home/FirstTimeExperienceModal';
+import { WhatIsCreateAgainModal } from './components/home/WhatIsCreateAgainModal';
 import { getThemeById } from './data/themes';
 
 // Mode 1 components
@@ -48,6 +52,7 @@ export default function App() {
     saveActiveSession,
     savedCreations,
     saveCreation,
+    deleteCreation,
     stats,
     trackSessionStart,
     settings,
@@ -59,6 +64,51 @@ export default function App() {
 
   // Navigation tab state
   const [currentTab, setCurrentTab] = useState<'home' | 'what-comes-next' | 'what-comes-next-completed' | 'collection' | 'progress'>('home');
+
+  // First-time visit and offline states
+  const [isFirstTimeOpen, setIsFirstTimeOpen] = useState(() => {
+    try {
+      return !localStorage.getItem('create_again_welcomed');
+    } catch {
+      return false;
+    }
+  });
+  const [isWhatIsModalOpen, setIsWhatIsModalOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleFirstTimeChoice = (flowId: 'dont-know' | 'practice' | 'experiment' | 'skills') => {
+    try {
+      localStorage.setItem('create_again_welcomed', 'true');
+    } catch {}
+    setIsFirstTimeOpen(false);
+    if (flowId === 'dont-know') {
+      setIsDontKnowOpen(true);
+    } else if (flowId === 'practice') {
+      setIsWarmUpOpen(true);
+    } else if (flowId === 'experiment') {
+      setIsChaosOpen(true);
+    } else if (flowId === 'skills') {
+      setIsCharacterProgressionOpen(true);
+    }
+  };
+
+  const handleCloseFirstTime = () => {
+    try {
+      localStorage.setItem('create_again_welcomed', 'true');
+    } catch {}
+    setIsFirstTimeOpen(false);
+  };
 
   // Modal states
   const [isChooserOpen, setIsChooserOpen] = useState(false);
@@ -491,20 +541,37 @@ export default function App() {
     }
   };
 
+  const isDrawingSession = currentTab === 'what-comes-next' && !!(activeSession && currentPrompt);
+
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#2D2723] flex flex-col font-sans selection:bg-[#E06D53] selection:text-white">
-      {/* Top Navigation Bar */}
-      <Header
-        currentTab={currentTab}
-        onNavigate={handleNavigate}
-        onOpenCreateChooser={() => setIsChooserOpen(true)}
-        onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
-        unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
-      />
+      {/* Offline Status Alert Banner (Point 46) */}
+      {!isOnline && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="bg-[#FEF6E4] border-b border-[#F0BC98] text-[#8A4A28] px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-2"
+        >
+          <span>YOU'RE OFFLINE</span>
+          <span className="font-normal text-[#5C5249]">
+            Your current creative session can still continue locally.
+          </span>
+        </div>
+      )}
 
+      {/* Top Navigation Bar (Hidden during active drawing session) */}
+      {!isDrawingSession && (
+        <Header
+          currentTab={currentTab}
+          onNavigate={handleNavigate}
+          onOpenCreateChooser={() => setIsChooserOpen(true)}
+          onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
+          unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
+        />
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className={isDrawingSession ? 'flex-1' : 'flex-1 pb-16 md:pb-0'}>
         {/* VIEW 1: Active Mode 1 Drawing Session */}
         {currentTab === 'what-comes-next' && activeSession && currentPrompt ? (
           <Mode1ActiveView
@@ -543,6 +610,7 @@ export default function App() {
             creations={savedCreations}
             onOpenCreate={() => setIsChooserOpen(true)}
             onBackToHome={() => setCurrentTab('home')}
+            onDeleteCreation={deleteCreation}
           />
         ) : currentTab === 'progress' ? (
           /* VIEW 4: Creative Journey Progress */
@@ -553,14 +621,13 @@ export default function App() {
           />
         ) : (
           /* VIEW 5: Home Screen Central Hub */
-          <div className="space-y-4">
+          <div className="app-container space-y-6">
             {/* 1. Hero Section */}
             <HeroSection
               onStartCreating={() => setIsChooserOpen(true)}
-              onDontKnowWhatToDraw={() => setIsDontKnowOpen(true)}
               onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
+              onOpenWhatIs={() => setIsWhatIsModalOpen(true)}
             />
-
 
             {/* 2. Unfinished Session Card (Only shows if unfinished session exists) */}
             <ContinueSessionCard
@@ -569,13 +636,16 @@ export default function App() {
               onStartNew={() => setIsMode1SetupOpen(true)}
             />
 
-            {/* 3. Featured Signature Mode (What Comes Next?) */}
-            <FeaturedWhatComesNextCard
-              onStartMystery={() => {
+            {/* 3. Section 8 Home Hub Cards: WHAT COMES NEXT?, I DON'T KNOW WHAT TO DRAW, QUICK ACTIVITIES */}
+            <HomeHubCards
+              onStartWhatComesNext={() => {
                 setSelectedPathway('open');
                 setIsMode1SetupOpen(true);
               }}
-              onOpenPathways={() => setIsPathwayChooserOpen(true)}
+              onOpenDontKnow={() => setIsDontKnowOpen(true)}
+              onOpenWarmUp={() => setIsWarmUpOpen(true)}
+              onOpenChaos={() => setIsChaosOpen(true)}
+              onOpenChallenge={() => setIsCharacterProgressionOpen(true)}
             />
 
             {/* 4. Creative Themes Section (Universal Theme System) */}
@@ -709,12 +779,38 @@ export default function App() {
         onSelectPrompt={handlePracticeMasterPrompt}
       />
 
-      {/* Minimalist Warm Paper Footer */}
-
-      <Footer
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenTests={() => setIsTestSuiteOpen(true)}
+      {/* First-Time Experience Onboarding Modal (Point 2 & 3) */}
+      <FirstTimeExperienceModal
+        isOpen={isFirstTimeOpen}
+        onClose={handleCloseFirstTime}
+        onOpenWhatIs={() => setIsWhatIsModalOpen(true)}
+        onSelectFlow={handleFirstTimeChoice}
       />
+
+      {/* What is Create Again? Explanation Modal */}
+      <WhatIsCreateAgainModal
+        isOpen={isWhatIsModalOpen}
+        onClose={() => setIsWhatIsModalOpen(false)}
+        onStartCreating={() => setIsChooserOpen(true)}
+      />
+
+      {/* Minimalist Warm Paper Footer (Hidden during active drawing session) */}
+      {!isDrawingSession && (
+        <Footer
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenTests={() => setIsTestSuiteOpen(true)}
+        />
+      )}
+
+      {/* Mobile Bottom Navigation Bar (Hidden during active drawing session) */}
+      {!isDrawingSession && (
+        <MobileBottomNav
+          currentTab={currentTab}
+          onNavigate={handleNavigate}
+          onOpenCreateChooser={() => setIsChooserOpen(true)}
+          unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
+        />
+      )}
     </div>
   );
 }

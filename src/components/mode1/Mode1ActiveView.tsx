@@ -1,206 +1,196 @@
 import React, { useState, useEffect } from 'react';
 import {
   Clock,
-  Pause,
   Play,
-  HelpCircle,
-  CheckCircle2,
-  Plus,
+  Pause,
   ArrowRight,
+  HelpCircle,
   BookOpen,
   Sparkles,
-  AlertCircle,
-  X,
   RefreshCw,
+  X,
+  Plus,
+  CheckCircle2,
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
-import { Prompt, PromptCategory } from '../../types/prompt';
 import { Mode1Session } from '../../types/session';
-import { STUCK_SUGGESTIONS, StuckSuggestion } from '../../data/stuckPrompts';
-import { getPathwayById } from '../../data/pathways';
-import { getThemeById } from '../../data/themes';
-import { ThemeChooserModal } from '../theme/ThemeChooserModal';
-import { getVisualReferenceForPrompt } from '../../utils/referenceService';
+import { Mode1Prompt } from '../../types/prompt';
 import { getVisualReferenceById } from '../../data/visualReferences';
+import { getStuckRescueIdea, StuckRescueIdea } from '../../data/stuckPrompts';
 import { VisualReferencePanel } from '../visual/VisualReferencePanel';
-import { VisualReferenceCard } from '../reference/VisualReferenceCard';
+import { ThemeChooserModal } from '../theme/ThemeChooserModal';
+import { getThemeById } from '../../data/themes';
+import { MICROCOPY } from '../../data/microcopy';
 
 interface Mode1ActiveViewProps {
   session: Mode1Session;
-  currentPrompt: Prompt;
+  currentPrompt: Mode1Prompt;
+  stepNumber?: number;
+  secondsRemaining?: number | null;
   onNextPrompt: () => void;
+  onPauseToggle: (isPaused: boolean) => void;
+  onExitToHome: () => void;
   onFinishSession: () => void;
   onExtendTimer: (extraSeconds: number) => void;
   onRemoveTimer: () => void;
-  onPauseToggle: (isPaused: boolean) => void;
-  onUseStuck: () => void;
-  onExitToHome: () => void;
-  onChangeTheme?: (themeId: string) => void;
+  onChangeTheme?: (newThemeId: string) => void;
+  onUseStuck?: () => void;
 }
 
 export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
   session,
   currentPrompt,
+  stepNumber: propStepNumber,
+  secondsRemaining: propSecondsRemaining,
   onNextPrompt,
+  onPauseToggle,
+  onExitToHome,
   onFinishSession,
   onExtendTimer,
   onRemoveTimer,
-  onPauseToggle,
-  onUseStuck,
-  onExitToHome,
   onChangeTheme,
+  onUseStuck,
 }) => {
+  const [isPaused, setIsPaused] = useState(false);
+  const [guidanceLevel, setGuidanceLevel] = useState<'show-all' | 'balanced' | 'minimal'>(() => {
+    try {
+      return (localStorage.getItem('create_again_guidance_level') as any) || 'balanced';
+    } catch {
+      return 'balanced';
+    }
+  });
+  const [showExample, setShowExample] = useState(() => guidanceLevel === 'show-all');
   const [stuckModalOpen, setStuckModalOpen] = useState(false);
-  const [activeStuckIdea, setActiveStuckIdea] = useState<StuckSuggestion | null>(null);
+  const [stuckLevel, setStuckLevel] = useState<1 | 2 | 3>(1);
+  const [stuckHintIndex, setStuckHintIndex] = useState<number>(0);
+  const [activeStuckIdea, setActiveStuckIdea] = useState<StuckRescueIdea | null>(null);
+  const [showStuckExample, setShowStuckExample] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [timesUpModal, setTimesUpModal] = useState(false);
+  const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
 
-  // Timer states
+  const stepNumber = propStepNumber ?? (session.promptHistory.length + 1);
+
+  // Internal countdown timer computed from session
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(() => {
-    if (!session.timerDuration || !session.timerStartedAt) return null;
-    const total = session.timerDuration + (session.timerExtraSeconds || 0);
+    if (propSecondsRemaining !== undefined) return propSecondsRemaining;
+    if (session.timerDuration === null || !session.timerStartedAt) return null;
     const elapsed = Math.floor((Date.now() - session.timerStartedAt) / 1000);
-    return Math.max(0, total - elapsed);
+    const totalAllowed = (session.timerDuration || 0) + (session.timerExtraSeconds || 0);
+    return Math.max(0, totalAllowed - elapsed);
   });
 
-  const [isPaused, setIsPaused] = useState(false);
-  const [timesUpModal, setTimesUpModal] = useState(false);
-
-  // Timer interval
   useEffect(() => {
-    if (!session.timerDuration || !session.timerStartedAt || isPaused) return;
+    if (propSecondsRemaining !== undefined) {
+      setSecondsRemaining(propSecondsRemaining);
+      return;
+    }
+
+    if (session.timerDuration === null || !session.timerStartedAt) {
+      setSecondsRemaining(null);
+      return;
+    }
+
+    const calculateRemaining = () => {
+      const elapsed = Math.floor((Date.now() - session.timerStartedAt!) / 1000);
+      const totalAllowed = (session.timerDuration || 0) + (session.timerExtraSeconds || 0);
+      return Math.max(0, totalAllowed - elapsed);
+    };
+
+    setSecondsRemaining(calculateRemaining());
 
     const interval = setInterval(() => {
-      const total = session.timerDuration! + (session.timerExtraSeconds || 0);
-      const elapsed = Math.floor((Date.now() - session.timerStartedAt!) / 1000);
-      const remaining = Math.max(0, total - elapsed);
-      setSecondsRemaining(remaining);
-
-      if (remaining === 0 && !timesUpModal) {
-        setTimesUpModal(true);
+      if (!isPaused) {
+        const rem = calculateRemaining();
+        setSecondsRemaining(rem);
+        if (rem === 0) {
+          setTimesUpModal(true);
+        }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [session.timerDuration, session.timerStartedAt, session.timerExtraSeconds, isPaused, timesUpModal]);
+  }, [session.timerDuration, session.timerStartedAt, session.timerExtraSeconds, isPaused, propSecondsRemaining]);
 
-  const [showExample, setShowExample] = useState(false);
-  const [showStuckExample, setShowStuckExample] = useState(false);
-
-  // Automatically hide reference whenever a new prompt appears
+  // Trigger time's up when secondsRemaining reaches 0
   useEffect(() => {
-    setShowExample(false);
-  }, [currentPrompt.id]);
+    if (secondsRemaining !== null && secondsRemaining === 0) {
+      setTimesUpModal(true);
+    }
+  }, [secondsRemaining]);
 
-  const visualReference = getVisualReferenceForPrompt(currentPrompt);
-
-  const formatTimer = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  // Find visual reference for current prompt
+  const visualReference = currentPrompt.visualReferenceId
+    ? getVisualReferenceById(currentPrompt.visualReferenceId)
+    : null;
 
   const handleOpenStuck = () => {
-    const random = STUCK_SUGGESTIONS[Math.floor(Math.random() * STUCK_SUGGESTIONS.length)];
-    setActiveStuckIdea(random);
+    const idea = getStuckRescueIdea(currentPrompt.category, session.themeId);
+    setActiveStuckIdea(idea);
+    setStuckLevel(1);
+    setStuckHintIndex(0);
     setShowStuckExample(false);
     setStuckModalOpen(true);
-    onUseStuck();
+    if (onUseStuck) onUseStuck();
   };
 
   const handleShuffleStuck = () => {
-    const pool = STUCK_SUGGESTIONS.filter((s) => s.id !== activeStuckIdea?.id);
-    const random = pool[Math.floor(Math.random() * pool.length)] || STUCK_SUGGESTIONS[0];
-    setActiveStuckIdea(random);
-    setShowStuckExample(false);
+    const currentHints = MICROCOPY.stuck.levels[stuckLevel - 1].hints;
+    setStuckHintIndex((prev) => (prev + 1) % currentHints.length);
   };
 
-  const getCategoryColor = (cat: PromptCategory) => {
-    switch (cat) {
-      case 'START':
-        return 'bg-[#2D2723] text-white';
-      case 'CONNECT':
-        return 'bg-[#2A9D8F] text-white';
-      case 'TRANSFORM':
-        return 'bg-[#E76F51] text-white';
-      case 'ADD':
-        return 'bg-[#DDA15E] text-[#2D2723]';
-      case 'INTERACT':
-        return 'bg-[#BC6C25] text-white';
-      case 'STORY':
-        return 'bg-[#606C38] text-white';
-      case 'CHAOS':
-        return 'bg-[#9D0208] text-white';
-      case 'DETAIL':
-        return 'bg-[#4A4E69] text-white';
-      case 'CHANGE':
-        return 'bg-[#7209B7] text-white';
-      case 'FINISH':
-        return 'bg-[#283618] text-white';
-      default:
-        return 'bg-[#4A4037] text-white';
-    }
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const stepNumber = session.usedPromptIds.length + 1;
+  const currentLevelData = MICROCOPY.stuck.levels[stuckLevel - 1];
+  const currentHint = currentLevelData.hints[stuckHintIndex % currentLevelData.hints.length];
 
   return (
-    <div className="min-h-[85vh] flex flex-col justify-between max-w-2xl mx-auto px-4 py-4 sm:py-6">
-      {/* Top Bar with abstract progress and timer */}
-      <div className="flex items-center justify-between gap-4 pb-4 border-b border-[#E8E0D5]">
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
-            <span>WHAT COMES NEXT?</span>
-          </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="font-extrabold text-base text-[#2D2723]">
-              Step {stepNumber}
-            </span>
-            {session.pathway && session.pathway !== 'open' && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE]">
-                {getPathwayById(session.pathway).name}
-              </span>
-            )}
-            {/* Active Theme Badge */}
-            {session.themeId && session.themeId !== 'none' && (
-              <button
-                type="button"
-                onClick={() => setIsThemeModalOpen(true)}
-                className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#FFF2E6] text-[#E06D53] border border-[#F5C7BC] hover:bg-[#FFE6D4] transition-colors flex items-center gap-1"
-                title="Change theme"
-              >
-                <span>Theme: {getThemeById(session.themeId)?.name || session.themeId}</span>
-              </button>
-            )}
-            {(!session.themeId || session.themeId === 'none') && (
-              <button
-                type="button"
-                onClick={() => setIsThemeModalOpen(true)}
-                className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#7A6E63] border border-[#D8CEBE] hover:bg-[#E5DDCF] transition-colors"
-                title="Set a theme"
-              >
-                + Theme
-              </button>
-            )}
-            {/* Abstract progress dots (no fixed end) */}
-            <div className="flex items-center gap-1.5 ml-1">
-              {Array.from({ length: Math.min(stepNumber, 5) }).map((_, i) => (
-                <span key={i} className="w-2 h-2 rounded-full bg-[#2D2723]" />
-              ))}
-              <span className="w-2 h-2 rounded-full bg-[#D5C9BC] animate-pulse" />
-              <span className="text-xs font-handwriting text-[#8A7D71] font-bold">
-                mystery continues...
-              </span>
-            </div>
-          </div>
+    <main
+      aria-label="Active drawing session workspace"
+      className="w-full max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-6 min-h-[calc(100vh-2rem)] flex flex-col justify-between"
+    >
+      {/* 1. Ultra-Minimal Top Session Bar */}
+      <header className="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#E8E0D5]/80">
+        {/* Left: Leave Session with safe confirmation */}
+        <button
+          onClick={() => setIsLeaveConfirmOpen(true)}
+          className="flex items-center gap-1.5 text-xs font-bold text-[#8A7D71] hover:text-[#2D2723] transition-colors min-h-[44px] -ml-1 px-2 rounded-xl hover:bg-[#EFE9DF]"
+          aria-label="Leave session"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Leave Session</span>
+          <span className="sm:hidden">Leave</span>
+        </button>
+
+        {/* Center: Step & Theme indicator */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
+            Step {stepNumber}
+          </span>
+          {session.themeId && session.themeId !== 'none' && (
+            <button
+              onClick={() => setIsThemeModalOpen(true)}
+              className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#FFF2E6] text-[#E06D53] border border-[#F5C7BC] hover:bg-[#FFE6D4] transition-colors"
+              title="Change theme"
+            >
+              {getThemeById(session.themeId)?.name || session.themeId}
+            </button>
+          )}
         </div>
 
-        {/* Timer or Pause Controls */}
-        <div className="flex items-center gap-2">
+        {/* Right: Small Secondary Timer or Untimed indicator */}
+        <div className="flex items-center gap-1.5">
           {secondsRemaining !== null ? (
-            <div className="flex items-center gap-2 bg-[#FCFAF6] border-2 border-[#E8E0D5] px-3 py-1.5 rounded-xl shadow-xs">
-              <Clock className="w-4 h-4 text-[#8A7D71]" />
+            <div className="flex items-center gap-1.5 bg-[#FCFAF6] border border-[#E8E0D5] px-2.5 py-1 rounded-xl shadow-2xs">
+              <Clock className="w-3.5 h-3.5 text-[#8A7D71]" />
               <span
-                className={`font-mono-code font-bold text-sm ${
+                className={`font-mono-code font-bold text-xs sm:text-sm ${
                   secondsRemaining <= 60 ? 'text-[#D90429] animate-pulse' : 'text-[#2D2723]'
                 }`}
               >
@@ -208,63 +198,52 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
               </span>
               <button
                 onClick={() => {
-                  const nextState = !isPaused;
-                  setIsPaused(nextState);
-                  onPauseToggle(nextState);
+                  const next = !isPaused;
+                  setIsPaused(next);
+                  onPauseToggle(next);
                 }}
-                className="p-1 hover:bg-[#EFE9DF] rounded-md text-[#786C61]"
-                title={isPaused ? 'Resume timer' : 'Pause timer'}
+                className="p-1 hover:bg-[#EFE9DF] rounded text-[#786C61]"
+                aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
               >
-                {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+                {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
               </button>
             </div>
           ) : (
-            <div className="text-xs font-mono-code text-[#7A6E63] bg-[#EFE9DF] px-3 py-1 rounded-full">
-              Untimed flow
-            </div>
+            <span className="text-[11px] font-mono-code text-[#8A7D71] bg-[#EFE9DF] px-2.5 py-1 rounded-full">
+              Untimed
+            </span>
           )}
-
-          <button
-            onClick={onExitToHome}
-            className="text-xs font-semibold text-[#8C7F73] hover:text-[#2D2723] px-2 py-1"
-          >
-            Leave
-          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Screen reminder notice */}
-      <div className="mt-3 py-1.5 px-3 bg-[#F2EDE4] rounded-xl text-center text-xs text-[#73665B] flex items-center justify-center gap-2 border border-[#E4D9CA]">
-        <BookOpen className="w-3.5 h-3.5 text-[#E06D53]" />
-        <span>
-          <strong>Your page is the canvas.</strong> Keep this screen beside your sketchbook.
-        </span>
-      </div>
-
-      {/* Time's Up Banner (non-blocking) */}
+      {/* Time's Up Banner (non-blocking, supportive alert) */}
       {timesUpModal && (
-        <div className="my-3 p-4 rounded-2xl bg-[#FFF3E8] border-2 border-[#F3BE96] shadow-sm animate-fadeIn">
+        <aside
+          aria-label="Time is up alert"
+          className="my-3 p-4 sm:p-5 rounded-2xl bg-[#FFF3E8] border-2 border-[#F3BE96] shadow-sm animate-fadeIn"
+        >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#E06D53]" />
-              <h4 className="font-extrabold text-sm sm:text-base text-[#2D2723]">
+              <h3 className="font-extrabold text-sm sm:text-base text-[#2D2723]">
                 TIME'S UP — Take a look at what you created!
-              </h4>
+              </h3>
             </div>
             <button
               onClick={() => setTimesUpModal(false)}
-              className="text-[#968475] hover:text-[#2D2723]"
+              className="text-[#968475] hover:text-[#2D2723] p-1"
+              aria-label="Dismiss alert"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-xs text-[#6E5F52] mt-1">
-            You reached your physical timer target. You can finish your piece now or keep drawing as long as you want.
+          <p className="text-xs text-[#6E5F52] mt-1.5">
+            Your timer finished. Keep creating on your paper as long as you want, or finish your session now.
           </p>
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-3.5">
             <button
               onClick={onFinishSession}
-              className="px-3.5 py-1.5 rounded-lg bg-[#2D2723] text-white text-xs font-bold"
+              className="px-4 py-2 rounded-xl bg-[#2D2723] text-white text-xs font-bold hover:bg-[#433B35] transition-all min-h-[44px]"
             >
               I'M DONE DRAWING
             </button>
@@ -273,9 +252,9 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
                 onExtendTimer(300);
                 setTimesUpModal(false);
               }}
-              className="px-3 py-1.5 rounded-lg bg-white border border-[#F3BE96] text-xs font-bold text-[#E06D53] flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-white border border-[#F3BE96] text-xs font-bold text-[#E06D53] hover:bg-[#FFF8F2] transition-all min-h-[44px] flex items-center gap-1"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
               <span>+5 MINUTES</span>
             </button>
             <button
@@ -283,129 +262,173 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
                 onRemoveTimer();
                 setTimesUpModal(false);
               }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#736355] hover:bg-[#FBEBE0]"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#736355] hover:bg-[#FBEBE0] transition-all min-h-[44px]"
             >
               CONTINUE WITHOUT TIMER
             </button>
           </div>
-        </div>
+        </aside>
       )}
 
-      {/* Main Active Prompt Card */}
-      <div className="my-auto py-6">
-        <div className="relative rounded-3xl bg-[#FAF7F2] border-3 border-[#2D2723] p-7 sm:p-10 paper-card subtle-shadow text-center">
+      {/* 2. Main Prompt Focus Area */}
+      <section className="my-auto py-4 sm:py-6">
+        <div className="rounded-3xl bg-[#FAF7F2] border-3 border-[#2D2723] p-6 sm:p-9 md:p-11 paper-card subtle-shadow text-center relative">
           {/* Subtle paper tape at top */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#E8DDD1] rotate-1 border border-[#D5C7B7] shadow-2xs" />
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 sm:w-32 h-5 bg-[#E8DDD1] rotate-1 border border-[#D5C7B7]" />
 
-          {/* Category Tag */}
-          <div className="inline-flex items-center gap-1.5 mb-5">
-            <span
-              className={`text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-xs ${getCategoryColor(
-                currentPrompt.category
-              )}`}
-            >
+          {/* Mode Title & Category */}
+          <div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
+              WHAT COMES NEXT?
+            </span>
+            <span className="w-1 h-1 rounded-full bg-[#8A7D71]" />
+            <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-[#E06D53]">
               {currentPrompt.category}
             </span>
           </div>
 
-          {/* Large Prompt Instruction */}
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#2D2723] tracking-tight leading-snug max-w-lg mx-auto font-sans">
+          {/* THE PROMPT IS THE LARGEST ELEMENT ON THE SCREEN */}
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#2D2723] tracking-tight leading-[1.2] max-w-xl mx-auto font-sans">
             {currentPrompt.text}
-          </h2>
+          </h1>
 
-          {/* Prompt Explanation / Guidance */}
+          {/* Prompt Explanation */}
           {currentPrompt.explanation && (
-            <p className="mt-3 text-sm sm:text-base text-[#55473B] max-w-md mx-auto leading-relaxed font-medium">
+            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-[#55473B] max-w-md mx-auto leading-relaxed font-medium">
               {currentPrompt.explanation}
             </p>
           )}
 
-          {/* Subtle subtext encouragement */}
+          {/* Handwritten Subtext Encouragement */}
           {currentPrompt.subtext && (
-            <p className="mt-4 font-handwriting text-xl sm:text-2xl text-[#6E6054] max-w-md mx-auto font-bold">
+            <p className="mt-3 font-handwriting text-xl sm:text-2xl text-[#6E6054] max-w-md mx-auto font-bold">
               {currentPrompt.subtext}
             </p>
           )}
 
-          {/* Encouraging rule banner */}
-          <div className="mt-8 pt-5 border-t border-[#EAE2D7] text-xs font-medium text-[#87786B] flex items-center justify-center gap-2">
-            <span>No erasing. No starting over. Just add.</span>
+          {/* Device-Down Reminder (Point 87) */}
+          <div className="mt-6 pt-4 border-t border-[#EAE2D7] text-xs font-medium text-[#7A6E63] flex flex-col sm:flex-row items-center justify-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#E06D53]" />
+              <span className="font-bold text-[#2D2723]">Your page is the canvas.</span>
+            </div>
+            <span className="text-[#8A7D71] hidden sm:inline">•</span>
+            <span>Put the device down. Go make it. Come back when ready.</span>
           </div>
         </div>
 
-        {/* Optional Expandable Visual Reference Panel */}
-        {showExample && visualReference && (
-          <div className="mt-6 animate-fadeIn text-left">
-            <VisualReferencePanel
-              visualReference={visualReference}
-              onHide={() => setShowExample(false)}
-              promptText={currentPrompt.text}
-            />
+        {/* Visual Reference Toggle & Panel with Point 18 Reassurance */}
+        {visualReference && (
+          <div className="mt-4 sm:mt-6 text-center">
+            <button
+              onClick={() => setShowExample(!showExample)}
+              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl border border-[#D8CEBE] bg-[#FCFAF6] hover:bg-[#EFE9DF] text-xs font-bold text-[#4A3F35] transition-all min-h-[44px]"
+              aria-expanded={showExample}
+            >
+              <BookOpen className="w-4 h-4 text-[#E06D53]" />
+              <span>{showExample ? 'HIDE EXAMPLE' : 'SHOW ME AN EXAMPLE'}</span>
+              {showExample ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {/* Guidance Level Controls (Point 82 & 83) */}
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#8A7D71] mt-2 font-mono-code">
+              <span>Guidance:</span>
+              {([
+                { id: 'show-all', label: 'Show examples' },
+                { id: 'balanced', label: 'Balanced' },
+                { id: 'minimal', label: 'Let me figure it out' },
+              ] as const).map((lvl) => (
+                <button
+                  key={lvl.id}
+                  onClick={() => {
+                    setGuidanceLevel(lvl.id);
+                    setShowExample(lvl.id === 'show-all');
+                    try {
+                      localStorage.setItem('create_again_guidance_level', lvl.id);
+                    } catch {}
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors ${
+                    guidanceLevel === lvl.id
+                      ? 'bg-[#2D2723] text-[#FAF7F2]'
+                      : 'text-[#6E6054] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+                  }`}
+                >
+                  {lvl.label}
+                </button>
+              ))}
+            </div>
+
+            {showExample && (
+              <div className="mt-3 text-left animate-fadeIn">
+                <div className="mb-2.5 p-2.5 rounded-xl bg-[#FFF6EE] border border-[#F3BE96] text-xs text-[#8A4A28] flex items-center justify-between gap-2">
+                  <span className="font-bold">
+                    HERE'S AN EXAMPLE: You don't need to copy it. Use it to see what we mean.
+                  </span>
+                </div>
+                <VisualReferencePanel
+                  visualReference={visualReference}
+                  onHide={() => setShowExample(false)}
+                  promptText={currentPrompt.text}
+                />
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Action Controls */}
-      <div className="pt-4 border-t border-[#E8E0D5] space-y-3">
+      {/* 3. Action Controls */}
+      <footer className="pt-3 sm:pt-4 border-t border-[#E8E0D5] space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Primary NEXT Button */}
           <button
             onClick={() => {
-              setShowExample(false);
+              setShowExample(guidanceLevel === 'show-all');
               onNextPrompt();
             }}
-            className="flex-1 py-4 sm:py-5 px-6 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-lg sm:text-xl hover:bg-[#433B35] transition-all shadow-md active:scale-98 flex items-center justify-center gap-3 group"
+            className="flex-1 py-4 sm:py-4.5 px-6 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-base sm:text-lg hover:bg-[#433B35] transition-all shadow-md active:scale-98 flex items-center justify-center gap-2.5 group min-h-[52px]"
           >
             <span>NEXT</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          {/* Secondary "SHOW ME AN EXAMPLE" Button (on supported exercises) */}
-          {visualReference && (
-            <button
-              onClick={() => setShowExample(!showExample)}
-              className={`py-4 sm:py-5 px-5 rounded-2xl border-2 font-bold text-sm sm:text-base transition-all active:scale-98 flex items-center justify-center gap-2 shrink-0 ${
-                showExample
-                  ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723]'
-                  : 'bg-[#FCFAF6] border-[#D8CEBE] text-[#4A3F35] hover:bg-[#F2EDE4]'
-              }`}
-            >
-              <BookOpen className={`w-5 h-5 ${showExample ? 'text-[#FAF7F2]' : 'text-[#E06D53]'}`} />
-              <span>{showExample ? 'HIDE EXAMPLE' : 'SHOW ME AN EXAMPLE'}</span>
-            </button>
-          )}
-
-          {/* "I'M STUCK" Button */}
+          {/* Secondary "I'M STUCK" Button */}
           <button
             onClick={handleOpenStuck}
-            className="py-4 sm:py-5 px-5 rounded-2xl bg-[#FCFAF6] border-2 border-[#D8CEBE] text-[#54483E] font-bold text-sm sm:text-base hover:bg-[#F2EDE4] transition-all active:scale-98 flex items-center justify-center gap-2 shrink-0"
+            className="py-3.5 sm:py-4 px-5 rounded-2xl bg-[#FCFAF6] border-2 border-[#D8CEBE] text-[#54483E] font-bold text-xs sm:text-sm hover:bg-[#F2EDE4] transition-all active:scale-98 flex items-center justify-center gap-2 shrink-0 min-h-[48px]"
           >
-            <HelpCircle className="w-5 h-5 text-[#E06D53]" />
-            <span className="hidden sm:inline">I'M STUCK</span>
-            <span className="sm:hidden">STUCK</span>
+            <HelpCircle className="w-4 h-4 text-[#E06D53]" />
+            <span>I'M STUCK</span>
           </button>
         </div>
 
-        {/* Bottom Finisher */}
-        <div className="flex items-center justify-between text-xs text-[#8A7D71] px-2">
-          <span>Draw it at your own speed on your paper.</span>
+        {/* Bottom Finisher & No-Erasing Philosophy (Points 23 & 28) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#8A7D71] px-1">
+          <span className="font-handwriting text-sm text-[#7A6E63] text-center sm:text-left">
+            No erase. No restart. Just add. Mistakes are allowed.
+          </span>
           <button
             onClick={onFinishSession}
-            className="font-bold text-[#E06D53] hover:text-[#C04D33] flex items-center gap-1 py-1"
+            className="font-bold text-[#E06D53] hover:text-[#C04D33] flex items-center gap-1 py-1.5 min-h-[40px]"
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>I'M DONE FOR NOW</span>
           </button>
         </div>
-      </div>
+      </footer>
 
-      {/* "I'M STUCK" Modal / Card */}
-      {stuckModalOpen && activeStuckIdea && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn">
+      {/* "I'M STUCK" 3-Level Escalating Rescue Modal (Points 20, 21, 22) */}
+      {stuckModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Creative rescue nudge"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+        >
           <div className="w-full max-w-lg bg-[#FCFAF6] rounded-3xl p-6 sm:p-7 paper-card border-2 border-[#E8E0D5] relative text-center max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setStuckModalOpen(false)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158]"
+              aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
@@ -415,60 +438,58 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
             </div>
 
             <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-              Gentle Rescue
+              STUCK? THAT'S OKAY.
             </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-[#2D2723] tracking-tight mt-1">
-              Try this on your page:
+            <h3 className="text-xl sm:text-2xl font-extrabold text-[#2D2723] tracking-tight mt-1 font-sans">
+              Try this tiny nudge:
             </h3>
 
-            <div className="my-5 p-5 bg-[#FAF7F2] rounded-2xl border-2 border-[#E8E0D5] text-left">
-              <p className="text-base sm:text-lg font-extrabold text-[#2D2723]">
-                {activeStuckIdea.text}
-              </p>
-              {activeStuckIdea.subtext && (
-                <p className="text-xs sm:text-sm text-[#6E6054] mt-1.5 font-handwriting text-lg">
-                  {activeStuckIdea.subtext}
-                </p>
-              )}
+            {/* Level Selector Tabs */}
+            <div className="grid grid-cols-3 gap-1.5 my-4 p-1 rounded-xl bg-[#EFE9DF]/60">
+              {([1, 2, 3] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => {
+                    setStuckLevel(lvl);
+                    setStuckHintIndex(0);
+                  }}
+                  className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all ${
+                    stuckLevel === lvl
+                      ? 'bg-[#2D2723] text-white shadow-2xs'
+                      : 'text-[#6D6156] hover:text-[#2D2723]'
+                  }`}
+                >
+                  Level {lvl}
+                </button>
+              ))}
             </div>
 
-            {/* Optional Stuck Idea Example */}
-            {activeStuckIdea.visualReferenceId && (
-              <div className="my-3">
-                {!showStuckExample ? (
-                  <button
-                    onClick={() => setShowStuckExample(true)}
-                    className="w-full py-2.5 px-3 rounded-xl border border-[#D8CEBE] bg-[#FAF7F2] text-[#4A3F35] font-bold text-xs hover:bg-[#EFE9DF] transition-all flex items-center justify-center gap-2"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-[#E06D53]" />
-                    <span>SHOW ME AN EXAMPLE</span>
-                  </button>
-                ) : (
-                  <div className="text-left mt-2">
-                    {getVisualReferenceById(activeStuckIdea.visualReferenceId) && (
-                      <VisualReferencePanel
-                        visualReference={getVisualReferenceById(activeStuckIdea.visualReferenceId)!}
-                        onHide={() => setShowStuckExample(false)}
-                      />
-                    )}
-                  </div>
-                )}
+            {/* Tiny Nudge Card */}
+            <div className="my-4 p-5 bg-[#FAF7F2] rounded-2xl border-2 border-[#2D2723] text-left">
+              <div className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#E06D53] mb-1">
+                {currentLevelData.title}
               </div>
-            )}
+              <p className="text-base sm:text-lg font-extrabold text-[#2D2723] leading-snug">
+                {currentHint}
+              </p>
+              <p className="text-xs text-[#7A6E63] mt-2 italic">
+                Your prompt is still waiting. Just make one mark to break the ice.
+              </p>
+            </div>
 
-            <div className="flex items-center justify-center gap-3">
+            {/* Controls */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-2">
               <button
                 onClick={handleShuffleStuck}
-                className="p-3 rounded-xl border border-[#D8CEBE] hover:bg-[#EFE9DF] text-[#6E6054] text-xs font-bold flex items-center gap-1.5"
-                title="Give another idea"
+                className="py-3 px-4 rounded-xl border border-[#D8CEBE] hover:bg-[#EFE9DF] text-[#6E6054] text-xs font-bold flex items-center justify-center gap-1.5 min-h-[44px]"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>ANOTHER IDEA</span>
+                <span>ANOTHER NUDGE</span>
               </button>
 
               <button
                 onClick={() => setStuckModalOpen(false)}
-                className="px-6 py-3 rounded-xl bg-[#2D2723] text-white font-extrabold text-xs shadow-sm hover:bg-[#433B35]"
+                className="py-3.5 px-6 rounded-xl bg-[#2D2723] text-white font-extrabold text-xs shadow-sm hover:bg-[#433B35] min-h-[44px]"
               >
                 GOT IT, BACK TO DRAWING
               </button>
@@ -477,17 +498,53 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
         </div>
       )}
 
-      {/* Theme Chooser Modal during active session */}
-      {onChangeTheme && (
-        <ThemeChooserModal
-          isOpen={isThemeModalOpen}
-          onClose={() => setIsThemeModalOpen(false)}
-          selectedThemeId={session.themeId || 'none'}
-          onSelectTheme={(newThemeId) => {
-            onChangeTheme(newThemeId);
-          }}
-        />
+      {/* Leave Session Confirmation Dialog (Point 57) */}
+      {isLeaveConfirmOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm leaving session"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+        >
+          <div className="w-full max-w-md bg-[#FCFAF6] rounded-3xl p-6 sm:p-7 paper-card border-2 border-[#2D2723] text-center shadow-xl">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-[#2D2723]">
+              LEAVE THIS SESSION?
+            </h3>
+            <p className="text-sm text-[#665A51] mt-2 leading-relaxed">
+              Your progress will be saved automatically. You can pick up right where you left off whenever you return.
+            </p>
+            <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={() => setIsLeaveConfirmOpen(false)}
+                className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-[#2D2723] text-white font-extrabold text-xs hover:bg-[#433B35] transition-all min-h-[44px]"
+              >
+                KEEP CREATING
+              </button>
+              <button
+                onClick={() => {
+                  setIsLeaveConfirmOpen(false);
+                  onExitToHome();
+                }}
+                className="w-full sm:flex-1 py-3 px-4 rounded-xl border border-[#D8CEBE] text-[#6E6054] font-bold text-xs hover:bg-[#EFE9DF] transition-all min-h-[44px]"
+              >
+                LEAVE SESSION
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    </div>
+
+      {/* Theme Chooser Modal during active session */}
+      <ThemeChooserModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+        selectedThemeId={session.themeId}
+        onSelectTheme={(themeId) => {
+          if (onChangeTheme) {
+            onChangeTheme(themeId);
+          }
+        }}
+      />
+    </main>
   );
 };

@@ -14,7 +14,6 @@ import {
   WarmUpCategory,
   WARM_UP_CATEGORIES,
   CATEGORY_WARM_UPS,
-  THEME_SPECIFIC_WARM_UPS,
   WarmUpExerciseItem,
 } from '../../data/warmUpExercises';
 import { getThemeById } from '../../data/themes';
@@ -34,64 +33,46 @@ export const WarmUpModal: React.FC<WarmUpModalProps> = ({
   onFinishWarmUp,
   themeId,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<WarmUpCategory | 'all' | 'themed'>('all');
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('wu-ml-01');
+  const [selectedCategory, setSelectedCategory] = useState<WarmUpCategory | 'all'>('all');
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>(CATEGORY_WARM_UPS[0].id);
+  const [durationMinutes, setDurationMinutes] = useState<number>(2);
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120);
   const [completed, setCompleted] = useState(false);
   const [showVisualRef, setShowVisualRef] = useState(false);
 
-  // Active theme info
   const activeTheme = getThemeById(themeId);
-  const themeExercises = themeId && themeId !== 'none'
-    ? THEME_SPECIFIC_WARM_UPS.filter((wu) => wu.themeId === themeId)
-    : [];
 
-  // Reset exercise when theme changes or modal opens
   useEffect(() => {
     if (isOpen) {
-      if (themeExercises.length > 0) {
-        setSelectedCategory('themed');
-        setSelectedExerciseId(`theme-${themeExercises[0].themeId}-${themeExercises[0].title}`);
-      } else {
-        setSelectedCategory('all');
-        setSelectedExerciseId(CATEGORY_WARM_UPS[0].id);
-      }
+      setSelectedCategory('all');
+      setSelectedExerciseId(CATEGORY_WARM_UPS[0].id);
       setIsRunning(false);
-      setTimeLeft(120);
+      setTimeLeft(durationMinutes * 60);
       setCompleted(false);
       setShowVisualRef(false);
     }
   }, [isOpen, themeId]);
 
-  // Compute available exercises based on filter
-  const displayedExercises: WarmUpExerciseItem[] = React.useMemo(() => {
-    if (selectedCategory === 'themed' && themeExercises.length > 0) {
-      return themeExercises.map((t, idx) => ({
-        id: `theme-${t.themeId}-${idx}`,
-        title: t.title,
-        category: t.category,
-        duration: t.duration,
-        description: t.description,
-        tip: t.tip,
-        visualReferenceId: t.visualReferenceId,
-      }));
-    }
+  const handleDurationChange = (mins: number) => {
+    setDurationMinutes(mins);
+    setIsRunning(false);
+    setTimeLeft(mins * 60);
+    setCompleted(false);
+  };
 
+  const displayedExercises = React.useMemo(() => {
     if (selectedCategory === 'all') {
       return CATEGORY_WARM_UPS;
     }
-
     return CATEGORY_WARM_UPS.filter((ex) => ex.category === selectedCategory);
-  }, [selectedCategory, themeExercises]);
+  }, [selectedCategory]);
 
-  // Find active exercise
   const activeExercise =
     displayedExercises.find((ex) => ex.id === selectedExerciseId) ||
     displayedExercises[0] ||
     CATEGORY_WARM_UPS[0];
 
-  // Timer interval
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRunning && timeLeft > 0) {
@@ -105,99 +86,93 @@ export const WarmUpModal: React.FC<WarmUpModalProps> = ({
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
 
-  // Handle exercise change
-  const handleSelectExercise = (ex: WarmUpExerciseItem) => {
-    setSelectedExerciseId(ex.id);
-    setTimeLeft(ex.duration);
-    setIsRunning(false);
-    setCompleted(false);
-    setShowVisualRef(false);
-  };
-
-  const formatTime = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const remaining = secs % 60;
-    return `${mins}:${remaining.toString().padStart(2, '0')}`;
-  };
-
   if (!isOpen) return null;
 
   const visualRef = activeExercise.visualReferenceId
     ? getVisualReferenceById(activeExercise.visualReferenceId)
     : null;
 
+  const formatTimer = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainder = secs % 60;
+    return `${mins}:${remainder.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Warm Up Modal"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+      aria-label="Warm up exercises"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="relative w-full max-w-2xl bg-[#FCFAF6] rounded-3xl p-6 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-[#FCFAF6] rounded-3xl p-5 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto text-left">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158]"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 mb-1">
-          <div className="p-1.5 rounded-lg bg-[#FFF2E6] text-[#E06D53]">
-            <Flame className="w-4 h-4" />
-          </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-            Quick Practice
-          </span>
-          {activeTheme && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#FFF2E6] text-[#E06D53] border border-[#F5C7BC]">
-              Theme: {activeTheme.name}
+        {/* Header */}
+        <div className="pb-4 border-b border-[#E8E0D5]">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-1 rounded-lg bg-[#FFF2E6] text-[#E06D53]">
+              <Flame className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
+              Quick Practice
             </span>
-          )}
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight font-sans">
+            WARM UP
+          </h2>
+          <p className="text-xs sm:text-sm text-[#7A6E63] font-handwriting text-lg sm:text-xl mt-0.5">
+            What skill do you want to wake up? Loosen your hand, relax your grip, and defeat perfectionism.
+          </p>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight">
-          Warm Up Your Hand
-        </h2>
-        <p className="text-xs sm:text-sm text-[#6E6054] mt-0.5 font-handwriting text-lg">
-          2 minutes to release tension, loosen your shoulder, and silence the inner judge.
-        </p>
-
-        {/* Category Pill Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-2 my-2 scrollbar-none">
-          {themeExercises.length > 0 && activeTheme && (
+        {/* Duration Picker: 2 MIN, 5 MIN, 10 MIN */}
+        <div className="pt-3 pb-2 flex items-center gap-2">
+          <span className="text-xs font-mono-code font-bold uppercase text-[#8A7D71] mr-1">
+            WARM-UP LENGTH:
+          </span>
+          {[2, 5, 10].map((mins) => (
             <button
-              onClick={() => setSelectedCategory('themed')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1 ${
-                selectedCategory === 'themed'
-                  ? 'bg-[#E06D53] text-white shadow-xs'
-                  : 'bg-[#FFF2E6] text-[#E06D53] hover:bg-[#FFE6D4] border border-[#F5C7BC]'
+              key={mins}
+              onClick={() => handleDurationChange(mins)}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all min-h-[36px] ${
+                durationMinutes === mins
+                  ? 'bg-[#2D2723] text-white shadow-xs'
+                  : 'bg-[#FAF7F2] border border-[#E8E0D5] text-[#6D6156] hover:bg-[#EFE9DF]'
               }`}
             >
-              <Sparkles className="w-3 h-3" />
-              <span>{activeTheme.name} Focus</span>
+              {mins} MIN
             </button>
-          )}
+          ))}
+        </div>
 
+        {/* Category Filter Pills */}
+        <div className="py-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-b border-[#EAE2D7]">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors min-h-[38px] ${
               selectedCategory === 'all'
                 ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'bg-[#EFE9DF] text-[#655A51] hover:bg-[#E5DDCF]'
+                : 'bg-[#FAF7F2] text-[#655A51] border border-[#E8E0D5] hover:bg-[#EFE9DF]'
             }`}
           >
-            All Skills
+            All Exercises
           </button>
-
           {WARM_UP_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors min-h-[38px] ${
                 selectedCategory === cat.id
                   ? 'bg-[#2D2723] text-[#FAF7F2]'
-                  : 'bg-[#EFE9DF] text-[#655A51] hover:bg-[#E5DDCF]'
+                  : 'bg-[#FAF7F2] text-[#655A51] border border-[#E8E0D5] hover:bg-[#EFE9DF]'
               }`}
             >
               {cat.name}
@@ -205,120 +180,154 @@ export const WarmUpModal: React.FC<WarmUpModalProps> = ({
           ))}
         </div>
 
-        {/* Specific Exercise Pills within selected category */}
-        <div className="flex items-center gap-2 overflow-x-auto py-2 mb-2">
-          {displayedExercises.map((ex) => (
-            <button
-              key={ex.id}
-              onClick={() => handleSelectExercise(ex)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
-                activeExercise.id === ex.id
-                  ? 'bg-[#2D2723] text-[#FAF7F2]'
-                  : 'bg-[#FAF7F2] text-[#655A51] border border-[#E8E0D5] hover:bg-[#EFE9DF]'
-              }`}
-            >
-              {ex.title}
-            </button>
-          ))}
-        </div>
+        {/* Active Exercise Detail Card */}
+        <div className="my-5 p-5 sm:p-6 rounded-2xl bg-[#FAF7F2] border-2 border-[#2D2723] subtle-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8E0D5]">
+            <div>
+              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
+                {activeExercise.category.replace('-', ' ')}
+              </span>
+              <h3 className="text-lg sm:text-xl font-extrabold text-[#2D2723] mt-0.5">
+                {activeExercise.title}
+              </h3>
+            </div>
 
-        {/* Active Exercise Display Card */}
-        <div className="bg-[#FAF7F2] rounded-2xl border-2 border-[#E8E0D5] p-5 sm:p-6 text-center my-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code mb-1">
-            {activeExercise.category.replace('-', ' ')}
+            {/* Timer Controller */}
+            <div className="flex items-center gap-2 bg-[#FCFAF6] px-3.5 py-1.5 rounded-xl border border-[#E8E0D5]">
+              <Clock className="w-4 h-4 text-[#8A7D71]" />
+              <span
+                className={`font-mono-code font-bold text-sm ${
+                  timeLeft <= 30 && timeLeft > 0 ? 'text-[#D90429] animate-pulse' : 'text-[#2D2723]'
+                }`}
+              >
+                {formatTimer(timeLeft)}
+              </span>
+              <button
+                onClick={() => setIsRunning(!isRunning)}
+                className="p-1 hover:bg-[#EFE9DF] rounded text-[#786C61] min-h-[32px] min-w-[32px] flex items-center justify-center"
+                aria-label={isRunning ? 'Pause' : 'Start'}
+              >
+                {isRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={() => {
+                  setIsRunning(false);
+                  setTimeLeft(durationMinutes * 60);
+                  setCompleted(false);
+                }}
+                className="p-1 hover:bg-[#EFE9DF] rounded text-[#786C61] min-h-[32px] min-w-[32px] flex items-center justify-center"
+                aria-label="Reset timer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-          <h3 className="text-xl font-extrabold text-[#2D2723]">
-            {activeExercise.title}
-          </h3>
-          <p className="text-sm sm:text-base text-[#52453B] mt-2 font-medium leading-relaxed max-w-lg mx-auto">
+
+          <p className="text-sm sm:text-base text-[#55473B] font-medium mt-3 leading-relaxed">
             {activeExercise.description}
           </p>
 
-          <div className="mt-3 p-3 bg-[#FCFAF6] rounded-xl border border-[#E8E0D5] text-xs text-[#7A6D61] font-handwriting text-base">
-            💡 {activeExercise.tip}
-          </div>
+          {/* Quick tip */}
+          {activeExercise.tip && (
+            <div className="mt-4 p-3 rounded-xl bg-[#FCFAF6] border border-[#E8E0D5]">
+              <span className="text-[10px] font-mono-code font-bold uppercase text-[#8A7D71] block mb-1">
+                TRY:
+              </span>
+              <p className="text-xs text-[#55473B]">
+                {activeExercise.tip}
+              </p>
+            </div>
+          )}
 
-          {/* Visual Reference Prompt if available */}
+          {/* Collapsible Visual Reference */}
           {visualRef && (
-            <div className="mt-3 text-left">
-              {!showVisualRef ? (
-                <button
-                  onClick={() => setShowVisualRef(true)}
-                  className="w-full py-2 px-3 rounded-xl border border-[#D8CEBE] bg-[#FCFAF6] text-[#4A3F35] font-bold text-xs hover:bg-[#EFE9DF] transition-all flex items-center justify-center gap-2"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-[#E06D53]" />
-                  <span>VIEW QUICK VISUAL GUIDE</span>
-                </button>
-              ) : (
-                <VisualReferencePanel
-                  visualReference={visualRef}
-                  onHide={() => setShowVisualRef(false)}
-                />
+            <div className="mt-4">
+              <button
+                onClick={() => setShowVisualRef(!showVisualRef)}
+                className="py-2 px-3.5 rounded-xl border border-[#D8CEBE] bg-[#FCFAF6] hover:bg-[#EFE9DF] text-xs font-bold text-[#4A3F35] transition-all flex items-center gap-1.5 min-h-[40px]"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[#E06D53]" />
+                <span>{showVisualRef ? 'HIDE VISUAL EXAMPLE' : 'SHOW VISUAL EXAMPLE'}</span>
+              </button>
+
+              {showVisualRef && (
+                <div className="mt-3">
+                  <VisualReferencePanel
+                    visualReference={visualRef}
+                    onHide={() => setShowVisualRef(false)}
+                    promptText={activeExercise.title}
+                  />
+                </div>
               )}
             </div>
           )}
 
-          {/* Timer Display */}
-          <div className="mt-5 flex flex-col items-center justify-center">
-            <div
-              className={`font-mono-code text-4xl sm:text-5xl font-extrabold mb-3 transition-colors ${
-                completed ? 'text-[#2A9D8F]' : 'text-[#2D2723]'
-              }`}
-            >
-              {completed ? 'DONE!' : formatTime(timeLeft)}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsRunning(!isRunning)}
-                className={`px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition-all ${
-                  isRunning
-                    ? 'bg-[#EFE9DF] text-[#2D2723]'
-                    : 'bg-[#2D2723] text-[#FAF7F2] shadow-xs hover:bg-[#433B35]'
-                }`}
-              >
-                {isRunning ? (
-                  <>
-                    <Pause className="w-3.5 h-3.5" />
-                    <span>PAUSE</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5" />
-                    <span>{timeLeft === activeExercise.duration ? 'START 2-MIN TIMER' : 'RESUME'}</span>
-                  </>
-                )}
-              </button>
-
+          {/* Completed State Notification */}
+          {completed && (
+            <div className="mt-4 p-3.5 rounded-xl bg-[#E9F5ED] border border-[#A7D7B5] text-[#1E5631] flex items-center justify-between gap-2 animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="text-xs font-extrabold">
+                  Warm-up completed! Your hand is loose and ready to create.
+                </span>
+              </div>
               <button
                 onClick={() => {
-                  setIsRunning(false);
-                  setTimeLeft(activeExercise.duration);
-                  setCompleted(false);
+                  onFinishWarmUp();
+                  onClose();
                 }}
-                className="p-2.5 rounded-xl border border-[#D5C9BC] hover:bg-[#EFE9DF] text-[#786C61]"
-                title="Reset timer"
+                className="px-3 py-1.5 rounded-lg bg-[#1E5631] text-white text-xs font-bold shrink-0"
               >
-                <RotateCcw className="w-4 h-4" />
+                DONE
               </button>
             </div>
+          )}
+        </div>
+
+        {/* Exercises Selector Grid */}
+        <div className="mt-4">
+          <div className="text-xs font-mono-code font-bold uppercase text-[#8A7D71] mb-2">
+            SELECT AN EXERCISE ({displayedExercises.length}):
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {displayedExercises.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setSelectedExerciseId(item.id);
+                  setIsRunning(false);
+                  setTimeLeft(durationMinutes * 60);
+                  setCompleted(false);
+                }}
+                className={`p-3 rounded-xl text-left border transition-all ${
+                  item.id === activeExercise.id
+                    ? 'bg-[#2D2723] text-white border-[#2D2723] shadow-xs'
+                    : 'bg-[#FAF7F2] text-[#2D2723] border-[#E8E0D5] hover:bg-[#EFE9DF]'
+                }`}
+              >
+                <div className="text-xs font-extrabold truncate">{item.title}</div>
+                <div
+                  className={`text-[10px] truncate mt-0.5 ${
+                    item.id === activeExercise.id ? 'text-[#D8CEBE]' : 'text-[#8A7D71]'
+                  }`}
+                >
+                  {item.category.replace('-', ' ')}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Completion Action */}
-        <div className="pt-2 flex items-center justify-between">
-          <span className="text-xs font-handwriting text-base text-[#8A7D71]">
-            Draw freely until the timer ends.
+        {/* Footer */}
+        <div className="mt-6 pt-4 border-t border-[#E8E0D5] flex items-center justify-between">
+          <span className="text-xs text-[#8A7D71] font-handwriting text-base">
+            Draw loosely. Don't worry about clean lines.
           </span>
           <button
-            onClick={() => {
-              onFinishWarmUp();
-              onClose();
-            }}
-            className="px-5 py-2.5 rounded-xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-xs shadow-xs flex items-center gap-1.5 active:scale-95 transition-all"
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-xl bg-[#2D2723] text-white font-bold text-xs hover:bg-[#433B35] transition-colors min-h-[44px]"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>I'M WARMED UP</span>
+            CLOSE
           </button>
         </div>
       </div>

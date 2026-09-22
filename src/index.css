@@ -1,10 +1,37 @@
 @import "tailwindcss";
 
+:root {
+  --paper: #FAF7F2;
+  --paper-card: #FCFAF6;
+  --paper-dark: #EFE9DF;
+  --paper-subtle: #F4EFE6;
+  --ink: #2D2723;
+  --ink-muted: #7A6E63;
+  --ink-light: #9C8E82;
+  --border: #E8E0D5;
+  --border-strong: #D8CEBE;
+  --accent: #E06D53;
+  --accent-hover: #CF5E45;
+  --accent-soft: #FFF2E6;
+  --success: #3B6324;
+  --warning: #B45309;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #FAF7F2;
-    color: #2D2723;
+    background-color: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure touch targets meet minimum 44px */
+  button, 
+  a, 
+  input, 
+  select {
+    touch-action: manipulation;
   }
 }
 
@@ -16,7 +43,7 @@
   font-family: 'Space Mono', monospace;
 }
 
-/* Subtle paper texture using CSS radial gradient dots */
+/* Subtle paper texture */
 .paper-pattern {
   background-color: #FAF7F2;
   background-image: radial-gradient(#DCD4C7 0.75px, transparent 0.75px);
@@ -39,10 +66,42 @@
   box-shadow: 0 10px 30px -4px rgba(45, 39, 35, 0.08), 0 4px 10px -2px rgba(45, 39, 35, 0.04);
 }
 
-/* Custom scrollbar for friendly look */
+/* Responsive layout containers */
+.app-container {
+  width: 100%;
+  max-width: 1360px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app-container {
+    max-width: 1440px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Custom scrollbar for friendly sketchbook look */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: #FAF7F2;
@@ -53,5 +112,15 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #BCB09E;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

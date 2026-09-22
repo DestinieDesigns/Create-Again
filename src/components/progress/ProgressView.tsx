@@ -3,12 +3,11 @@ import {
   Palette,
   Sparkles,
   Flame,
-  Trophy,
   Calendar,
   Compass,
   ArrowLeft,
-  Heart,
-  BookOpen,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react';
 import { CreativeStats } from '../../types/session';
 
@@ -23,115 +22,153 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
   onBackToHome,
   onStartDrawing,
 }) => {
-  const statCards = [
-    {
-      label: 'Things Created',
-      value: stats.thingsCreated,
-      icon: Palette,
-      desc: 'Physical drawings brought to life on your page',
-      color: 'bg-[#FFF2E6] text-[#E06D53]',
-    },
-    {
-      label: 'Mystery Adventures',
-      value: stats.mysteryDrawings,
-      icon: Sparkles,
-      desc: 'Step-by-step What Comes Next drawings',
-      color: 'bg-[#FEF6E4] text-[#DDA15E]',
-    },
-    {
-      label: 'Warmups Completed',
-      value: stats.warmupsCompleted,
-      icon: Flame,
-      desc: 'Quick 2-minute loosening drills',
-      color: 'bg-[#F2F4EB] text-[#606C38]',
-    },
-    {
-      label: 'Total Sessions',
-      value: stats.creativeSessions,
-      icon: Compass,
-      desc: 'Times you chose to sit down and make something',
-      color: 'bg-[#EFE9DF] text-[#2D2723]',
-    },
-    {
-      label: 'Days Creating',
-      value: stats.daysCreating,
-      icon: Calendar,
-      desc: 'Distinct calendar days you touched pen to paper',
-      color: 'bg-[#F7EDE2] text-[#7D5A50]',
-    },
+  const practicedItems = [
+    { title: 'Marks & Lines', desc: 'Loose strokes, line weight, hatching' },
+    { title: 'Simple Shapes', desc: 'Circles, triangles, cylinders as building blocks' },
+    { title: 'Character Heads', desc: 'Head construction and silhouette shapes' },
+    { title: 'Expressions', desc: 'Eyes, brows, smiles, and mood cues' },
+    { title: 'Quick Warm-ups', desc: '2-minute hand loosening drills' },
+  ];
+
+  const exploringItems = [
+    { title: 'Environment & Setting', desc: 'Foreground trees, horizon lines, small doorways' },
+    { title: 'Perspective & Scale', desc: 'Near vs. far, simple isometric angles' },
+    { title: 'Storytelling & Composition', desc: 'Placing objects and characters in scenes' },
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
+    <div className="app-container py-6 sm:py-10 animate-fadeIn text-left">
       {/* Top Header */}
       <div className="pb-6 border-b border-[#E8E0D5]">
         <button
           onClick={onBackToHome}
-          className="inline-flex items-center gap-1 text-xs font-bold text-[#8A7D71] hover:text-[#2D2723] mb-2 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8A7D71] hover:text-[#2D2723] mb-2 transition-colors min-h-[44px] -ml-1 px-1"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Home</span>
         </button>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2D2723] tracking-tight">
-          Your Creative Journey
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-[#2D2723] tracking-tight font-sans">
+          YOUR CREATIVE JOURNEY
         </h1>
-        <p className="text-sm font-handwriting text-2xl text-[#6B5E53] mt-1">
+        <p className="text-xs sm:text-sm font-handwriting text-lg sm:text-xl text-[#7A6E63] mt-0.5">
           Tracking the courage to show up and make a mark.
         </p>
       </div>
 
-      {/* Core Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-8">
-        {statCards.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={i}
-              className="p-5 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] flex flex-col justify-between subtle-shadow"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-                  {stat.label}
-                </span>
-                <div className={`p-2 rounded-xl ${stat.color}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-              </div>
+      {/* Participation Overview Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+        <div className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5]">
+          <div className="text-[10px] font-mono-code font-bold uppercase text-[#8A7D71]">
+            Drawings Made
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] mt-1">
+            {stats.thingsCreated}
+          </div>
+          <div className="text-[11px] text-[#7A6E63] mt-0.5">On physical paper</div>
+        </div>
 
-              <div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-[#2D2723] font-mono-code">
-                  {stat.value}
-                </div>
-                <p className="text-xs text-[#7A6E63] mt-1 leading-relaxed">
-                  {stat.desc}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+        <div className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5]">
+          <div className="text-[10px] font-mono-code font-bold uppercase text-[#8A7D71]">
+            Mystery Steps
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] mt-1">
+            {stats.mysteryDrawings}
+          </div>
+          <div className="text-[11px] text-[#7A6E63] mt-0.5">Step-by-step</div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5]">
+          <div className="text-[10px] font-mono-code font-bold uppercase text-[#8A7D71]">
+            Warm-Ups Done
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] mt-1">
+            {stats.warmupsCompleted}
+          </div>
+          <div className="text-[11px] text-[#7A6E63] mt-0.5">Hand looseners</div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5]">
+          <div className="text-[10px] font-mono-code font-bold uppercase text-[#8A7D71]">
+            Days Creating
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] mt-1">
+            {stats.daysCreating}
+          </div>
+          <div className="text-[11px] text-[#7A6E63] mt-0.5">Touched pen to paper</div>
+        </div>
       </div>
 
-      {/* Encouragement & Philosophy Section */}
-      <div className="rounded-3xl bg-[#FAF7F2] border-2 border-[#E8E0D5] p-6 sm:p-8 my-8 text-center subtle-shadow">
-        <Heart className="w-8 h-8 text-[#E06D53] mx-auto mb-3" />
-        <h2 className="text-xl sm:text-2xl font-extrabold text-[#2D2723]">
-          Why we don't have artist levels or points
-        </h2>
-        <p className="text-sm text-[#5C5046] mt-2 max-w-xl mx-auto leading-relaxed">
-          Points and skill rankings turn creative play into work. Create Again doesn't care if a drawing is realistic, proportional, or finished.
-        </p>
-        <p className="text-base font-handwriting text-2xl text-[#2D2723] font-bold mt-3">
-          “Start somewhere. Add something. See what happens.”
-        </p>
+      {/* Two Column Section: Things you've practiced vs. Currently exploring */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+        {/* Left: Things you've practiced */}
+        <div className="p-6 rounded-3xl bg-[#FAF7F2] border-2 border-[#E8E0D5]">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle2 className="w-5 h-5 text-[#3B6324]" />
+            <h2 className="text-lg font-extrabold text-[#2D2723] font-sans">
+              Things you've practiced
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {practicedItems.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/70 border border-[#E8E0D5]">
+                <span className="text-[#3B6324] font-bold mt-0.5">✓</span>
+                <div>
+                  <span className="block text-xs sm:text-sm font-bold text-[#2D2723]">
+                    {item.title}
+                  </span>
+                  <span className="block text-[11px] text-[#7A6E63]">
+                    {item.desc}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Currently exploring */}
+        <div className="p-6 rounded-3xl bg-[#FAF7F2] border-2 border-[#E8E0D5]">
+          <div className="flex items-center gap-2 mb-4">
+            <Compass className="w-5 h-5 text-[#E06D53]" />
+            <h2 className="text-lg font-extrabold text-[#2D2723] font-sans">
+              Currently exploring
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {exploringItems.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/70 border border-[#E8E0D5]">
+                <span className="text-[#E06D53] font-bold mt-0.5">→</span>
+                <div>
+                  <span className="block text-xs sm:text-sm font-bold text-[#2D2723]">
+                    {item.title}
+                  </span>
+                  <span className="block text-[11px] text-[#7A6E63]">
+                    {item.desc}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Quick launch */}
-      <div className="text-center pt-4">
+      {/* Reminder Banner */}
+      <div className="p-5 rounded-2xl bg-[#FCFAF6] border border-[#E8E0D5] flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-6">
+        <div>
+          <h3 className="text-sm font-extrabold text-[#2D2723]">
+            No scores. No rankings. No judging.
+          </h3>
+          <p className="text-xs text-[#7A6E63] mt-0.5">
+            Drawing is an intimate human practice. The goal is simply to make marks and enjoy the process.
+          </p>
+        </div>
+
         <button
           onClick={onStartDrawing}
-          className="px-8 py-3.5 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-sm shadow-md hover:bg-[#433B35] transition-all active:scale-95"
+          className="py-3 px-6 rounded-xl bg-[#2D2723] text-white font-bold text-xs hover:bg-[#433B35] transition-all min-h-[44px] shrink-0"
         >
-          START ANOTHER DRAWING
+          DRAW SOMETHING TODAY
         </button>
       </div>
     </div>

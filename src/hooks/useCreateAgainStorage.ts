@@ -121,6 +121,17 @@ export function useCreateAgainStorage() {
     }
   };
 
+  // Delete a creation from the saved collection
+  const deleteCreation = (id: string) => {
+    const updated = savedCreations.filter((c) => c.id !== id);
+    setSavedCreations(updated);
+    try {
+      localStorage.setItem(SAVED_CREATIONS_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error('Failed to delete creation', e);
+    }
+  };
+
   // Increment creative session count (e.g. when starting)
   const trackSessionStart = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -166,6 +177,7 @@ export function useCreateAgainStorage() {
     saveActiveSession,
     savedCreations,
     saveCreation,
+    deleteCreation,
     stats,
     trackSessionStart,
     settings,
