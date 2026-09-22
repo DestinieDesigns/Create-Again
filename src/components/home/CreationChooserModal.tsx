@@ -1,10 +1,18 @@
 import React from 'react';
-import { X, Sparkles, Flame, Dices, HelpCircle, ArrowRight } from 'lucide-react';
+import { X, Sparkles, Flame, Dices, HelpCircle, ArrowRight, Compass, BookOpen } from 'lucide-react';
 
 interface CreationChooserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectMode: (mode: 'what-comes-next' | 'warm-up' | 'chaos' | 'dont-know') => void;
+  onSelectMode: (
+    mode:
+      | 'what-comes-next'
+      | 'warm-up'
+      | 'chaos'
+      | 'dont-know'
+      | 'pathways'
+      | 'character-progression'
+  ) => void;
 }
 
 export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
@@ -26,6 +34,30 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       icon: Sparkles,
       iconColor: 'text-[#E06D53]',
       borderColor: 'hover:border-[#E06D53]',
+    },
+    {
+      id: 'pathways' as const,
+      title: 'CREATIVE PATHWAYS',
+      subtitle: 'Character, Graphic Design, Nature...',
+      description: 'Specialized focus journeys for Character Creation, Graphic Design, Nature Studies, Animation & Motion, and World Building.',
+      badge: 'Thematic Tracks',
+      badgeColor: 'bg-[#2A9D8F] text-white',
+      buttonLabel: 'CHOOSE PATH',
+      icon: Compass,
+      iconColor: 'text-[#2A9D8F]',
+      borderColor: 'hover:border-[#2A9D8F]',
+    },
+    {
+      id: 'character-progression' as const,
+      title: 'CHARACTER CREATOR',
+      subtitle: '22 Skills with Visual References',
+      description: 'Master shapes, expressions, hair, anatomy, gestures, and scenes with step-by-step physical sketchbook exercises and visual references.',
+      badge: '22 Visual Skills',
+      badgeColor: 'bg-[#E76F51] text-white',
+      buttonLabel: 'VIEW 22 SKILLS',
+      icon: BookOpen,
+      iconColor: 'text-[#E76F51]',
+      borderColor: 'hover:border-[#E76F51]',
     },
     {
       id: 'warm-up' as const,

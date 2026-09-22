@@ -26,6 +26,44 @@ export type SessionPhase =
   | "wild"
   | "closing";
 
+export type CreativePathwayId =
+  | "open"
+  | "character-creator"
+  | "graphic-design"
+  | "nature-study"
+  | "animation"
+  | "world-builder";
+
+import type { VisualReferenceType, VisualReference } from './visualReference';
+export type { VisualReferenceType, VisualReference };
+
+export interface CharacterSkill {
+  id: string;
+  skillNumber: string;
+  title: string;
+  subtitle: string;
+  category: "anatomy" | "expression" | "body" | "costume" | "action" | "composition";
+  writtenExercise: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  tags: string[];
+  prerequisites?: string[];
+  relatedSkills?: string[];
+  visualReference?: VisualReference;
+  warmUp?: string;
+  challenge?: string;
+}
+
+export interface CreativePathway {
+  id: CreativePathwayId;
+  name: string;
+  tagline: string;
+  description: string;
+  badge: string;
+  badgeColor: string;
+  relevantTags: string[];
+  accentColor: string;
+}
+
 export interface Prompt {
   id: string;
   category: PromptCategory;
@@ -42,4 +80,6 @@ export interface Prompt {
   preferAfterCategories?: PromptCategory[];
   minSessionMinute?: number;
   maxSessionMinute?: number;
+  visualReference?: VisualReference;
+  visualReferenceId?: string;
 }

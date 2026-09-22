@@ -1,4 +1,4 @@
-import { AdventureType, PromptCategory } from './prompt';
+import { AdventureType, CreativePathwayId, PromptCategory } from './prompt';
 
 export interface PromptHistoryItem {
   promptId: string;
@@ -25,6 +25,7 @@ export interface Mode1Session {
   timerStartedAt?: number;
   timerExtraSeconds?: number;
   difficulty: AdventureType;
+  pathway?: CreativePathwayId;
   currentPromptId?: string;
   usedPromptIds: string[];
   promptHistory: PromptHistoryItem[];
@@ -57,6 +58,7 @@ export interface SavedCreation {
   photoDataUrl?: string;
   promptCount: number;
   difficulty?: string;
+  pathway?: CreativePathwayId;
   durationMinutes?: number;
   reflection?: ReflectionFeeling;
   promptsUsed?: string[];

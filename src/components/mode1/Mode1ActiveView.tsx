@@ -16,6 +16,11 @@ import {
 import { Prompt, PromptCategory } from '../../types/prompt';
 import { Mode1Session } from '../../types/session';
 import { STUCK_SUGGESTIONS, StuckSuggestion } from '../../data/stuckPrompts';
+import { getPathwayById } from '../../data/pathways';
+import { getVisualReferenceForPrompt } from '../../utils/referenceService';
+import { getVisualReferenceById } from '../../data/visualReferences';
+import { VisualReferencePanel } from '../reference/VisualReferencePanel';
+import { VisualReferenceCard } from '../reference/VisualReferenceCard';
 
 interface Mode1ActiveViewProps {
   session: Mode1Session;
@@ -72,6 +77,16 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
     return () => clearInterval(interval);
   }, [session.timerDuration, session.timerStartedAt, session.timerExtraSeconds, isPaused, timesUpModal]);
 
+  const [showExample, setShowExample] = useState(false);
+  const [showStuckExample, setShowStuckExample] = useState(false);
+
+  // Automatically hide reference whenever a new prompt appears
+  useEffect(() => {
+    setShowExample(false);
+  }, [currentPrompt.id]);
+
+  const visualReference = getVisualReferenceForPrompt(currentPrompt);
+
   const formatTimer = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const s = secs % 60;
@@ -81,13 +96,16 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
   const handleOpenStuck = () => {
     const random = STUCK_SUGGESTIONS[Math.floor(Math.random() * STUCK_SUGGESTIONS.length)];
     setActiveStuckIdea(random);
+    setShowStuckExample(false);
     setStuckModalOpen(true);
     onUseStuck();
   };
 
   const handleShuffleStuck = () => {
-    const random = STUCK_SUGGESTIONS[Math.floor(Math.random() * STUCK_SUGGESTIONS.length)];
+    const pool = STUCK_SUGGESTIONS.filter((s) => s.id !== activeStuckIdea?.id);
+    const random = pool[Math.floor(Math.random() * pool.length)] || STUCK_SUGGESTIONS[0];
     setActiveStuckIdea(random);
+    setShowStuckExample(false);
   };
 
   const getCategoryColor = (cat: PromptCategory) => {
@@ -132,6 +150,11 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
             <span className="font-extrabold text-base text-[#2D2723]">
               Step {stepNumber}
             </span>
+            {session.pathway && session.pathway !== 'open' && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE]">
+                {getPathwayById(session.pathway).name}
+              </span>
+            )}
             {/* Abstract progress dots (no fixed end) */}
             <div className="flex items-center gap-1.5 ml-1">
               {Array.from({ length: Math.min(stepNumber, 5) }).map((_, i) => (
@@ -276,19 +299,48 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
             <span>No erasing. No starting over. Just add.</span>
           </div>
         </div>
+
+        {/* Optional Expandable Visual Reference Panel */}
+        {showExample && visualReference && (
+          <div className="mt-6 animate-fadeIn text-left">
+            <VisualReferencePanel
+              reference={visualReference}
+              onHide={() => setShowExample(false)}
+              promptText={currentPrompt.text}
+            />
+          </div>
+        )}
       </div>
 
       {/* Action Controls */}
       <div className="pt-4 border-t border-[#E8E0D5] space-y-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Primary NEXT Button */}
           <button
-            onClick={onNextPrompt}
+            onClick={() => {
+              setShowExample(false);
+              onNextPrompt();
+            }}
             className="flex-1 py-4 sm:py-5 px-6 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-lg sm:text-xl hover:bg-[#433B35] transition-all shadow-md active:scale-98 flex items-center justify-center gap-3 group"
           >
             <span>NEXT</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
+
+          {/* Secondary "SHOW ME AN EXAMPLE" Button (on supported exercises) */}
+          {visualReference && (
+            <button
+              onClick={() => setShowExample(!showExample)}
+              className={`py-4 sm:py-5 px-5 rounded-2xl border-2 font-bold text-sm sm:text-base transition-all active:scale-98 flex items-center justify-center gap-2 shrink-0 ${
+                showExample
+                  ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723]'
+                  : 'bg-[#FCFAF6] border-[#D8CEBE] text-[#4A3F35] hover:bg-[#F2EDE4]'
+              }`}
+            >
+              <BookOpen className={`w-5 h-5 ${showExample ? 'text-[#FAF7F2]' : 'text-[#E06D53]'}`} />
+              <span>{showExample ? 'HIDE EXAMPLE' : 'SHOW ME AN EXAMPLE'}</span>
+            </button>
+          )}
 
           {/* "I'M STUCK" Button */}
           <button
@@ -317,7 +369,7 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
       {/* "I'M STUCK" Modal / Card */}
       {stuckModalOpen && activeStuckIdea && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md bg-[#FCFAF6] rounded-3xl p-6 sm:p-7 paper-card border-2 border-[#E8E0D5] relative text-center">
+          <div className="w-full max-w-lg bg-[#FCFAF6] rounded-3xl p-6 sm:p-7 paper-card border-2 border-[#E8E0D5] relative text-center max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setStuckModalOpen(false)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158]"
@@ -346,6 +398,30 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
                 </p>
               )}
             </div>
+
+            {/* Optional Stuck Idea Example */}
+            {activeStuckIdea.visualReferenceId && (
+              <div className="my-3">
+                {!showStuckExample ? (
+                  <button
+                    onClick={() => setShowStuckExample(true)}
+                    className="w-full py-2.5 px-3 rounded-xl border border-[#D8CEBE] bg-[#FAF7F2] text-[#4A3F35] font-bold text-xs hover:bg-[#EFE9DF] transition-all flex items-center justify-center gap-2"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-[#E06D53]" />
+                    <span>SHOW ME AN EXAMPLE</span>
+                  </button>
+                ) : (
+                  <div className="text-left mt-2">
+                    {getVisualReferenceById(activeStuckIdea.visualReferenceId) && (
+                      <VisualReferenceCard
+                        reference={getVisualReferenceById(activeStuckIdea.visualReferenceId)!}
+                        onClose={() => setShowStuckExample(false)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex items-center justify-center gap-3">
               <button

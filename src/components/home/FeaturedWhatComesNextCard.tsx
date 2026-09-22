@@ -1,12 +1,14 @@
 import React from 'react';
-import { Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldAlert, Compass } from 'lucide-react';
 
 interface FeaturedWhatComesNextCardProps {
   onStartMystery: () => void;
+  onOpenPathways?: () => void;
 }
 
 export const FeaturedWhatComesNextCard: React.FC<FeaturedWhatComesNextCardProps> = ({
   onStartMystery,
+  onOpenPathways,
 }) => {
   return (
     <section className="max-w-4xl mx-auto px-4 my-8">
@@ -89,13 +91,26 @@ export const FeaturedWhatComesNextCard: React.FC<FeaturedWhatComesNextCardProps>
               </div>
             </div>
 
-            <button
-              onClick={onStartMystery}
-              className="w-full mt-2 py-3 px-5 rounded-xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-sm tracking-wide shadow-sm flex items-center justify-center gap-2 transition-all active:scale-98"
-            >
-              <span>START A MYSTERY</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 mt-2">
+              <button
+                onClick={onStartMystery}
+                className="flex-1 py-3 px-4 rounded-xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-sm tracking-wide shadow-sm flex items-center justify-center gap-2 transition-all active:scale-98"
+              >
+                <span>START A MYSTERY</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              {onOpenPathways && (
+                <button
+                  type="button"
+                  onClick={onOpenPathways}
+                  className="py-3 px-4 rounded-xl border-2 border-[#2D2723] bg-white hover:bg-[#F2ECE3] text-[#2D2723] font-extrabold text-xs tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-98"
+                >
+                  <Compass className="w-3.5 h-3.5 text-[#E06D53]" />
+                  <span>PATHWAYS</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

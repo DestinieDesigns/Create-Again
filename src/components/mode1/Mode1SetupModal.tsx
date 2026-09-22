@@ -1,23 +1,74 @@
-import React, { useState } from 'react';
-import { X, Clock, Sparkles, BookOpen, Compass, Flame, AlertCircle } from 'lucide-react';
-import { AdventureType } from '../../types/prompt';
+import React, { useState, useEffect } from 'react';
+import {
+  X,
+  Clock,
+  Sparkles,
+  BookOpen,
+  Compass,
+  Flame,
+  AlertCircle,
+  User,
+  Palette,
+  Leaf,
+  Film,
+  Layers,
+} from 'lucide-react';
+import { AdventureType, CreativePathwayId } from '../../types/prompt';
+import { getPathwayById } from '../../data/pathways';
 
 interface Mode1SetupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartSession: (duration: number | null, difficulty: AdventureType) => void;
+  onStartSession: (
+    duration: number | null,
+    difficulty: AdventureType,
+    pathway?: CreativePathwayId
+  ) => void;
+  pathway?: CreativePathwayId;
+  onChangePathway?: () => void;
 }
 
 export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   isOpen,
   onClose,
   onStartSession,
+  pathway = 'open',
+  onChangePathway,
 }) => {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(300); // 5 minutes default
   const [selectedAdventure, setSelectedAdventure] = useState<AdventureType>('full-adventure');
+  const [selectedPathway, setSelectedPathway] = useState<CreativePathwayId>(pathway);
   const [step, setStep] = useState<'configure' | 'prep'>('configure');
 
+  useEffect(() => {
+    if (pathway) {
+      setSelectedPathway(pathway);
+    }
+  }, [pathway]);
+
   if (!isOpen) return null;
+
+  const currentPathwayInfo = getPathwayById(selectedPathway);
+
+  const getPathwayIcon = (id: CreativePathwayId) => {
+    switch (id) {
+      case 'character-creator':
+        return User;
+      case 'graphic-design':
+        return Palette;
+      case 'nature-study':
+        return Leaf;
+      case 'animation':
+        return Film;
+      case 'world-builder':
+        return Compass;
+      case 'open':
+      default:
+        return Sparkles;
+    }
+  };
+
+  const PathwayIcon = getPathwayIcon(selectedPathway);
 
   const durationOptions = [
     { label: '2 MINUTES', value: 120, desc: 'Quick spark' },
@@ -66,7 +117,7 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   ];
 
   const handleStart = () => {
-    onStartSession(selectedDuration, selectedAdventure);
+    onStartSession(selectedDuration, selectedAdventure, selectedPathway);
     setStep('configure');
   };
 
@@ -96,6 +147,50 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
             <p className="text-sm font-handwriting text-lg text-[#655A51] mt-1">
               Choose your time and style. You draw on your paper, one prompt at a time.
             </p>
+
+            {/* Selected Pathway Card */}
+            <div className="mt-5 p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
+                  style={{
+                    backgroundColor: `${currentPathwayInfo.accentColor}18`,
+                    borderColor: `${currentPathwayInfo.accentColor}40`,
+                    color: currentPathwayInfo.accentColor,
+                  }}
+                >
+                  <PathwayIcon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
+                      Pathway
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code ${currentPathwayInfo.badgeColor}`}
+                    >
+                      {currentPathwayInfo.badge}
+                    </span>
+                  </div>
+                  <div className="text-sm font-extrabold text-[#2D2723] truncate">
+                    {currentPathwayInfo.name}
+                  </div>
+                  <div className="text-xs text-[#6B6056] truncate">
+                    {currentPathwayInfo.tagline}
+                  </div>
+                </div>
+              </div>
+
+              {onChangePathway && (
+                <button
+                  type="button"
+                  onClick={onChangePathway}
+                  className="px-3 py-1.5 rounded-xl border border-[#D8CEBE] text-xs font-bold text-[#5C5046] hover:bg-[#EFE9DF] transition-colors shrink-0"
+                >
+                  CHANGE
+                </button>
+              )}
+            </div>
 
             {/* Time Selector */}
             <div className="mt-6">

@@ -17,6 +17,8 @@ import { FaithContentCard } from './components/home/FaithContentCard';
 import { Mode1SetupModal } from './components/mode1/Mode1SetupModal';
 import { Mode1ActiveView } from './components/mode1/Mode1ActiveView';
 import { Mode1CompletionView } from './components/mode1/Mode1CompletionView';
+import { PathwayChooserModal } from './components/pathway/PathwayChooserModal';
+import { CharacterProgressionModal } from './components/character/CharacterProgressionModal';
 
 // Other modals / views
 import { WarmUpModal } from './components/warmup/WarmUpModal';
@@ -31,7 +33,7 @@ import { PromptTestSuiteModal } from './components/testing/PromptTestSuiteModal'
 import { useCreateAgainStorage } from './hooks/useCreateAgainStorage';
 import { getNextRandomPrompt, recordRecentPromptId } from './utils/promptSelector';
 import { MODE1_PROMPTS } from './data/mode1Prompts';
-import { AdventureType, Prompt } from './types/prompt';
+import { AdventureType, CreativePathwayId, Prompt, CharacterSkill } from './types/prompt';
 import { Mode1Session, SavedCreation } from './types/session';
 
 export default function App() {
@@ -53,6 +55,9 @@ export default function App() {
   // Modal states
   const [isChooserOpen, setIsChooserOpen] = useState(false);
   const [isMode1SetupOpen, setIsMode1SetupOpen] = useState(false);
+  const [isPathwayChooserOpen, setIsPathwayChooserOpen] = useState(false);
+  const [isCharacterProgressionOpen, setIsCharacterProgressionOpen] = useState(false);
+  const [selectedPathway, setSelectedPathway] = useState<CreativePathwayId>('open');
   const [isWarmUpOpen, setIsWarmUpOpen] = useState(false);
   const [isChaosOpen, setIsChaosOpen] = useState(false);
   const [isDontKnowOpen, setIsDontKnowOpen] = useState(false);
@@ -74,13 +79,24 @@ export default function App() {
         }
       }
       // If prompt wasn't cached, pick next
-      const nextP = getNextRandomPrompt(activeSession);
+      const nextP = getNextRandomPrompt(activeSession, MODE1_PROMPTS, activeSession.pathway);
       setCurrentPrompt(nextP);
     }
   }, [activeSession]);
 
+  // Select a pathway and proceed to adventure setup
+  const handleSelectPathway = (pathwayId: CreativePathwayId) => {
+    setSelectedPathway(pathwayId);
+    setIsPathwayChooserOpen(false);
+    setIsMode1SetupOpen(true);
+  };
+
   // Start a new Mode 1 Session
-  const handleStartMode1 = (duration: number | null, difficulty: AdventureType) => {
+  const handleStartMode1 = (
+    duration: number | null,
+    difficulty: AdventureType,
+    pathway: CreativePathwayId = selectedPathway
+  ) => {
     setIsMode1SetupOpen(false);
 
     const newSession: Mode1Session = {
@@ -90,13 +106,14 @@ export default function App() {
       timerDuration: duration,
       timerStartedAt: duration ? Date.now() : undefined,
       difficulty,
+      pathway,
       usedPromptIds: [],
       promptHistory: [],
       completed: false,
       stuckUsed: 0,
     };
 
-    const firstPrompt = getNextRandomPrompt(newSession);
+    const firstPrompt = getNextRandomPrompt(newSession, MODE1_PROMPTS, pathway);
     newSession.currentPromptId = firstPrompt.id;
 
     saveActiveSession(newSession);
@@ -117,7 +134,11 @@ export default function App() {
         promptId: currentPrompt.id,
         category: currentPrompt.category,
         text: currentPrompt.text,
-        shownAt: activeSession.promptHistory.length === 0 ? activeSession.startedAt : (activeSession.promptHistory[activeSession.promptHistory.length - 1]?.completedAt || now),
+        shownAt:
+          activeSession.promptHistory.length === 0
+            ? activeSession.startedAt
+            : activeSession.promptHistory[activeSession.promptHistory.length - 1]?.completedAt ||
+              now,
         completedAt: now,
       },
     ];
@@ -130,8 +151,8 @@ export default function App() {
       promptHistory: updatedHistory,
     };
 
-    // Calculate strictly next prompt (never pre-computed!)
-    const nextP = getNextRandomPrompt(updatedSession);
+    // Calculate strictly next prompt using pathway filter (never pre-computed!)
+    const nextP = getNextRandomPrompt(updatedSession, MODE1_PROMPTS, updatedSession.pathway);
     updatedSession.currentPromptId = nextP.id;
 
     saveActiveSession(updatedSession);
@@ -293,10 +314,63 @@ export default function App() {
     setCurrentTab('what-comes-next');
   };
 
+  // Handle starting a session from a Character Skill
+  const handleStartSkillSession = (skill: CharacterSkill) => {
+    const promptDifficulty: 'easy' | 'medium' | 'hard' =
+      skill.difficulty === 'beginner' ? 'easy' : skill.difficulty === 'advanced' ? 'hard' : 'medium';
+
+    const skillPrompt: Prompt = {
+      id: `skill-prompt-${skill.id}-${Date.now()}`,
+      category: 'START',
+      text: skill.writtenExercise,
+      subtext: `Character Creator Skill ${skill.skillNumber}: ${skill.title}`,
+      weight: 1,
+      difficulty: promptDifficulty,
+      tags: [...skill.tags, 'character-creator'],
+      goodForBeginning: true,
+      goodForMiddle: true,
+      goodForEnding: false,
+      requiresPreviousDrawing: false,
+      visualReference: skill.visualReference,
+    };
+
+    const newSession: Mode1Session = {
+      id: 'session-' + Date.now(),
+      sessionSeed: 'seed-' + Math.random().toString(36).substring(2),
+      startedAt: Date.now(),
+      timerDuration: 300,
+      timerStartedAt: Date.now(),
+      difficulty: 'tiny-mystery',
+      pathway: 'character-creator',
+      usedPromptIds: [],
+      promptHistory: [],
+      completed: false,
+      stuckUsed: 0,
+      currentPromptId: skillPrompt.id,
+    };
+
+    saveActiveSession(newSession);
+    setCurrentPrompt(skillPrompt);
+    trackSessionStart();
+    setCurrentTab('what-comes-next');
+  };
+
   // Handle mode chooser selection
-  const handleSelectMode = (mode: 'what-comes-next' | 'warm-up' | 'chaos' | 'dont-know') => {
+  const handleSelectMode = (
+    mode:
+      | 'what-comes-next'
+      | 'warm-up'
+      | 'chaos'
+      | 'dont-know'
+      | 'pathways'
+      | 'character-progression'
+  ) => {
     if (mode === 'what-comes-next') {
       setIsMode1SetupOpen(true);
+    } else if (mode === 'pathways') {
+      setIsPathwayChooserOpen(true);
+    } else if (mode === 'character-progression') {
+      setIsCharacterProgressionOpen(true);
     } else if (mode === 'warm-up') {
       setIsWarmUpOpen(true);
     } else if (mode === 'chaos') {
@@ -404,7 +478,11 @@ export default function App() {
 
             {/* 3. Featured Signature Mode (What Comes Next?) */}
             <FeaturedWhatComesNextCard
-              onStartMystery={() => setIsMode1SetupOpen(true)}
+              onStartMystery={() => {
+                setSelectedPathway('open');
+                setIsMode1SetupOpen(true);
+              }}
+              onOpenPathways={() => setIsPathwayChooserOpen(true)}
             />
 
             {/* 4. Quick Start / Pick Your Vibe */}
@@ -448,10 +526,33 @@ export default function App() {
         onSelectMode={handleSelectMode}
       />
 
+      <PathwayChooserModal
+        isOpen={isPathwayChooserOpen}
+        onClose={() => setIsPathwayChooserOpen(false)}
+        selectedPathway={selectedPathway}
+        onSelectPathway={handleSelectPathway}
+        onOpenProgression={() => {
+          setIsPathwayChooserOpen(false);
+          setIsCharacterProgressionOpen(true);
+        }}
+      />
+
+      {/* 22-Skill Character Creator Progression Track */}
+      <CharacterProgressionModal
+        isOpen={isCharacterProgressionOpen}
+        onClose={() => setIsCharacterProgressionOpen(false)}
+        onStartSkillSession={handleStartSkillSession}
+      />
+
       <Mode1SetupModal
         isOpen={isMode1SetupOpen}
         onClose={() => setIsMode1SetupOpen(false)}
         onStartSession={handleStartMode1}
+        pathway={selectedPathway}
+        onChangePathway={() => {
+          setIsMode1SetupOpen(false);
+          setIsPathwayChooserOpen(true);
+        }}
       />
 
       <WarmUpModal

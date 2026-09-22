@@ -1,6 +1,8 @@
 import { MODE1_PROMPTS } from '../data/mode1Prompts';
+import { getPathwayById } from '../data/pathways';
 import {
   AdventureType,
+  CreativePathwayId,
   Prompt,
   PromptCategory,
   SessionPhase,
@@ -191,7 +193,8 @@ export interface PromptEvaluation {
  */
 export function getNextRandomPrompt(
   session: Mode1Session,
-  allPrompts: Prompt[] = MODE1_PROMPTS
+  allPrompts: Prompt[] = MODE1_PROMPTS,
+  pathway?: CreativePathwayId
 ): Prompt {
   const isFirstPrompt = session.usedPromptIds.length === 0;
   const recentIds = getRecentPromptIds();
@@ -214,6 +217,23 @@ export function getNextRandomPrompt(
     );
   }
 
+  // Filter 3: Filter for tags relevant to chosen pathway
+  const activePathway = pathway || session.pathway;
+  let pathwayTags: string[] = [];
+  if (activePathway && activePathway !== 'open') {
+    const pathwayConfig = getPathwayById(activePathway);
+    if (pathwayConfig && pathwayConfig.relevantTags.length > 0) {
+      pathwayTags = pathwayConfig.relevantTags.map((t) => t.toLowerCase());
+      const pathwayMatching = candidates.filter((p) =>
+        p.tags.some((t) => pathwayTags.includes(t.toLowerCase()))
+      );
+      // Filter to relevant pathway prompts if matching candidates exist
+      if (pathwayMatching.length > 0) {
+        candidates = pathwayMatching;
+      }
+    }
+  }
+
   if (candidates.length === 0) {
     // Failsafe in case all prompts were exhausted in deep session
     candidates = allPrompts.filter((p) => p.id !== session.currentPromptId);
@@ -222,6 +242,11 @@ export function getNextRandomPrompt(
   // Calculate final weights for each candidate
   const evaluated: PromptEvaluation[] = candidates.map((p) => {
     let weight = p.weight;
+
+    // Pathway tag boost if prompt contains matching tags
+    if (pathwayTags.length > 0 && p.tags.some((t) => pathwayTags.includes(t.toLowerCase()))) {
+      weight *= 2.5;
+    }
 
     // 1. Category phase weight
     const categoryWeight = getCategoryPhaseWeight(p.category, phase, session.difficulty);

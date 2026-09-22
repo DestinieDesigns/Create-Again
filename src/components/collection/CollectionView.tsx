@@ -10,6 +10,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { SavedCreation } from '../../types/session';
+import { getPathwayById } from '../../data/pathways';
 
 interface CollectionViewProps {
   creations: SavedCreation[];
@@ -101,9 +102,16 @@ export const CollectionView: React.FC<CollectionViewProps> = ({
                   </div>
                 )}
 
-                <h3 className="font-extrabold text-base text-[#2D2723] tracking-tight">
-                  {item.title}
-                </h3>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-extrabold text-base text-[#2D2723] tracking-tight">
+                    {item.title}
+                  </h3>
+                  {item.pathway && item.pathway !== 'open' && (
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE] shrink-0">
+                      {getPathwayById(item.pathway).name}
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-2 text-xs text-[#8A7D71] mt-1 font-mono-code">
                   <Calendar className="w-3.5 h-3.5" />
@@ -134,8 +142,15 @@ export const CollectionView: React.FC<CollectionViewProps> = ({
               <X className="w-5 h-5" />
             </button>
 
-            <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code mb-1">
-              Creation Details
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
+                Creation Details
+              </span>
+              {selectedCreation.pathway && selectedCreation.pathway !== 'open' && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE]">
+                  {getPathwayById(selectedCreation.pathway).name}
+                </span>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723]">
               {selectedCreation.title}

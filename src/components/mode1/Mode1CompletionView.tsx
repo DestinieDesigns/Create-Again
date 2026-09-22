@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Mode1Session, SavedCreation } from '../../types/session';
 import { SessionHistoryModal, getCategoryBadgeStyle } from './SessionHistoryModal';
+import { getPathwayById } from '../../data/pathways';
 
 interface Mode1CompletionViewProps {
   session: Mode1Session;
@@ -64,6 +65,7 @@ export const Mode1CompletionView: React.FC<Mode1CompletionViewProps> = ({
       sessionId: session.id,
       title: title.trim() || 'Untitled Sketch',
       mode: 'Mode 1: What Comes Next?',
+      pathway: session.pathway,
       date: new Date().toISOString().split('T')[0],
       timestamp: Date.now(),
       completedAt: Date.now(),
@@ -86,8 +88,15 @@ export const Mode1CompletionView: React.FC<Mode1CompletionViewProps> = ({
             <Sparkles className="w-7 h-7" />
           </div>
 
-          <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-            Adventure Complete
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
+              Adventure Complete
+            </span>
+            {session.pathway && session.pathway !== 'open' && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE]">
+                {getPathwayById(session.pathway).name}
+              </span>
+            )}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2D2723] tracking-tight mt-1">
             YOU CREATED SOMETHING.
