@@ -8,7 +8,13 @@ export type VisualReferenceType =
   | 'silhouette'
   | 'composition'
   | 'environment'
-  | 'object';
+  | 'object'
+  | 'diagram';
+
+export interface BeginnerTerm {
+  term: string;
+  definition: string;
+}
 
 export interface VisualReference {
   id: string;
@@ -25,4 +31,12 @@ export interface VisualReference {
   contextHint?: string;
   tags?: string[];
   relatedPromptId?: string;
+
+  // Master Prompt Sheet specifications
+  examples?: string[];
+  whatToNotice?: string;
+  explanation?: string;
+  challenge?: string;
+  beginnerTerms?: BeginnerTerm[];
 }
+

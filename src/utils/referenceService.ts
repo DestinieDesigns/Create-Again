@@ -15,24 +15,39 @@ const clientReferenceCache = new Map<string, VisualReference>();
  * 3. Checks heuristic matching from static curated library
  * 4. Checks client-side dynamic cache
  */
-export const getVisualReferenceForPrompt = (prompt: Prompt): VisualReference | undefined => {
+export const getVisualReferenceForPrompt = (prompt: Prompt): VisualReference => {
+  let ref: VisualReference | undefined = undefined;
+
   if (prompt.visualReference) {
-    return prompt.visualReference;
+    ref = prompt.visualReference;
+  } else if (prompt.visualReferenceId) {
+    ref = getVisualReferenceById(prompt.visualReferenceId);
+  } else if (clientReferenceCache.has(prompt.id)) {
+    ref = clientReferenceCache.get(prompt.id);
   }
 
-  if (prompt.visualReferenceId) {
-    const found = getVisualReferenceById(prompt.visualReferenceId);
-    if (found) return found;
+  if (!ref) {
+    ref = findVisualReferenceForPrompt(prompt.text, prompt.tags, prompt.category);
   }
 
-  // Check client cache
-  if (clientReferenceCache.has(prompt.id)) {
-    return clientReferenceCache.get(prompt.id);
+  // Guaranteed fallback so NO prompt exists without a visual reference
+  if (!ref) {
+    ref = VISUAL_REFERENCES['ref-01-marks'] || VISUAL_REFERENCES['ref-sketching-foundations'];
   }
 
-  // Check curated matching
-  return findVisualReferenceForPrompt(prompt.text, prompt.tags, prompt.category);
+  // If prompt has enriched master sheet properties, enhance the reference
+  return {
+    ...ref,
+    title: ref.title || prompt.text,
+    description: ref.description || prompt.explanation || prompt.subtext,
+    explanation: prompt.explanation || ref.explanation || prompt.subtext,
+    examples: prompt.examples && prompt.examples.length > 0 ? prompt.examples : ref.examples,
+    whatToNotice: prompt.whatToNotice || ref.whatToNotice,
+    challenge: prompt.challenge || ref.challenge,
+    beginnerTerms: prompt.beginnerTerms || ref.beginnerTerms,
+  };
 };
+
 
 /**
  * Securely requests an AI-assisted instructional reference diagram via the server-side API.

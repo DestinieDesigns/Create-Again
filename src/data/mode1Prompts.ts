@@ -1,6 +1,8 @@
-import { Prompt } from '../types/prompt';
+import { Prompt, PromptCategory } from '../types/prompt';
+import { MASTER_CREATIVE_PROMPTS, MASTER_VISUAL_REFERENCES } from './masterPromptSheet';
 
-export const MODE1_PROMPTS: Prompt[] = [
+const BASE_MODE1_PROMPTS: Prompt[] = [
+
   {
     "id": "start-01",
     "category": "START",
@@ -3824,3 +3826,28 @@ export const MODE1_PROMPTS: Prompt[] = [
     "goodForEnding": true
   }
 ];
+
+const MASTER_MODE1_PROMPTS: Prompt[] = MASTER_CREATIVE_PROMPTS.map((cp) => ({
+  id: cp.id,
+  text: cp.prompt,
+  explanation: cp.explanation,
+  category: cp.category as PromptCategory,
+  difficulty: cp.difficulty,
+  tags: cp.tags,
+  visualReference: MASTER_VISUAL_REFERENCES[cp.id],
+  examples: cp.visualReference.examples,
+  whatToNotice: cp.visualReference.whatToNotice,
+  challenge: cp.visualReference.challenge,
+  beginnerTerms: cp.visualReference.beginnerTerms,
+  goodForBeginning: cp.category === 'START',
+  goodForMiddle: cp.category !== 'START' && cp.category !== 'FINISH',
+  goodForEnding: cp.category === 'FINISH',
+  requiresPreviousDrawing: cp.category !== 'START',
+  weight: 9,
+}));
+
+export const MODE1_PROMPTS: Prompt[] = [
+  ...BASE_MODE1_PROMPTS,
+  ...MASTER_MODE1_PROMPTS,
+];
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, Flame, Dices, HelpCircle, ArrowRight, Compass, BookOpen } from 'lucide-react';
+import { X, Sparkles, Flame, Dices, HelpCircle, ArrowRight, Compass, BookOpen, Palette } from 'lucide-react';
 
 interface CreationChooserModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface CreationChooserModalProps {
       | 'dont-know'
       | 'pathways'
       | 'character-progression'
+      | 'master-sheet'
   ) => void;
 }
 
@@ -36,6 +37,18 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       borderColor: 'hover:border-[#E06D53]',
     },
     {
+      id: 'master-sheet' as const,
+      title: 'VISUAL EXAMPLE MASTER SHEET',
+      subtitle: '30 Visual Teaching Guides + Variations',
+      description: 'Every prompt has an instructional visual reference. Learn anatomy, lines, shapes, perspective, and expressions with no prompt lacking a guide.',
+      badge: '30 Master Guides',
+      badgeColor: 'bg-[#4F46E5] text-white',
+      buttonLabel: 'BROWSE GUIDES',
+      icon: Palette,
+      iconColor: 'text-[#4F46E5]',
+      borderColor: 'hover:border-[#4F46E5]',
+    },
+    {
       id: 'pathways' as const,
       title: 'CREATIVE PATHWAYS',
       subtitle: 'Character, Graphic Design, Nature...',
@@ -47,6 +60,7 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       iconColor: 'text-[#2A9D8F]',
       borderColor: 'hover:border-[#2A9D8F]',
     },
+
     {
       id: 'character-progression' as const,
       title: 'CHARACTER CREATOR',

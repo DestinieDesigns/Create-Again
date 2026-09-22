@@ -1,11 +1,14 @@
 import { VisualReference } from '../types/prompt';
 import { PROMPT_VISUAL_REFERENCES } from './promptVisualReferences';
 import { THEME_VISUAL_REFERENCES } from './themeVisualReferences';
+import { MASTER_VISUAL_REFERENCES } from './masterPromptSheet';
 
 export const VISUAL_REFERENCES: Record<string, VisualReference> = {
   ...PROMPT_VISUAL_REFERENCES,
   ...THEME_VISUAL_REFERENCES,
+  ...MASTER_VISUAL_REFERENCES,
   'ref-head-shapes': {
+
     id: 'ref-head-shapes',
     type: 'shape',
     title: 'Fundamental Head Silhouettes',
@@ -637,7 +640,67 @@ export const findVisualReferenceForPrompt = (
     return VISUAL_REFERENCES['ref-character-props'];
   }
 
+  // Master Sheet specific anatomy & concept matches
+  if (lowerText.includes('beak') || lowerText.includes('snout') || lowerText.includes('sharp corner')) {
+    return VISUAL_REFERENCES['ref-07-snout-beak-corner'];
+  }
+  if (lowerText.includes('eyebrow') || lowerText.includes('brow')) {
+    return VISUAL_REFERENCES['ref-10-eyebrows'];
+  }
+  if (lowerText.includes('nose') || lowerText.includes('nostril')) {
+    return VISUAL_REFERENCES['ref-11-noses'];
+  }
+  if (lowerText.includes('mouth') || lowerText.includes('smile') || lowerText.includes('grin') || lowerText.includes('smirk')) {
+    return VISUAL_REFERENCES['ref-12-mouths'];
+  }
+  if (lowerText.includes('eye') || lowerText.includes('pupil') || lowerText.includes('gaze')) {
+    return VISUAL_REFERENCES['ref-09-eyes'];
+  }
+  if (lowerText.includes('hair') || lowerText.includes('afro') || lowerText.includes('braid') || lowerText.includes('curl')) {
+    return VISUAL_REFERENCES['ref-14-hair'];
+  }
+  if (lowerText.includes('arm') || lowerText.includes('elbow')) {
+    return VISUAL_REFERENCES['ref-17-arms'];
+  }
+  if (lowerText.includes('leg') || lowerText.includes('stride') || lowerText.includes('knee')) {
+    return VISUAL_REFERENCES['ref-18-legs'];
+  }
+  if (lowerText.includes('foot') || lowerText.includes('feet') || lowerText.includes('shoe') || lowerText.includes('boot')) {
+    return VISUAL_REFERENCES['ref-20-feet'];
+  }
+  if (lowerText.includes('proportion') || lowerText.includes('chibi') || lowerText.includes('scale contrast')) {
+    return VISUAL_REFERENCES['ref-16-proportions'];
+  }
+  if (lowerText.includes('line of action') || lowerText.includes('spine')) {
+    return VISUAL_REFERENCES['ref-22-line-of-action'];
+  }
+  if (lowerText.includes('clothes') || lowerText.includes('clothing') || lowerText.includes('dress') || lowerText.includes('hoodie') || lowerText.includes('cloak')) {
+    return VISUAL_REFERENCES['ref-24-clothing'];
+  }
+  if (lowerText.includes('backpack') || lowerText.includes('accessory') || lowerText.includes('accessories') || lowerText.includes('prop')) {
+    return VISUAL_REFERENCES['ref-25-accessories'];
+  }
+  if (lowerText.includes('hybrid') || lowerText.includes('creature') || lowerText.includes('combine two animals')) {
+    return VISUAL_REFERENCES['ref-27-creature-design'];
+  }
+  if (lowerText.includes('perspective') || lowerText.includes('horizon') || lowerText.includes('farther away')) {
+    return VISUAL_REFERENCES['ref-29-perspective'];
+  }
+  if (lowerText.includes('negative space') || lowerText.includes('space around') || lowerText.includes('air void')) {
+    return VISUAL_REFERENCES['ref-31-negative-space'];
+  }
+  if (lowerText.includes('texture') || lowerText.includes('bark') || lowerText.includes('wood') || lowerText.includes('pebble')) {
+    return VISUAL_REFERENCES['ref-32-texture'];
+  }
+  if (lowerText.includes('color mood') || lowerText.includes('palette') || lowerText.includes('temperature')) {
+    return VISUAL_REFERENCES['ref-33-color-mood'];
+  }
+  if (lowerText.includes('ordinary and change') || lowerText.includes('surreal') || lowerText.includes('mutate')) {
+    return VISUAL_REFERENCES['ref-34-creative-transformation'];
+  }
+
   // Theme-aware matches
+
   if (lowerText.includes('dragon') || lowerText.includes('fairy') || lowerText.includes('magic') || lowerText.includes('potion') || lowerText.includes('talisman') || lowerText.includes('horns') || lowerText.includes('wings')) {
     return VISUAL_REFERENCES['ref-fantasy-creature-parts'];
   }

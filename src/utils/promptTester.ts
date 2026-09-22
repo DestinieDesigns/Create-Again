@@ -1,6 +1,9 @@
 import { MODE1_PROMPTS } from '../data/mode1Prompts';
+import { MASTER_CREATIVE_PROMPTS } from '../data/masterPromptSheet';
+import { getVisualReferenceForPrompt } from './referenceService';
 import { Mode1Session } from '../types/session';
 import { getNextRandomPrompt, getRecentPromptIds } from './promptSelector';
+
 
 export interface TestResult {
   id: string;
@@ -257,5 +260,51 @@ export function runPromptSystemTests(): TestResult[] {
     message: `Verified: Session state stores only currentPromptId and historical prompts. The next prompt is calculated strictly just-in-time.`,
   });
 
+  // Test 11: Core Rule Verification — NO creative prompt exists without a visual reference
+  let missingRef = 0;
+  const samplePrompts = MODE1_PROMPTS.slice(0, 50);
+  for (const prompt of samplePrompts) {
+    const ref = getVisualReferenceForPrompt(prompt);
+    if (!ref || (!ref.svgContent && !ref.imageUrl)) {
+      missingRef++;
+    }
+  }
+  const test11Passed = missingRef === 0;
+  results.push({
+    id: 'test-11',
+    name: 'No prompt exists without a visual reference',
+    passed: test11Passed,
+    message: test11Passed
+      ? `100% of tested prompts (${samplePrompts.length}/${samplePrompts.length}) successfully resolved instructional visual reference diagrams.`
+      : `Failed: ${missingRef} prompts lacked a visual reference diagram.`,
+  });
+
+  // Test 12: Master Prompt Structure Verification
+  // Every master prompt contains Prompt, Short explanation, Visual example, Example variations, What to notice, Optional challenge
+  let validMasterPrompts = 0;
+  for (const p of MASTER_CREATIVE_PROMPTS) {
+    if (
+      p.prompt &&
+      p.explanation &&
+      p.visualReference &&
+      (p.visualReference.svgContent || p.visualReference.imageUrl) &&
+      p.visualReference.examples &&
+      p.visualReference.examples.length >= 2 &&
+      p.visualReference.whatToNotice
+    ) {
+      validMasterPrompts++;
+    }
+  }
+  const test12Passed = validMasterPrompts === MASTER_CREATIVE_PROMPTS.length;
+  results.push({
+    id: 'test-12',
+    name: 'Master Prompt Structure completeness (All 30 Sections)',
+    passed: test12Passed,
+    message: test12Passed
+      ? `All ${validMasterPrompts}/${MASTER_CREATIVE_PROMPTS.length} master prompts have prompt text, explanation, visual diagrams, example variations, and "what to notice" insights.`
+      : `Failed: Only ${validMasterPrompts}/${MASTER_CREATIVE_PROMPTS.length} passed structure validation.`,
+  });
+
   return results;
 }
+

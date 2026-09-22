@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { BookOpen, Sparkles, Flame, Compass, FolderHeart, BarChart3, Settings, Menu, X, ArrowRight } from 'lucide-react';
+import { BookOpen, Sparkles, Flame, Compass, FolderHeart, BarChart3, Settings, Menu, X, ArrowRight, Palette } from 'lucide-react';
 
 interface HeaderProps {
   currentTab: string;
   onNavigate: (tab: string) => void;
   onOpenCreateChooser: () => void;
+  onOpenMasterSheet?: () => void;
   unfinishedSessionExists: boolean;
 }
 
@@ -12,6 +13,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentTab,
   onNavigate,
   onOpenCreateChooser,
+  onOpenMasterSheet,
   unfinishedSessionExists,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'home', label: 'Home', icon: BookOpen },
     { id: 'create', label: 'Create', icon: Sparkles, highlight: true },
+    { id: 'master-sheet', label: 'Visual Guide', icon: Palette },
     { id: 'practice', label: 'Warm Up', icon: Flame },
     { id: 'challenges', label: 'Chaos', icon: Compass },
     { id: 'collection', label: 'Collection', icon: FolderHeart },
@@ -29,11 +32,14 @@ export const Header: React.FC<HeaderProps> = ({
   const handleNavClick = (id: string) => {
     if (id === 'create') {
       onOpenCreateChooser();
+    } else if (id === 'master-sheet') {
+      if (onOpenMasterSheet) onOpenMasterSheet();
     } else {
       onNavigate(id);
     }
     setMobileMenuOpen(false);
   };
+
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#E8E0D5]">

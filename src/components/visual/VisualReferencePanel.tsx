@@ -160,18 +160,30 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
       {/* Philosophy Banner: 'LOOK, THEN CREATE' */}
       <div
         id={`${id}-philosophy-banner`}
-        className="mt-3.5 px-3.5 py-2 rounded-xl bg-[#F5EFE6] border border-[#E4D9CC] flex items-center justify-between gap-2 flex-wrap"
+        className="mt-3.5 px-3.5 py-2.5 rounded-2xl bg-[#F5EFE6] border border-[#E4D9CC] flex flex-col sm:flex-row sm:items-center justify-between gap-2"
       >
         <div className="flex items-center gap-2">
           <span className="flex h-2 w-2 rounded-full bg-[#E06D53]" aria-hidden="true" />
-          <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#2D2723]">
-            Look, Then Create
+          <span className="text-[11px] sm:text-xs font-black tracking-wider text-[#2D2723]">
+            PROMPT → SEE EXAMPLES → UNDERSTAND → PUT DEVICE DOWN → CREATE
           </span>
         </div>
         <p className="text-[11px] text-[#6E6054] font-medium">
-          Take a look, absorb the idea, then put your screen down and draw.
+          Examples show variety, never one right answer. Draw on your paper.
         </p>
       </div>
+
+      {/* Short Explanation: "What does this instruction mean?" */}
+      {(activeReference.explanation || activeReference.description) && (
+        <div className="mt-3 px-4 py-2.5 rounded-2xl bg-[#FAF6EE] border border-[#E8DFC9] text-left">
+          <p className="text-[11px] font-bold text-[#8C754A] uppercase tracking-wider">
+            What this instruction means
+          </p>
+          <p className="text-xs sm:text-sm font-medium text-[#3D332A] mt-0.5 leading-relaxed">
+            {activeReference.explanation || activeReference.description}
+          </p>
+        </div>
+      )}
 
       {/* Main Visual Media Display */}
       <div className="mt-3.5">
@@ -212,13 +224,82 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
         <p className="sr-only" aria-live="polite">
           Visual reference image: {activeReference.altText}
         </p>
-
-        {activeReference.description && (
-          <p className="mt-2 text-xs text-[#6B5F54] leading-relaxed px-1">
-            {activeReference.description}
-          </p>
-        )}
       </div>
+
+      {/* Example Variations List (Demonstrating Variety rather than one correct answer) */}
+      {activeReference.examples && activeReference.examples.length > 0 && (
+        <div className="mt-3.5 p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E8DEC8]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#635446]">
+              Example Variations (Notice the variety)
+            </span>
+            <span className="text-[10px] text-[#918171] font-mono-code font-bold">
+              {activeReference.examples.length} possibilities
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {activeReference.examples.map((ex, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2 px-2.5 py-1.5 rounded-xl bg-[#F4EFE6] border border-[#E4D9C8] text-xs text-[#3D332A]"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E06D53] shrink-0 mt-1.5" />
+                <span className="font-medium">{ex}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* What to Notice Callout */}
+      {activeReference.whatToNotice && (
+        <div className="mt-3 p-3.5 rounded-2xl bg-[#F0F5F2] border border-[#D0E2D8] text-left">
+          <div className="flex items-start gap-2.5">
+            <span className="text-base leading-none mt-0.5">👁️</span>
+            <div>
+              <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#2D6A4F]">
+                What to notice
+              </p>
+              <p className="text-xs sm:text-sm font-semibold text-[#1B4332] mt-0.5 leading-relaxed">
+                {activeReference.whatToNotice}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Optional Challenge */}
+      {activeReference.challenge && (
+        <div className="mt-2.5 px-3.5 py-2.5 rounded-2xl bg-[#FFF9F2] border border-[#FAD8B8] text-left">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#E06D53] shrink-0" aria-hidden="true" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#A7412A]">
+              Optional Challenge:
+            </span>
+            <span className="text-xs text-[#523A28] font-medium">
+              {activeReference.challenge}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Beginner Terms Glossary (Plain Language Definitions) */}
+      {activeReference.beginnerTerms && activeReference.beginnerTerms.length > 0 && (
+        <div className="mt-2.5 flex items-center gap-2 flex-wrap text-left">
+          <span className="text-[10px] uppercase font-bold text-[#8C7E72] tracking-wider">
+            Art Terms:
+          </span>
+          {activeReference.beginnerTerms.map((termItem, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ECE4D8] border border-[#DDD3C5] text-[11px] text-[#42372E]"
+            >
+              <strong className="font-bold text-[#2D2723]">{termItem.term}:</strong>
+              <span>{termItem.definition}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Context-Aware Microcopy & Grounding Steps */}
       <div className="mt-4 space-y-2.5">
@@ -262,6 +343,7 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
           </button>
         </div>
       </div>
+
     </aside>
   );
 };

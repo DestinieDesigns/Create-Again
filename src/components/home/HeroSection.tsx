@@ -5,19 +5,33 @@ import { CreativeAffirmationComponent } from './CreativeAffirmation';
 interface HeroSectionProps {
   onStartCreating: () => void;
   onDontKnowWhatToDraw: () => void;
+  onOpenMasterSheet?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onStartCreating,
   onDontKnowWhatToDraw,
+  onOpenMasterSheet,
 }) => {
   return (
     <section className="relative pt-8 pb-12 sm:pt-14 sm:pb-16 text-center max-w-3xl mx-auto px-4">
-      {/* Decorative tape / pin badge */}
-      <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EFE8DC] border border-[#DDD3C4] text-[#6A5E53] text-xs font-semibold mb-6 shadow-xs">
-        <PenTool className="w-3.5 h-3.5 text-[#E06D53]" />
-        <span>A creative companion for your sketchbook or tablet</span>
+      {/* Decorative tape / pin badge & Master Sheet quick link */}
+      <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EFE8DC] border border-[#DDD3C4] text-[#6A5E53] text-xs font-semibold shadow-xs">
+          <PenTool className="w-3.5 h-3.5 text-[#E06D53]" />
+          <span>A creative companion for your sketchbook or tablet</span>
+        </div>
+        {onOpenMasterSheet && (
+          <button
+            type="button"
+            onClick={onOpenMasterSheet}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF5EB] border border-[#E0D3C0] hover:bg-[#F2ECE1] text-[#7A5B35] text-xs font-bold transition-all shadow-xs"
+          >
+            <span>🎨 30 Visual Prompt Guides</span>
+          </button>
+        )}
       </div>
+
 
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-[#2D2723] tracking-tight leading-[1.15]">
         What are you creating today?

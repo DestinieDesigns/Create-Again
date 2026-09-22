@@ -34,8 +34,33 @@ export type CreativePathwayId =
   | "animation"
   | "world-builder";
 
-import type { VisualReferenceType, VisualReference } from './visualReference';
-export type { VisualReferenceType, VisualReference };
+import type { VisualReferenceType, VisualReference, BeginnerTerm } from './visualReference';
+export type { VisualReferenceType, VisualReference, BeginnerTerm };
+
+export interface CreativePrompt {
+  id: string;
+  prompt: string;
+  explanation: string;
+  category: string;
+  difficulty: "easy" | "medium" | "hard";
+
+  visualReference: {
+    type: string;
+    imageUrl?: string;
+    svgContent?: string;
+    altText: string;
+    examples: string[];
+    whatToNotice: string;
+    challenge?: string;
+    title?: string;
+    description?: string;
+    beginnerTerms?: BeginnerTerm[];
+  };
+
+  tags: string[];
+  themeIds?: string[];
+  skillIds?: string[];
+}
 
 export interface CharacterSkill {
   id: string;
@@ -69,6 +94,7 @@ export interface Prompt {
   category: PromptCategory;
   text: string;
   subtext?: string;
+  explanation?: string;
   difficulty: PromptDifficulty;
   tags: string[];
   weight: number;
@@ -82,6 +108,12 @@ export interface Prompt {
   maxSessionMinute?: number;
   visualReference?: VisualReference;
   visualReferenceId?: string;
+  examples?: string[];
+  whatToNotice?: string;
+  challenge?: string;
+  beginnerTerms?: BeginnerTerm[];
   themeIds?: string[];
   themeTags?: string[];
+  skillIds?: string[];
 }
+

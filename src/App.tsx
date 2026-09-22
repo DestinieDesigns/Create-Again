@@ -31,6 +31,9 @@ import { CollectionView } from './components/collection/CollectionView';
 import { ProgressView } from './components/progress/ProgressView';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { PromptTestSuiteModal } from './components/testing/PromptTestSuiteModal';
+import { VisualReferenceMasterSheetModal } from './components/visual/VisualReferenceMasterSheetModal';
+import { MASTER_VISUAL_REFERENCES } from './data/masterPromptSheet';
+import { CreativePrompt } from './types/prompt';
 
 // Storage and Prompt selector
 import { useCreateAgainStorage } from './hooks/useCreateAgainStorage';
@@ -69,6 +72,8 @@ export default function App() {
   const [isDontKnowOpen, setIsDontKnowOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTestSuiteOpen, setIsTestSuiteOpen] = useState(false);
+  const [isMasterSheetOpen, setIsMasterSheetOpen] = useState(false);
+
 
   // Active Mode 1 state
   const [currentPrompt, setCurrentPrompt] = useState<Prompt | null>(null);
@@ -376,6 +381,63 @@ export default function App() {
     setCurrentTab('what-comes-next');
   };
 
+  // Launch a focused drawing session directly from the Master Prompt Sheet
+  const handlePracticeMasterPrompt = (prompt: CreativePrompt) => {
+    const visualRef = MASTER_VISUAL_REFERENCES[prompt.id] || {
+      id: `ref-${prompt.id}`,
+      type: prompt.visualReference.type as any,
+      title: prompt.visualReference.title || prompt.prompt,
+      description: prompt.explanation,
+      svgContent: prompt.visualReference.svgContent,
+      altText: prompt.visualReference.altText,
+      examples: prompt.visualReference.examples,
+      whatToNotice: prompt.visualReference.whatToNotice,
+      challenge: prompt.visualReference.challenge,
+      beginnerTerms: prompt.visualReference.beginnerTerms,
+      beginnerFriendly: true,
+      tags: prompt.tags,
+    };
+
+    const sessionPrompt: Prompt = {
+      id: prompt.id,
+      text: prompt.prompt,
+      explanation: prompt.explanation,
+      category: prompt.category as any,
+      difficulty: prompt.difficulty,
+      tags: prompt.tags,
+      visualReference: visualRef,
+      examples: prompt.visualReference.examples,
+      whatToNotice: prompt.visualReference.whatToNotice,
+      challenge: prompt.visualReference.challenge,
+      beginnerTerms: prompt.visualReference.beginnerTerms,
+      goodForBeginning: true,
+      goodForMiddle: true,
+      goodForEnding: false,
+      requiresPreviousDrawing: false,
+      weight: 10,
+    };
+
+    const newSession: Mode1Session = {
+      id: 'session-' + Date.now(),
+      sessionSeed: 'seed-' + Math.random().toString(36).substring(2),
+      startedAt: Date.now(),
+      timerDuration: 300,
+      timerStartedAt: Date.now(),
+      difficulty: 'tiny-mystery',
+      usedPromptIds: [],
+      promptHistory: [],
+      completed: false,
+      stuckUsed: 0,
+      currentPromptId: sessionPrompt.id,
+    };
+
+    saveActiveSession(newSession);
+    setCurrentPrompt(sessionPrompt);
+    trackSessionStart();
+    setIsMasterSheetOpen(false);
+    setCurrentTab('what-comes-next');
+  };
+
   // Handle mode chooser selection
   const handleSelectMode = (
     mode:
@@ -385,9 +447,12 @@ export default function App() {
       | 'dont-know'
       | 'pathways'
       | 'character-progression'
+      | 'master-sheet'
   ) => {
     if (mode === 'what-comes-next') {
       setIsMode1SetupOpen(true);
+    } else if (mode === 'master-sheet') {
+      setIsMasterSheetOpen(true);
     } else if (mode === 'pathways') {
       setIsPathwayChooserOpen(true);
     } else if (mode === 'character-progression') {
@@ -405,6 +470,8 @@ export default function App() {
   const handleNavigate = (tab: string) => {
     if (tab === 'home') {
       setCurrentTab('home');
+    } else if (tab === 'master-sheet') {
+      setIsMasterSheetOpen(true);
     } else if (tab === 'what-comes-next') {
       if (activeSession && !activeSession.completed) {
         setCurrentTab('what-comes-next');
@@ -431,8 +498,10 @@ export default function App() {
         currentTab={currentTab}
         onNavigate={handleNavigate}
         onOpenCreateChooser={() => setIsChooserOpen(true)}
+        onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
         unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
       />
+
 
       {/* Main Content Area */}
       <main className="flex-1">
@@ -489,7 +558,9 @@ export default function App() {
             <HeroSection
               onStartCreating={() => setIsChooserOpen(true)}
               onDontKnowWhatToDraw={() => setIsDontKnowOpen(true)}
+              onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
             />
+
 
             {/* 2. Unfinished Session Card (Only shows if unfinished session exists) */}
             <ContinueSessionCard
@@ -631,7 +702,15 @@ export default function App() {
         onClose={() => setIsTestSuiteOpen(false)}
       />
 
+      {/* 30-Section Prompt + Visual Example Master Sheet Explorer */}
+      <VisualReferenceMasterSheetModal
+        isOpen={isMasterSheetOpen}
+        onClose={() => setIsMasterSheetOpen(false)}
+        onSelectPrompt={handlePracticeMasterPrompt}
+      />
+
       {/* Minimalist Warm Paper Footer */}
+
       <Footer
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenTests={() => setIsTestSuiteOpen(true)}
