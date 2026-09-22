@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, HelpCircle, ArrowRight, PenTool } from 'lucide-react';
+import { CreativeAffirmationComponent } from './CreativeAffirmation';
 
 interface HeroSectionProps {
   onStartCreating: () => void;
@@ -29,8 +30,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </span>
       </p>
 
+      {/* Rotating Creative Affirmation */}
+      <div className="mt-7 mb-2">
+        <CreativeAffirmationComponent />
+      </div>
+
       {/* Philosophy banner */}
-      <div className="mt-6 mb-8 py-2.5 px-4 bg-[#F2EDE4] rounded-2xl inline-block border border-[#E2D8CA] text-xs sm:text-sm text-[#73665B] font-medium">
+      <div className="mt-4 mb-8 py-2.5 px-4 bg-[#F2EDE4] rounded-2xl inline-block border border-[#E2D8CA] text-xs sm:text-sm text-[#73665B] font-medium">
         <span className="font-extrabold text-[#2D2723]">YOUR NEXT CREATION DOESN'T HAPPEN HERE.</span>{' '}
         It happens on your page.
       </div>
