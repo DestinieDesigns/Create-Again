@@ -82,4 +82,6 @@ export interface Prompt {
   maxSessionMinute?: number;
   visualReference?: VisualReference;
   visualReferenceId?: string;
+  themeIds?: string[];
+  themeTags?: string[];
 }

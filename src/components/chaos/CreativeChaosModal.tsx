@@ -1,68 +1,45 @@
-import React, { useState } from 'react';
-import { X, Dices, RefreshCw, Sparkles, Clock, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Dices, RefreshCw, Sparkles } from 'lucide-react';
+import { getChaosPoolForTheme } from '../../data/creativeChaosPools';
+import { getThemeById } from '../../data/themes';
 
 interface CreativeChaosModalProps {
   isOpen: boolean;
   onClose: () => void;
   onStartChaosDrawing: (comboText: string) => void;
+  themeId?: string | null;
 }
-
-const CHARACTERS = [
-  'A very tired badger',
-  'An intergalactic mail carrier',
-  'A tea kettle with tiny legs',
-  'An ancient moss-covered robot',
-  'A grumpy librarian owl',
-  'A baker who only makes miniature food',
-  'A nervous ghost trying to make friends',
-  'A deep-sea diver in an antique bronze suit',
-];
-
-const FEATURES = [
-  'wearing oversized combat boots',
-  'balancing a teacup on their head',
-  'sprouting glowing mushrooms',
-  'carrying an umbrella made of leaves',
-  'with an accordion strapped to their chest',
-  'holding a miniature constellation in a jar',
-  'wrapped in a comically long scarf',
-];
-
-const SETTINGS = [
-  'standing in a flooded bookstore',
-  'atop an overgrown clock tower',
-  'waiting at a bus stop on a comet',
-  'inside a hollowed-out pumpkin cafe',
-  'on a narrow suspension bridge above clouds',
-  'in a kitchen at 3 AM',
-];
-
-const RULES = [
-  'No sharp angles allowed—everything must be curved.',
-  'Only draw with broken hatch marks.',
-  'Draw their shadow much larger than them.',
-  'Include three hidden eyes somewhere in the scene.',
-  'Draw everything with extra-thick outlines.',
-  'Do not lift your pen when drawing the character.',
-];
 
 export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
   isOpen,
   onClose,
   onStartChaosDrawing,
+  themeId,
 }) => {
-  const [character, setCharacter] = useState(CHARACTERS[0]);
-  const [feature, setFeature] = useState(FEATURES[0]);
-  const [setting, setSetting] = useState(SETTINGS[0]);
-  const [rule, setRule] = useState(RULES[0]);
+  const [activePool, setActivePool] = useState(() => getChaosPoolForTheme(themeId));
+  const [character, setCharacter] = useState(activePool.characters[0]);
+  const [feature, setFeature] = useState(activePool.features[0]);
+  const [setting, setSetting] = useState(activePool.settings[0]);
+  const [rule, setRule] = useState(activePool.rules[0]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const pool = getChaosPoolForTheme(themeId);
+      setActivePool(pool);
+      setCharacter(pool.characters[Math.floor(Math.random() * pool.characters.length)]);
+      setFeature(pool.features[Math.floor(Math.random() * pool.features.length)]);
+      setSetting(pool.settings[Math.floor(Math.random() * pool.settings.length)]);
+      setRule(pool.rules[Math.floor(Math.random() * pool.rules.length)]);
+    }
+  }, [isOpen, themeId]);
 
   if (!isOpen) return null;
 
   const rollAll = () => {
-    setCharacter(CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)]);
-    setFeature(FEATURES[Math.floor(Math.random() * FEATURES.length)]);
-    setSetting(SETTINGS[Math.floor(Math.random() * SETTINGS.length)]);
-    setRule(RULES[Math.floor(Math.random() * RULES.length)]);
+    setCharacter(activePool.characters[Math.floor(Math.random() * activePool.characters.length)]);
+    setFeature(activePool.features[Math.floor(Math.random() * activePool.features.length)]);
+    setSetting(activePool.settings[Math.floor(Math.random() * activePool.settings.length)]);
+    setRule(activePool.rules[Math.floor(Math.random() * activePool.rules.length)]);
   };
 
   const handleStart = () => {
@@ -71,12 +48,20 @@ export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
     onClose();
   };
 
+  const currentTheme = getThemeById(themeId);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Creative Chaos Generator"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+    >
       <div className="relative w-full max-w-xl bg-[#FCFAF6] rounded-3xl p-6 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-6 right-6 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158]"
+          aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
@@ -88,20 +73,27 @@ export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
           <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
             Chaos Generator
           </span>
+          {currentTheme && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#FFF2E6] text-[#E06D53] border border-[#F5C7BC]">
+              Theme: {currentTheme.name}
+            </span>
+          )}
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight">
           Creative Chaos
         </h2>
         <p className="text-xs sm:text-sm text-[#6E6054] mt-0.5 font-handwriting text-lg">
-          Unpredictable combinations to shock your imagination into motion.
+          {currentTheme
+            ? `Unpredictable combinations tailored to ${currentTheme.name} to shock your imagination.`
+            : 'Unpredictable combinations to shock your imagination into motion.'}
         </p>
 
         {/* Chaos Slots Card */}
         <div className="my-6 bg-[#FAF7F2] rounded-2xl border-2 border-[#E8E0D5] p-5 sm:p-6 space-y-4 subtle-shadow">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#998A7D] font-mono-code">
-              1. The Character
+              1. The Character / Subject
             </div>
             <div className="text-base sm:text-lg font-extrabold text-[#2D2723] mt-0.5">
               {character}

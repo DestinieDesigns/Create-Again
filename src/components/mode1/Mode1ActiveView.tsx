@@ -17,6 +17,8 @@ import { Prompt, PromptCategory } from '../../types/prompt';
 import { Mode1Session } from '../../types/session';
 import { STUCK_SUGGESTIONS, StuckSuggestion } from '../../data/stuckPrompts';
 import { getPathwayById } from '../../data/pathways';
+import { getThemeById } from '../../data/themes';
+import { ThemeChooserModal } from '../theme/ThemeChooserModal';
 import { getVisualReferenceForPrompt } from '../../utils/referenceService';
 import { getVisualReferenceById } from '../../data/visualReferences';
 import { VisualReferencePanel } from '../visual/VisualReferencePanel';
@@ -32,6 +34,7 @@ interface Mode1ActiveViewProps {
   onPauseToggle: (isPaused: boolean) => void;
   onUseStuck: () => void;
   onExitToHome: () => void;
+  onChangeTheme?: (themeId: string) => void;
 }
 
 export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
@@ -44,9 +47,11 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
   onPauseToggle,
   onUseStuck,
   onExitToHome,
+  onChangeTheme,
 }) => {
   const [stuckModalOpen, setStuckModalOpen] = useState(false);
   const [activeStuckIdea, setActiveStuckIdea] = useState<StuckSuggestion | null>(null);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
   // Timer states
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(() => {
@@ -154,6 +159,27 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#4A3F35] border border-[#D8CEBE]">
                 {getPathwayById(session.pathway).name}
               </span>
+            )}
+            {/* Active Theme Badge */}
+            {session.themeId && session.themeId !== 'none' && (
+              <button
+                type="button"
+                onClick={() => setIsThemeModalOpen(true)}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#FFF2E6] text-[#E06D53] border border-[#F5C7BC] hover:bg-[#FFE6D4] transition-colors flex items-center gap-1"
+                title="Change theme"
+              >
+                <span>Theme: {getThemeById(session.themeId)?.name || session.themeId}</span>
+              </button>
+            )}
+            {(!session.themeId || session.themeId === 'none') && (
+              <button
+                type="button"
+                onClick={() => setIsThemeModalOpen(true)}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full font-mono-code bg-[#EFE9DF] text-[#7A6E63] border border-[#D8CEBE] hover:bg-[#E5DDCF] transition-colors"
+                title="Set a theme"
+              >
+                + Theme
+              </button>
             )}
             {/* Abstract progress dots (no fixed end) */}
             <div className="flex items-center gap-1.5 ml-1">
@@ -442,6 +468,18 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Theme Chooser Modal during active session */}
+      {onChangeTheme && (
+        <ThemeChooserModal
+          isOpen={isThemeModalOpen}
+          onClose={() => setIsThemeModalOpen(false)}
+          selectedThemeId={session.themeId || 'none'}
+          onSelectTheme={(newThemeId) => {
+            onChangeTheme(newThemeId);
+          }}
+        />
       )}
     </div>
   );

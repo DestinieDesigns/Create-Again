@@ -12,6 +12,9 @@ import { CreativeJourneyStatsSection } from './components/home/CreativeJourneySt
 import { RecentCreationsSection } from './components/home/RecentCreationsSection';
 import { UnfinishedIdeasSection } from './components/home/UnfinishedIdeasSection';
 import { FaithContentCard } from './components/home/FaithContentCard';
+import { CreativeThemesSection } from './components/home/CreativeThemesSection';
+import { ThemeChooserModal } from './components/theme/ThemeChooserModal';
+import { getThemeById } from './data/themes';
 
 // Mode 1 components
 import { Mode1SetupModal } from './components/mode1/Mode1SetupModal';
@@ -47,6 +50,8 @@ export default function App() {
     settings,
     updateSettings,
     clearAllData,
+    selectedThemeId,
+    updateSelectedTheme,
   } = useCreateAgainStorage();
 
   // Navigation tab state
@@ -58,6 +63,7 @@ export default function App() {
   const [isPathwayChooserOpen, setIsPathwayChooserOpen] = useState(false);
   const [isCharacterProgressionOpen, setIsCharacterProgressionOpen] = useState(false);
   const [selectedPathway, setSelectedPathway] = useState<CreativePathwayId>('open');
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isWarmUpOpen, setIsWarmUpOpen] = useState(false);
   const [isChaosOpen, setIsChaosOpen] = useState(false);
   const [isDontKnowOpen, setIsDontKnowOpen] = useState(false);
@@ -78,8 +84,8 @@ export default function App() {
           return;
         }
       }
-      // If prompt wasn't cached, pick next
-      const nextP = getNextRandomPrompt(activeSession, MODE1_PROMPTS, activeSession.pathway);
+      // If prompt wasn't cached, pick next respecting pathway and theme
+      const nextP = getNextRandomPrompt(activeSession, MODE1_PROMPTS, activeSession.pathway, activeSession.themeId);
       setCurrentPrompt(nextP);
     }
   }, [activeSession]);
@@ -95,9 +101,12 @@ export default function App() {
   const handleStartMode1 = (
     duration: number | null,
     difficulty: AdventureType,
-    pathway: CreativePathwayId = selectedPathway
+    pathway: CreativePathwayId = selectedPathway,
+    themeId?: string | null
   ) => {
     setIsMode1SetupOpen(false);
+
+    const activeThemeToUse = themeId !== undefined ? themeId : selectedThemeId;
 
     const newSession: Mode1Session = {
       id: 'session-' + Date.now(),
@@ -107,19 +116,31 @@ export default function App() {
       timerStartedAt: duration ? Date.now() : undefined,
       difficulty,
       pathway,
+      themeId: activeThemeToUse || undefined,
       usedPromptIds: [],
       promptHistory: [],
       completed: false,
       stuckUsed: 0,
     };
 
-    const firstPrompt = getNextRandomPrompt(newSession, MODE1_PROMPTS, pathway);
+    const firstPrompt = getNextRandomPrompt(newSession, MODE1_PROMPTS, pathway, activeThemeToUse);
     newSession.currentPromptId = firstPrompt.id;
 
     saveActiveSession(newSession);
     setCurrentPrompt(firstPrompt);
     trackSessionStart();
     setCurrentTab('what-comes-next');
+  };
+
+  // Change theme mid-session in Mode 1
+  const handleChangeSessionTheme = (newThemeId: string) => {
+    updateSelectedTheme(newThemeId);
+    if (!activeSession) return;
+    const updated: Mode1Session = {
+      ...activeSession,
+      themeId: newThemeId,
+    };
+    saveActiveSession(updated);
   };
 
   // Advance to Next Prompt in Mode 1
@@ -151,8 +172,8 @@ export default function App() {
       promptHistory: updatedHistory,
     };
 
-    // Calculate strictly next prompt using pathway filter (never pre-computed!)
-    const nextP = getNextRandomPrompt(updatedSession, MODE1_PROMPTS, updatedSession.pathway);
+    // Calculate strictly next prompt using pathway and theme filter (never pre-computed!)
+    const nextP = getNextRandomPrompt(updatedSession, MODE1_PROMPTS, updatedSession.pathway, updatedSession.themeId);
     updatedSession.currentPromptId = nextP.id;
 
     saveActiveSession(updatedSession);
@@ -427,6 +448,7 @@ export default function App() {
             onPauseToggle={handlePauseToggle}
             onUseStuck={handleUseStuck}
             onExitToHome={() => setCurrentTab('home')}
+            onChangeTheme={handleChangeSessionTheme}
           />
         ) : currentTab === 'what-comes-next-completed' && finishedSession ? (
           /* VIEW 2: Mode 1 Session Completion & Reflection */
@@ -485,7 +507,18 @@ export default function App() {
               onOpenPathways={() => setIsPathwayChooserOpen(true)}
             />
 
-            {/* 4. Quick Start / Pick Your Vibe */}
+            {/* 4. Creative Themes Section (Universal Theme System) */}
+            <CreativeThemesSection
+              selectedThemeId={selectedThemeId || 'none'}
+              onSelectTheme={(themeId) => updateSelectedTheme(themeId)}
+              onOpenThemeModal={() => setIsThemeModalOpen(true)}
+              onStartWithTheme={(themeId) => {
+                updateSelectedTheme(themeId);
+                handleStartMode1(300, 'tiny-mystery', selectedPathway, themeId);
+              }}
+            />
+
+            {/* 5. Quick Start / Pick Your Vibe */}
             <PickYourVibeSection
               onQuickStart={handleQuickStart}
               onSurpriseMe={handleSurpriseMe}
@@ -493,27 +526,27 @@ export default function App() {
               onWarmUp={handleWarmUp}
             />
 
-            {/* 5. Creative Journey User Statistics */}
+            {/* 6. Creative Journey User Statistics */}
             <CreativeJourneyStatsSection
               stats={stats}
               onViewDetailedJourney={() => setCurrentTab('progress')}
             />
 
-            {/* 6. Recent Creations Sketchbook Grid */}
+            {/* 7. Recent Creations Sketchbook Grid */}
             <RecentCreationsSection
               creations={savedCreations}
               onOpenCreate={() => setIsChooserOpen(true)}
               onViewAll={() => setCurrentTab('collection')}
             />
 
-            {/* 7. Unfinished Ideas encouragement */}
+            {/* 8. Unfinished Ideas encouragement */}
             <UnfinishedIdeasSection
               session={activeSession}
               onResume={() => setCurrentTab('what-comes-next')}
               onNew={() => setIsMode1SetupOpen(true)}
             />
 
-            {/* 8. Optional Faith Content Card */}
+            {/* 9. Optional Faith Content Card */}
             <FaithContentCard enabled={settings.enableFaithContent} />
           </div>
         )}
@@ -524,6 +557,13 @@ export default function App() {
         isOpen={isChooserOpen}
         onClose={() => setIsChooserOpen(false)}
         onSelectMode={handleSelectMode}
+      />
+
+      <ThemeChooserModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+        selectedThemeId={selectedThemeId || 'none'}
+        onSelectTheme={(themeId) => updateSelectedTheme(themeId)}
       />
 
       <PathwayChooserModal
@@ -561,12 +601,14 @@ export default function App() {
         onFinishWarmUp={() => {
           // Increment warmup stats
         }}
+        themeId={selectedThemeId}
       />
 
       <CreativeChaosModal
         isOpen={isChaosOpen}
         onClose={() => setIsChaosOpen(false)}
         onStartChaosDrawing={handleStartChaosDrawing}
+        themeId={selectedThemeId}
       />
 
       <IDontKnowModal

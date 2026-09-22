@@ -1,8 +1,10 @@
 import { VisualReference } from '../types/prompt';
 import { PROMPT_VISUAL_REFERENCES } from './promptVisualReferences';
+import { THEME_VISUAL_REFERENCES } from './themeVisualReferences';
 
 export const VISUAL_REFERENCES: Record<string, VisualReference> = {
   ...PROMPT_VISUAL_REFERENCES,
+  ...THEME_VISUAL_REFERENCES,
   'ref-head-shapes': {
     id: 'ref-head-shapes',
     type: 'shape',
@@ -633,6 +635,39 @@ export const findVisualReferenceForPrompt = (
 
   if (lowerText.includes('carry') || lowerText.includes('hold') || lowerText.includes('prop') || lowerText.includes('item')) {
     return VISUAL_REFERENCES['ref-character-props'];
+  }
+
+  // Theme-aware matches
+  if (lowerText.includes('dragon') || lowerText.includes('fairy') || lowerText.includes('magic') || lowerText.includes('potion') || lowerText.includes('talisman') || lowerText.includes('horns') || lowerText.includes('wings')) {
+    return VISUAL_REFERENCES['ref-fantasy-creature-parts'];
+  }
+
+  if (lowerText.includes('animal') || lowerText.includes('paw') || lowerText.includes('critter') || lowerText.includes('fur') || lowerText.includes('whiskers') || lowerText.includes('snout')) {
+    return VISUAL_REFERENCES['ref-animal-basic-construction'];
+  }
+
+  if (lowerText.includes('mug') || lowerText.includes('cup') || lowerText.includes('household') || lowerText.includes('still-life') || lowerText.includes('kitchen') || lowerText.includes('eyeglasses')) {
+    return VISUAL_REFERENCES['ref-still-life-construction'];
+  }
+
+  if (lowerText.includes('robot') || lowerText.includes('sci-fi') || lowerText.includes('planet') || lowerText.includes('antenna') || lowerText.includes('circuit') || lowerText.includes('technology')) {
+    return VISUAL_REFERENCES['ref-sci-fi-shapes'];
+  }
+
+  if (lowerText.includes('ghost') || lowerText.includes('spooky') || lowerText.includes('candle') || lowerText.includes('cobweb') || lowerText.includes('haunted') || lowerText.includes('bats')) {
+    return VISUAL_REFERENCES['ref-spooky-silhouettes'];
+  }
+
+  if (lowerText.includes('game') || lowerText.includes('shield') || lowerText.includes('weapon') || lowerText.includes('inventory') || lowerText.includes('boss')) {
+    return VISUAL_REFERENCES['ref-game-props'];
+  }
+
+  if (lowerText.includes('storybook') || lowerText.includes('cottage') || lowerText.includes('traveler') || lowerText.includes('flourish') || lowerText.includes('whimsical')) {
+    return VISUAL_REFERENCES['ref-storybook-cottage'];
+  }
+
+  if (lowerText.includes('building') || lowerText.includes('facade') || lowerText.includes('architecture') || lowerText.includes('street') || lowerText.includes('archway')) {
+    return VISUAL_REFERENCES['ref-places-architecture'];
   }
 
   // 3. Circle fallback if prompt asked for circles

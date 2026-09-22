@@ -1,5 +1,7 @@
 import { MODE1_PROMPTS } from '../data/mode1Prompts';
+import { THEME_PROMPTS } from '../data/themePrompts';
 import { getPathwayById } from '../data/pathways';
+import { getThemeById } from '../data/themes';
 import {
   AdventureType,
   CreativePathwayId,
@@ -8,6 +10,8 @@ import {
   SessionPhase,
 } from '../types/prompt';
 import { Mode1Session } from '../types/session';
+
+export const ALL_COMBINED_PROMPTS: Prompt[] = [...MODE1_PROMPTS, ...THEME_PROMPTS];
 
 const RECENT_PROMPTS_KEY = 'create_again_recent_prompts';
 
@@ -193,8 +197,9 @@ export interface PromptEvaluation {
  */
 export function getNextRandomPrompt(
   session: Mode1Session,
-  allPrompts: Prompt[] = MODE1_PROMPTS,
-  pathway?: CreativePathwayId
+  allPrompts: Prompt[] = ALL_COMBINED_PROMPTS,
+  pathway?: CreativePathwayId,
+  themeId?: string | null
 ): Prompt {
   const isFirstPrompt = session.usedPromptIds.length === 0;
   const recentIds = getRecentPromptIds();
@@ -204,6 +209,12 @@ export function getNextRandomPrompt(
   const history = session.promptHistory;
   const prevCategory = history.length > 0 ? history[history.length - 1].category : null;
   const prevPrevCategory = history.length > 1 ? history[history.length - 2].category : null;
+
+  // Active theme configuration
+  const activeThemeId = themeId || session.themeId;
+  const activeTheme = getThemeById(activeThemeId);
+  const themeTags = activeTheme ? activeTheme.tags.map((t) => t.toLowerCase()) : [];
+  const themeKeywords = activeTheme ? activeTheme.promptKeywords.map((k) => k.toLowerCase()) : [];
 
   // Filter 1: Prompt must NOT have been used in this session
   let candidates = allPrompts.filter(
@@ -246,6 +257,23 @@ export function getNextRandomPrompt(
     // Pathway tag boost if prompt contains matching tags
     if (pathwayTags.length > 0 && p.tags.some((t) => pathwayTags.includes(t.toLowerCase()))) {
       weight *= 2.5;
+    }
+
+    // Theme boost: Increase weight of theme-compatible prompts (1.8x - 2.5x)
+    // while keeping general prompts available so results remain varied and non-repetitive
+    if (activeTheme) {
+      const isExplicitTheme = p.themeIds && p.themeIds.includes(activeTheme.id);
+      const hasMatchingThemeTag = p.tags.some((t) => themeTags.includes(t.toLowerCase())) ||
+        (p.themeTags && p.themeTags.some((tt) => themeTags.includes(tt.toLowerCase())));
+      const hasMatchingKeyword = themeKeywords.some((kw) => p.text.toLowerCase().includes(kw));
+
+      if (isExplicitTheme) {
+        weight *= 2.2;
+      } else if (hasMatchingThemeTag || hasMatchingKeyword) {
+        weight *= 1.8;
+      } else {
+        weight *= 1.0;
+      }
     }
 
     // 1. Category phase weight

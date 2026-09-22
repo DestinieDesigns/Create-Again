@@ -20,6 +20,16 @@ interface CharacterProgressionModalProps {
   onStartSkillSession: (skill: CharacterSkill) => void;
 }
 
+const CATEGORIES = [
+  { id: 'all', label: 'All 22 Skills' },
+  { id: 'anatomy', label: 'Anatomy & Shapes' },
+  { id: 'body', label: 'Body & Proportions' },
+  { id: 'costume', label: 'Hair & Costume' },
+  { id: 'action', label: 'Poses & Balance' },
+  { id: 'expression', label: 'Expression & Mood' },
+  { id: 'composition', label: 'Sheets & Scenes' },
+];
+
 export const CharacterProgressionModal: React.FC<CharacterProgressionModalProps> = ({
   isOpen,
   onClose,
@@ -27,20 +37,11 @@ export const CharacterProgressionModal: React.FC<CharacterProgressionModalProps>
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<CharacterSkill>(CHARACTER_SKILLS[0]);
   const [showReference, setShowReference] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('all');
 
   if (!isOpen) return null;
 
-  const categories = [
-    { id: 'all', label: 'All 22 Skills' },
-    { id: 'anatomy', label: 'Anatomy & Shapes' },
-    { id: 'body', label: 'Body & Proportions' },
-    { id: 'costume', label: 'Hair & Costume' },
-    { id: 'action', label: 'Poses & Balance' },
-    { id: 'expression', label: 'Expression & Mood' },
-    { id: 'composition', label: 'Sheets & Scenes' },
-  ];
-
-  const [activeCategory, setActiveCategory] = useState('all');
+  const categories = CATEGORIES;
 
   const filteredSkills =
     activeCategory === 'all'

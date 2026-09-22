@@ -5,6 +5,7 @@ const ACTIVE_SESSION_KEY = 'create_again_active_session';
 const SAVED_CREATIONS_KEY = 'create_again_saved_creations';
 const STATS_KEY = 'create_again_creative_stats';
 const SETTINGS_KEY = 'create_again_settings';
+const SELECTED_THEME_KEY = 'create_again_selected_theme';
 
 const DEFAULT_STATS: CreativeStats = {
   thingsCreated: 0,
@@ -57,6 +58,23 @@ export function useCreateAgainStorage() {
       return DEFAULT_SETTINGS;
     }
   });
+
+  const [selectedThemeId, setSelectedThemeIdState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(SELECTED_THEME_KEY) || 'none';
+    } catch {
+      return 'none';
+    }
+  });
+
+  const updateSelectedTheme = (themeId: string) => {
+    setSelectedThemeIdState(themeId);
+    try {
+      localStorage.setItem(SELECTED_THEME_KEY, themeId);
+    } catch (e) {
+      console.error('Failed to save selected theme', e);
+    }
+  };
 
   // Save active session
   const saveActiveSession = (session: Mode1Session | null) => {
@@ -152,6 +170,8 @@ export function useCreateAgainStorage() {
     trackSessionStart,
     settings,
     updateSettings,
+    selectedThemeId,
+    updateSelectedTheme,
     clearAllData,
   };
 }

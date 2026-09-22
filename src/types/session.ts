@@ -26,6 +26,7 @@ export interface Mode1Session {
   timerExtraSeconds?: number;
   difficulty: AdventureType;
   pathway?: CreativePathwayId;
+  themeId?: string;
   currentPromptId?: string;
   usedPromptIds: string[];
   promptHistory: PromptHistoryItem[];
@@ -59,6 +60,7 @@ export interface SavedCreation {
   promptCount: number;
   difficulty?: string;
   pathway?: CreativePathwayId;
+  themeId?: string;
   durationMinutes?: number;
   reflection?: ReflectionFeeling;
   promptsUsed?: string[];

@@ -15,6 +15,20 @@ import {
 } from 'lucide-react';
 import { AdventureType, CreativePathwayId } from '../../types/prompt';
 import { getPathwayById } from '../../data/pathways';
+import { getThemeById } from '../../data/themes';
+import { ThemeChooserModal } from '../theme/ThemeChooserModal';
+import {
+  Trees,
+  Footprints,
+  Coffee,
+  Rocket,
+  Ghost,
+  Gamepad2,
+  Shapes,
+  MapPin,
+  Dices,
+  CircleOff,
+} from 'lucide-react';
 
 interface Mode1SetupModalProps {
   isOpen: boolean;
@@ -22,10 +36,12 @@ interface Mode1SetupModalProps {
   onStartSession: (
     duration: number | null,
     difficulty: AdventureType,
-    pathway?: CreativePathwayId
+    pathway?: CreativePathwayId,
+    themeId?: string
   ) => void;
   pathway?: CreativePathwayId;
   onChangePathway?: () => void;
+  themeId?: string;
 }
 
 export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
@@ -34,10 +50,13 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   onStartSession,
   pathway = 'open',
   onChangePathway,
+  themeId = 'none',
 }) => {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(300); // 5 minutes default
   const [selectedAdventure, setSelectedAdventure] = useState<AdventureType>('full-adventure');
   const [selectedPathway, setSelectedPathway] = useState<CreativePathwayId>(pathway);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>(themeId);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [step, setStep] = useState<'configure' | 'prep'>('configure');
 
   useEffect(() => {
@@ -45,6 +64,12 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
       setSelectedPathway(pathway);
     }
   }, [pathway]);
+
+  useEffect(() => {
+    if (themeId) {
+      setSelectedThemeId(themeId);
+    }
+  }, [themeId]);
 
   if (!isOpen) return null;
 
@@ -117,7 +142,7 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   ];
 
   const handleStart = () => {
-    onStartSession(selectedDuration, selectedAdventure, selectedPathway);
+    onStartSession(selectedDuration, selectedAdventure, selectedPathway, selectedThemeId);
     setStep('configure');
   };
 
@@ -148,48 +173,102 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
               Choose your time and style. You draw on your paper, one prompt at a time.
             </p>
 
-            {/* Selected Pathway Card */}
-            <div className="mt-5 p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
-                  style={{
-                    backgroundColor: `${currentPathwayInfo.accentColor}18`,
-                    borderColor: `${currentPathwayInfo.accentColor}40`,
-                    color: currentPathwayInfo.accentColor,
-                  }}
-                >
-                  <PathwayIcon className="w-5 h-5" />
+            {/* Configuration Row: Pathway & Theme */}
+            <div className="mt-5 space-y-2.5">
+              {/* Selected Pathway Card */}
+              <div className="p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
+                    style={{
+                      backgroundColor: `${currentPathwayInfo.accentColor}18`,
+                      borderColor: `${currentPathwayInfo.accentColor}40`,
+                      color: currentPathwayInfo.accentColor,
+                    }}
+                  >
+                    <PathwayIcon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
+                        Pathway (How You Practice)
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code ${currentPathwayInfo.badgeColor}`}
+                      >
+                        {currentPathwayInfo.badge}
+                      </span>
+                    </div>
+                    <div className="text-sm font-extrabold text-[#2D2723] truncate">
+                      {currentPathwayInfo.name}
+                    </div>
+                    <div className="text-xs text-[#6B6056] truncate">
+                      {currentPathwayInfo.tagline}
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
-                      Pathway
-                    </span>
-                    <span
-                      className={`text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code ${currentPathwayInfo.badgeColor}`}
-                    >
-                      {currentPathwayInfo.badge}
-                    </span>
-                  </div>
-                  <div className="text-sm font-extrabold text-[#2D2723] truncate">
-                    {currentPathwayInfo.name}
-                  </div>
-                  <div className="text-xs text-[#6B6056] truncate">
-                    {currentPathwayInfo.tagline}
-                  </div>
-                </div>
+
+                {onChangePathway && (
+                  <button
+                    type="button"
+                    onClick={onChangePathway}
+                    className="px-3 py-1.5 rounded-xl border border-[#D8CEBE] text-xs font-bold text-[#5C5046] hover:bg-[#EFE9DF] transition-colors shrink-0"
+                  >
+                    CHANGE
+                  </button>
+                )}
               </div>
 
-              {onChangePathway && (
+              {/* Selected Creative Theme Card */}
+              <div className="p-3.5 rounded-2xl border-2 border-[#E8E0D5] bg-[#FAF7F2] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#EFE9DF] text-[#E06D53]">
+                    {selectedThemeId === 'surprise' ? (
+                      <Dices className="w-5 h-5" />
+                    ) : selectedThemeId === 'none' || !selectedThemeId ? (
+                      <CircleOff className="w-5 h-5 text-[#7A6E63]" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider font-mono-code text-[#8A7D71]">
+                        Creative Theme (What You Create)
+                      </span>
+                      <span className="text-[9px] font-bold px-2 py-0.2 rounded-full uppercase tracking-wider font-mono-code bg-[#E8DDD1] text-[#6E5D4F]">
+                        {selectedThemeId === 'surprise'
+                          ? 'Surprise Me'
+                          : selectedThemeId === 'none' || !selectedThemeId
+                          ? 'Open / None'
+                          : getThemeById(selectedThemeId)?.name || 'Theme'}
+                      </span>
+                    </div>
+                    <div className="text-sm font-extrabold text-[#2D2723] truncate">
+                      {selectedThemeId === 'surprise'
+                        ? 'Surprise Me'
+                        : selectedThemeId === 'none' || !selectedThemeId
+                        ? 'No Specific Theme'
+                        : getThemeById(selectedThemeId)?.name}
+                    </div>
+                    <div className="text-xs text-[#6B6056] truncate">
+                      {selectedThemeId === 'surprise'
+                        ? 'A surprise theme will be selected for this adventure'
+                        : selectedThemeId === 'none' || !selectedThemeId
+                        ? 'Prompts drawn from the complete creative library'
+                        : getThemeById(selectedThemeId)?.description}
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   type="button"
-                  onClick={onChangePathway}
+                  onClick={() => setIsThemeModalOpen(true)}
                   className="px-3 py-1.5 rounded-xl border border-[#D8CEBE] text-xs font-bold text-[#5C5046] hover:bg-[#EFE9DF] transition-colors shrink-0"
                 >
                   CHANGE
                 </button>
-              )}
+              </div>
             </div>
 
             {/* Time Selector */}
@@ -342,6 +421,14 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* Theme Selection Modal */}
+      <ThemeChooserModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+        selectedThemeId={selectedThemeId}
+        onSelectTheme={(id) => setSelectedThemeId(id)}
+      />
     </div>
   );
 };
