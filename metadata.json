@@ -1,0 +1,6 @@
+{
+  "name": "Create Again",
+  "description": "A creative companion for your sketchbook, paper, or drawing tablet. Start somewhere. Add something. See what happens.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

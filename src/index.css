@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #FAF7F2;
+    color: #2D2723;
+  }
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-mono-code {
+  font-family: 'Space Mono', monospace;
+}
+
+/* Subtle paper texture using CSS radial gradient dots */
+.paper-pattern {
+  background-color: #FAF7F2;
+  background-image: radial-gradient(#DCD4C7 0.75px, transparent 0.75px);
+  background-size: 18px 18px;
+}
+
+.sketchbook-paper {
+  background-color: #FCFAF6;
+  background-image: 
+    linear-gradient(#F0EAE1 1px, transparent 1px),
+    linear-gradient(90deg, #F0EAE1 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.subtle-shadow {
+  box-shadow: 0 4px 20px -2px rgba(45, 39, 35, 0.06), 0 2px 6px -1px rgba(45, 39, 35, 0.04);
+}
+
+.paper-card {
+  box-shadow: 0 10px 30px -4px rgba(45, 39, 35, 0.08), 0 4px 10px -2px rgba(45, 39, 35, 0.04);
+}
+
+/* Custom scrollbar for friendly look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8CEBE;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BCB09E;
+}
+
