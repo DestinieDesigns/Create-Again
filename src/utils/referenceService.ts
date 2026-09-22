@@ -31,7 +31,7 @@ export const getVisualReferenceForPrompt = (prompt: Prompt): VisualReference | u
   }
 
   // Check curated matching
-  return findVisualReferenceForPrompt(prompt.text, prompt.tags);
+  return findVisualReferenceForPrompt(prompt.text, prompt.tags, prompt.category);
 };
 
 /**

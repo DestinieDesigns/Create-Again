@@ -1,6 +1,8 @@
 import { VisualReference } from '../types/prompt';
+import { PROMPT_VISUAL_REFERENCES } from './promptVisualReferences';
 
 export const VISUAL_REFERENCES: Record<string, VisualReference> = {
+  ...PROMPT_VISUAL_REFERENCES,
   'ref-head-shapes': {
     id: 'ref-head-shapes',
     type: 'shape',
@@ -428,6 +430,51 @@ export const VISUAL_REFERENCES: Record<string, VisualReference> = {
       </svg>
     `,
   },
+
+  'ref-sketching-foundations': {
+    id: 'ref-sketching-foundations',
+    type: 'shape',
+    title: 'Sketching Foundations & Form Building',
+    description:
+      'Every complex drawing begins as simple geometry. Use light, sweeping lines to build primitive shapes—spheres, cylinders, boxes, and gesture curves—before committing to heavier marks.',
+    altText:
+      'Instructional drawing diagram demonstrating foundational form building: spheres with cross-contour axes, cylinders with rhythmic ellipses, and loose constructive gesture lines on paper.',
+    tags: ['foundation', 'shapes', 'circles', 'lines', 'gesture', 'basics', 'sketch'],
+    beginnerFriendly: true,
+    source: 'local',
+    attribution: 'Create Again Instructional Series',
+    svgContent: `
+      <svg viewBox="0 0 380 130" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Sphere with contour wireframe -->
+        <g transform="translate(55, 60)">
+          <circle cx="0" cy="0" r="32" stroke="#2D2723" stroke-width="2.5" />
+          <ellipse cx="0" cy="0" rx="32" ry="12" stroke="#8C7E72" stroke-width="1.5" stroke-dasharray="3 2" />
+          <line x1="0" y1="-32" x2="0" y2="32" stroke="#8C7E72" stroke-width="1.5" stroke-dasharray="3 2" />
+          <text x="0" y="48" font-size="10" font-family="sans-serif" font-weight="bold" fill="currentColor" text-anchor="middle" stroke="none">SPHERE (3D)</text>
+        </g>
+
+        <!-- Cylinder & Ellipse Flow -->
+        <g transform="translate(175, 60)">
+          <ellipse cx="0" cy="-22" rx="24" ry="9" stroke="#2D2723" stroke-width="2.2" />
+          <line x1="-24" y1="-22" x2="-24" y2="20" stroke="#2D2723" stroke-width="2.2" />
+          <line x1="24" y1="-22" x2="24" y2="20" stroke="#2D2723" stroke-width="2.2" />
+          <path d="M-24 20 C-24 30 24 30 24 20" stroke="#2D2723" stroke-width="2.2" />
+          <ellipse cx="0" cy="0" rx="24" ry="7" stroke="#8C7E72" stroke-width="1.5" stroke-dasharray="2 2" />
+          <text x="0" y="48" font-size="10" font-family="sans-serif" font-weight="bold" fill="currentColor" text-anchor="middle" stroke="none">CYLINDER</text>
+        </g>
+
+        <!-- Dynamic Gesture Line & Arc Connections -->
+        <g transform="translate(295, 60)">
+          <path d="M-40 25 Q-15 -35 15 -10 T45 20" stroke="#E06D53" stroke-width="2.5" />
+          <circle cx="-40" cy="25" r="4" fill="#E06D53" />
+          <circle cx="15" cy="-10" r="4" fill="#E06D53" />
+          <circle cx="45" cy="20" r="4" fill="#E06D53" />
+          <path d="M-25 10 Q0 -15 30 5" stroke="#8C7E72" stroke-width="1.5" stroke-dasharray="3 2" />
+          <text x="0" y="48" font-size="10" font-family="sans-serif" font-weight="bold" fill="#E06D53" text-anchor="middle" stroke="none">GESTURE FLOW</text>
+        </g>
+      </svg>
+    `,
+  },
 };
 
 export const getVisualReferenceById = (id?: string): VisualReference | undefined => {
@@ -437,27 +484,130 @@ export const getVisualReferenceById = (id?: string): VisualReference | undefined
 
 export const findVisualReferenceForPrompt = (
   promptText: string,
-  tags: string[] = []
-): VisualReference | undefined => {
+  tags: string[] = [],
+  category?: string
+): VisualReference => {
   const lowerText = promptText.toLowerCase();
 
-  // Explicit keyword matches
-  if (lowerText.includes('head') || lowerText.includes('silhouette') || lowerText.includes('circle')) {
-    if (lowerText.includes('expression') || lowerText.includes('smile') || lowerText.includes('angry') || lowerText.includes('face')) {
-      return VISUAL_REFERENCES['ref-facial-expressions'];
-    }
-    return VISUAL_REFERENCES['ref-head-shapes'];
+  // 1. Precise prompt text matching
+  if (lowerText.includes('three circles')) {
+    return VISUAL_REFERENCES['ref-three-circles'];
   }
 
+  if (/\b(parallel lines|parallel)\b/i.test(lowerText)) {
+    return VISUAL_REFERENCES['ref-parallel-lines'];
+  }
+
+  if (lowerText.includes("don't touch") || (lowerText.includes('two lines') && !lowerText.includes('intersect'))) {
+    return VISUAL_REFERENCES['ref-two-lines'];
+  }
+
+  if (/\b(egg|oval)\b/i.test(lowerText)) {
+    return VISUAL_REFERENCES['ref-egg-shape'];
+  }
+
+  if (/\b(dot|dots)\b/i.test(lowerText)) {
+    return VISUAL_REFERENCES['ref-dot-placement'];
+  }
+
+  if (lowerText.includes('zigzag')) {
+    return VISUAL_REFERENCES['ref-zigzag-line'];
+  }
+
+  if (lowerText.includes('wavy') || lowerText.includes('wave')) {
+    return VISUAL_REFERENCES['ref-wavy-line'];
+  }
+
+  if (lowerText.includes('tilted box') || lowerText.includes('box with open') || lowerText.includes('cube')) {
+    return VISUAL_REFERENCES['ref-tilted-box'];
+  }
+
+  if (lowerText.includes('spiral')) {
+    return VISUAL_REFERENCES['ref-spiral'];
+  }
+
+  if (lowerText.includes('one large, one small') || lowerText.includes('two circles') || lowerText.includes('contrasting')) {
+    return VISUAL_REFERENCES['ref-contrasting-circles'];
+  }
+
+  if (lowerText.includes('crescent')) {
+    return VISUAL_REFERENCES['ref-crescent-shape'];
+  }
+
+  if (lowerText.includes('triangular') || (lowerText.includes('triangle') && !lowerText.includes('head'))) {
+    return VISUAL_REFERENCES['ref-rounded-triangle'];
+  }
+
+  if (lowerText.includes('blob') || lowerText.includes('asymmetrical') || lowerText.includes('never intentionally')) {
+    return VISUAL_REFERENCES['ref-organic-blob'];
+  }
+
+  if (lowerText.includes('takes up most') || lowerText.includes('most of the page') || lowerText.includes('one large shape')) {
+    return VISUAL_REFERENCES['ref-large-shape'];
+  }
+
+  if (lowerText.includes('tiny shape') || lowerText.includes('something small')) {
+    return VISUAL_REFERENCES['ref-tiny-shape'];
+  }
+
+  if (lowerText.includes('corner') || lowerText.includes('center of the page')) {
+    return VISUAL_REFERENCES['ref-corner-center'];
+  }
+
+  if (lowerText.includes('touch') || lowerText.includes('shapes touch')) {
+    return VISUAL_REFERENCES['ref-shapes-touching'];
+  }
+
+  if (lowerText.includes('bridge') || lowerText.includes('path between') || lowerText.includes('connect')) {
+    return VISUAL_REFERENCES['ref-connect-bridge'];
+  }
+
+  if (lowerText.includes('alive') || lowerText.includes('creature') || lowerText.includes('animal') || lowerText.includes('little crowd')) {
+    return VISUAL_REFERENCES['ref-turn-alive'];
+  }
+
+  if (/\b(hat|hats|beanie|cap|caps|bowler|crown)\b/i.test(lowerText)) {
+    return VISUAL_REFERENCES['ref-give-hat'];
+  }
+
+  if (lowerText.includes('above') || lowerText.includes('sky') || lowerText.includes('cloud') || lowerText.includes('smoke') || lowerText.includes('overhead')) {
+    return VISUAL_REFERENCES['ref-add-above'];
+  }
+
+  if (lowerText.includes('underneath') || lowerText.includes('ground') || lowerText.includes('shadow') || lowerText.includes('roots')) {
+    return VISUAL_REFERENCES['ref-add-underneath'];
+  }
+
+  if (lowerText.includes('texture') || lowerText.includes('pattern') || lowerText.includes('hatching') || lowerText.includes('stippling') || lowerText.includes('wood grain') || lowerText.includes('scales')) {
+    return VISUAL_REFERENCES['ref-textures-patterns'];
+  }
+
+  if (lowerText.includes('much bigger') || lowerText.includes('enormous') || lowerText.includes('ridiculously tiny') || lowerText.includes('colossal')) {
+    return VISUAL_REFERENCES['ref-scale-contrast'];
+  }
+
+  if (lowerText.includes('happened here') || lowerText.includes('footprint') || lowerText.includes('tracks') || lowerText.includes('clue') || lowerText.includes('someone lives here') || lowerText.includes('story') || lowerText.includes('unexpected')) {
+    return VISUAL_REFERENCES['ref-story-clues'];
+  }
+
+  if (lowerText.includes('signature') || lowerText.includes('framing line') || lowerText.includes('final detail') || lowerText.includes('final mark') || lowerText.includes('stop before you overthink') || lowerText.includes('give your creation a name')) {
+    return VISUAL_REFERENCES['ref-final-signature'];
+  }
+
+  // 2. Character & anatomy specific matches
   if (lowerText.includes('expression') || lowerText.includes('mood') || lowerText.includes('smile') || lowerText.includes('eyes') || lowerText.includes('gaze')) {
     return VISUAL_REFERENCES['ref-facial-expressions'];
+  }
+
+  if (lowerText.includes('head silhouette') || lowerText.includes('head shape')) {
+    return VISUAL_REFERENCES['ref-head-shapes'];
   }
 
   if (lowerText.includes('weight') || lowerText.includes('stand') || lowerText.includes('balance') || lowerText.includes('posture')) {
     return VISUAL_REFERENCES['ref-weight-shift'];
   }
 
-  if (lowerText.includes('motion') || lowerText.includes('action') || lowerText.includes('run') || lowerText.includes('jump') || lowerText.includes('gesture')) {
+  if (lowerText.includes('motion') || lowerText.includes('action') || lowerText.includes('run') || lowerText.includes('jump')) {
     return VISUAL_REFERENCES['ref-line-of-action'];
   }
 
@@ -465,11 +615,11 @@ export const findVisualReferenceForPrompt = (
     return VISUAL_REFERENCES['ref-body-proportions'];
   }
 
-  if (lowerText.includes('depth') || lowerText.includes('distance') || lowerText.includes('foreground') || lowerText.includes('background') || lowerText.includes('horizon')) {
+  if (lowerText.includes('depth') || lowerText.includes('distance') || lowerText.includes('foreground') || lowerText.includes('horizon')) {
     return VISUAL_REFERENCES['ref-environment-depth'];
   }
 
-  if (lowerText.includes('poster') || lowerText.includes('title') || lowerText.includes('hierarchy') || lowerText.includes('typography') || lowerText.includes('grid')) {
+  if (lowerText.includes('poster') || lowerText.includes('hierarchy') || lowerText.includes('typography') || lowerText.includes('grid')) {
     return VISUAL_REFERENCES['ref-typography-hierarchy'];
   }
 
@@ -485,9 +635,26 @@ export const findVisualReferenceForPrompt = (
     return VISUAL_REFERENCES['ref-character-props'];
   }
 
-  // Tag matches
+  // 3. Circle fallback if prompt asked for circles
+  if (lowerText.includes('circle') || lowerText.includes('circles')) {
+    return VISUAL_REFERENCES['ref-three-circles'];
+  }
+
+  // 4. Line fallback if prompt asked for lines
+  if (lowerText.includes('line') || lowerText.includes('lines')) {
+    return VISUAL_REFERENCES['ref-two-lines'];
+  }
+
+  // 5. Tag matches
   for (const tag of tags) {
     const t = tag.toLowerCase();
+    if (t === 'circles' || t === 'circle') return VISUAL_REFERENCES['ref-three-circles'];
+    if (t === 'lines' || t === 'line') return VISUAL_REFERENCES['ref-two-lines'];
+    if (t === 'dots' || t === 'dot') return VISUAL_REFERENCES['ref-dot-placement'];
+    if (t === 'connection' || t === 'bridge') return VISUAL_REFERENCES['ref-connect-bridge'];
+    if (t === 'alive' || t === 'creature') return VISUAL_REFERENCES['ref-turn-alive'];
+    if (t === 'texture' || t === 'detail') return VISUAL_REFERENCES['ref-textures-patterns'];
+    if (t === 'hat') return VISUAL_REFERENCES['ref-give-hat'];
     if (t === 'face' || t === 'expression') return VISUAL_REFERENCES['ref-facial-expressions'];
     if (t === 'head') return VISUAL_REFERENCES['ref-head-shapes'];
     if (t === 'gesture' || t === 'pose') return VISUAL_REFERENCES['ref-weight-shift'];
@@ -496,7 +663,35 @@ export const findVisualReferenceForPrompt = (
     if (t === 'typography' || t === 'composition') return VISUAL_REFERENCES['ref-typography-hierarchy'];
     if (t === 'nature' || t === 'botanical') return VISUAL_REFERENCES['ref-leaf-botany'];
     if (t === 'hand' || t === 'hands') return VISUAL_REFERENCES['ref-hand-gestures'];
+    if (t === 'final' || t === 'signature') return VISUAL_REFERENCES['ref-final-signature'];
   }
 
-  return undefined;
+  // 6. Category-level thematic alignment
+  if (category) {
+    switch (category) {
+      case 'START':
+        return VISUAL_REFERENCES['ref-three-circles'];
+      case 'CONNECT':
+        return VISUAL_REFERENCES['ref-connect-bridge'];
+      case 'TRANSFORM':
+        return VISUAL_REFERENCES['ref-turn-alive'];
+      case 'ADD':
+        return VISUAL_REFERENCES['ref-add-above'];
+      case 'INTERACT':
+        return VISUAL_REFERENCES['ref-character-props'];
+      case 'STORY':
+        return VISUAL_REFERENCES['ref-story-clues'];
+      case 'CHAOS':
+        return VISUAL_REFERENCES['ref-give-hat'];
+      case 'DETAIL':
+        return VISUAL_REFERENCES['ref-textures-patterns'];
+      case 'CHANGE':
+        return VISUAL_REFERENCES['ref-scale-contrast'];
+      case 'FINISH':
+        return VISUAL_REFERENCES['ref-final-signature'];
+    }
+  }
+
+  // Universal sketching foundations fallback
+  return VISUAL_REFERENCES['ref-sketching-foundations'];
 };

@@ -19,7 +19,7 @@ import { STUCK_SUGGESTIONS, StuckSuggestion } from '../../data/stuckPrompts';
 import { getPathwayById } from '../../data/pathways';
 import { getVisualReferenceForPrompt } from '../../utils/referenceService';
 import { getVisualReferenceById } from '../../data/visualReferences';
-import { VisualReferencePanel } from '../reference/VisualReferencePanel';
+import { VisualReferencePanel } from '../visual/VisualReferencePanel';
 import { VisualReferenceCard } from '../reference/VisualReferenceCard';
 
 interface Mode1ActiveViewProps {
@@ -304,7 +304,7 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
         {showExample && visualReference && (
           <div className="mt-6 animate-fadeIn text-left">
             <VisualReferencePanel
-              reference={visualReference}
+              visualReference={visualReference}
               onHide={() => setShowExample(false)}
               promptText={currentPrompt.text}
             />
@@ -413,9 +413,9 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
                 ) : (
                   <div className="text-left mt-2">
                     {getVisualReferenceById(activeStuckIdea.visualReferenceId) && (
-                      <VisualReferenceCard
-                        reference={getVisualReferenceById(activeStuckIdea.visualReferenceId)!}
-                        onClose={() => setShowStuckExample(false)}
+                      <VisualReferencePanel
+                        visualReference={getVisualReferenceById(activeStuckIdea.visualReferenceId)!}
+                        onHide={() => setShowStuckExample(false)}
                       />
                     )}
                   </div>
