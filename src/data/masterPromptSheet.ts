@@ -5,9 +5,11 @@ import { MASTER_PROMPTS_PART_2 } from './masterPromptsPart2';
 import { MASTER_PROMPTS_PART_3 } from './masterPromptsPart3';
 import { MASTER_PROMPTS_PART_4 } from './masterPromptsPart4';
 import { EXPANDED_LIBRARY_PROMPTS } from './expandedLibrary';
+import { ALL_500_PROMPTS } from './prompts500';
 
-// Complete Master Prompt list with foundational + expanded libraries
+// Complete Master Prompt list with 500-Item Master Library + foundational + expanded libraries
 export const MASTER_CREATIVE_PROMPTS: CreativePrompt[] = [
+  ...ALL_500_PROMPTS,
   ...MASTER_PROMPTS_PART_1,
   ...MASTER_PROMPTS_PART_2,
   ...MASTER_PROMPTS_PART_3,

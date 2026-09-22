@@ -248,9 +248,10 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {activeReference.examples.map((ex, idx) => {
-              const isObj = typeof ex === 'object' && ex !== null;
-              const label = isObj ? (ex as any).label : ex;
-              const desc = isObj ? (ex as any).description : null;
+              const isArr = Array.isArray(ex);
+              const isObj = typeof ex === 'object' && ex !== null && !isArr;
+              const label = isArr ? ex[0] : isObj ? (ex as any).label : ex;
+              const desc = isArr ? ex[1] : isObj ? (ex as any).description : null;
 
               return (
                 <div
@@ -268,9 +269,10 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
 
             {/* Additional Variations when Show More is expanded */}
             {showMoreExamples && activeReference.moreExamples && activeReference.moreExamples.map((ex, idx) => {
-              const isObj = typeof ex === 'object' && ex !== null;
-              const label = isObj ? (ex as any).label : ex;
-              const desc = isObj ? (ex as any).description : null;
+              const isArr = Array.isArray(ex);
+              const isObj = typeof ex === 'object' && ex !== null && !isArr;
+              const label = isArr ? ex[0] : isObj ? (ex as any).label : ex;
+              const desc = isArr ? ex[1] : isObj ? (ex as any).description : null;
 
               return (
                 <div

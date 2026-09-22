@@ -310,9 +310,10 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {activePrompt.visualReference.examples.map((ex, i) => {
-                        const isObj = typeof ex === 'object' && ex !== null;
-                        const label = isObj ? (ex as any).label : ex;
-                        const desc = isObj ? (ex as any).description : null;
+                        const isArr = Array.isArray(ex);
+                        const isObj = typeof ex === 'object' && ex !== null && !isArr;
+                        const label = isArr ? ex[0] : isObj ? (ex as any).label : ex;
+                        const desc = isArr ? ex[1] : isObj ? (ex as any).description : null;
 
                         return (
                           <div
@@ -330,9 +331,10 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
 
                       {/* Additional Variations when Show More is expanded */}
                       {showMoreExamples && activePrompt.visualReference.moreExamples && activePrompt.visualReference.moreExamples.map((ex, i) => {
-                        const isObj = typeof ex === 'object' && ex !== null;
-                        const label = isObj ? (ex as any).label : ex;
-                        const desc = isObj ? (ex as any).description : null;
+                        const isArr = Array.isArray(ex);
+                        const isObj = typeof ex === 'object' && ex !== null && !isArr;
+                        const label = isArr ? ex[0] : isObj ? (ex as any).label : ex;
+                        const desc = isArr ? ex[1] : isObj ? (ex as any).description : null;
 
                         return (
                           <div

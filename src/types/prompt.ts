@@ -1,38 +1,66 @@
-export type PromptCategory =
-  | "START"
-  | "CONNECT"
-  | "TRANSFORM"
-  | "ADD"
-  | "INTERACT"
-  | "STORY"
-  | "CHAOS"
-  | "DETAIL"
-  | "CHANGE"
-  | "FINISH";
+export type MasterCategory =
+  | 'Marks & Lines'
+  | 'Shapes & Forms'
+  | 'Line Transformations'
+  | 'Observation'
+  | 'Character Heads'
+  | 'Facial Features'
+  | 'Expressions'
+  | 'Hair & Ears'
+  | 'Bodies & Proportions'
+  | 'Arms, Legs, Hands & Feet'
+  | 'Poses & Movement'
+  | 'Clothing & Accessories'
+  | 'Animals'
+  | 'Creatures & Creature Mixing'
+  | 'Environments'
+  | 'Perspective & Depth'
+  | 'Composition'
+  | 'Texture, Light & Shadow'
+  | 'Color'
+  | 'Storytelling'
+  | 'Creative Transformation'
+  | 'Graphic Design'
+  | 'Typography & Layout'
+  | 'Environmental Graphics';
 
-export type PromptDifficulty = "easy" | "medium" | "hard";
+export type SessionCategory =
+  | 'START'
+  | 'CONNECT'
+  | 'TRANSFORM'
+  | 'ADD'
+  | 'INTERACT'
+  | 'STORY'
+  | 'CHAOS'
+  | 'DETAIL'
+  | 'CHANGE'
+  | 'FINISH';
+
+export type PromptCategory = MasterCategory | SessionCategory | string;
+
+export type PromptDifficulty = 'easy' | 'medium' | 'hard';
 
 export type AdventureType =
-  | "tiny-mystery"
-  | "short-adventure"
-  | "full-adventure"
-  | "deep-dive"
-  | "chaos";
+  | 'tiny-mystery'
+  | 'short-adventure'
+  | 'full-adventure'
+  | 'deep-dive'
+  | 'chaos';
 
 export type SessionPhase =
-  | "opening"
-  | "building"
-  | "developing"
-  | "wild"
-  | "closing";
+  | 'opening'
+  | 'building'
+  | 'developing'
+  | 'wild'
+  | 'closing';
 
 export type CreativePathwayId =
-  | "open"
-  | "character-creator"
-  | "graphic-design"
-  | "nature-study"
-  | "animation"
-  | "world-builder";
+  | 'open'
+  | 'character-creator'
+  | 'graphic-design'
+  | 'nature-study'
+  | 'animation'
+  | 'world-builder';
 
 import type { VisualReferenceType, VisualReference, BeginnerTerm, PromptExample, ReferenceLevel } from './visualReference';
 export type { VisualReferenceType, VisualReference, BeginnerTerm, PromptExample, ReferenceLevel };
@@ -41,38 +69,29 @@ export interface CreativePrompt {
   id: string;
   prompt: string;
   explanation: string;
-  category: string;
-  difficulty: "easy" | "medium" | "hard";
-  level?: ReferenceLevel;
-
-  visualReference: {
-    id?: string;
-    type: string;
-    imageUrl?: string;
-    svgContent?: string;
-    altText: string;
-    explanation?: string;
-    examples?: (PromptExample | string)[];
-    moreExamples?: (PromptExample | string)[];
-    whatToNotice?: string | string[];
-    challenge?: string;
-    title?: string;
-    description?: string;
-    beginnerTerms?: BeginnerTerm[];
-    beginnerFriendly?: boolean;
-    level?: ReferenceLevel;
-  };
-
-  examples?: (PromptExample | string)[];
-  moreExamples?: (PromptExample | string)[];
-  whatToNotice?: string | string[];
-  challenge?: string;
-  beginnerTerms?: BeginnerTerm[];
-
+  category: PromptCategory;
+  difficulty: 'easy' | 'medium' | 'hard';
+  visualReference: VisualReference;
+  examples?: (string | [string, string] | PromptExample)[];
+  whatToNotice?: string[] | string;
+  optionalChallenge?: string;
+  themes?: string[];
+  skills?: string[];
+  creativePaths?: string[];
+  modes?: string[];
   tags: string[];
+  beginnerFriendly?: boolean;
+  requiresPreviousDrawing?: boolean;
+
+  // Additional optional backward-compatible fields
   themeIds?: string[];
   skillIds?: string[];
+  challenge?: string;
+  moreExamples?: PromptExample[];
+  level?: ReferenceLevel;
+  beginnerTerms?: BeginnerTerm[];
 }
+
 
 
 export interface CharacterSkill {
@@ -122,8 +141,8 @@ export interface Prompt {
   maxSessionMinute?: number;
   visualReference?: VisualReference;
   visualReferenceId?: string;
-  examples?: (string | PromptExample)[];
-  moreExamples?: (string | PromptExample)[];
+  examples?: (string | PromptExample | [string, string])[];
+  moreExamples?: (string | PromptExample | [string, string])[];
   whatToNotice?: string | string[];
   challenge?: string;
   beginnerTerms?: BeginnerTerm[];

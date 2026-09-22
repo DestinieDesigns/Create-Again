@@ -20,6 +20,7 @@ export type VisualReferenceType =
   | 'gesture'
   | 'silhouette'
   | 'photo'
+  | 'transformation'
   | 'multiple';
 
 export interface BeginnerTerm {
@@ -37,30 +38,31 @@ export interface PromptExample {
 export type ReferenceLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export interface VisualReference {
-  id: string;
+  id?: string;
   type: VisualReferenceType;
+  altText: string;
+  imageUrl?: string;
+  filePath?: string;
+  explanation?: string;
+  whatToNotice?: string[] | string;
+  beginnerFriendly?: boolean;
+
+  // Optional backward-compatible & vector diagram fields
   title?: string;
   description?: string;
-  imageUrl?: string;
   svgContent?: string;
-  altText: string;
   promptForGeneration?: string;
   source?: 'local' | 'generated' | 'external';
   attribution?: string;
-  beginnerFriendly?: boolean;
   contextHint?: string;
   tags?: string[];
   relatedPromptId?: string;
-
-  // Master Prompt Sheet & Expanded Library fields
   level?: ReferenceLevel;
-  explanation?: string;
-  whatToNotice?: string | string[];
-  examples?: (string | PromptExample)[];
-  moreExamples?: (string | PromptExample)[];
+  examples?: (string | PromptExample | [string, string])[];
+  moreExamples?: (string | PromptExample | [string, string])[];
   challenge?: string;
   beginnerTerms?: BeginnerTerm[];
-
 }
+
 
 

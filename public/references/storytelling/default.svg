@@ -1,0 +1,27 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(40, 20)">
+        <rect x="0" y="0" width="180" height="135" rx="4" stroke="#8C7E72" stroke-width="1.5" fill="#FAF5EB" />
+        <text x="90" y="22" font-size="8" font-family="sans-serif" font-weight="bold" fill="#8C7E72" text-anchor="middle" stroke="none">EQUAL WEIGHT (CONFUSING)</text>
+        <rect x="25" y="35" width="130" height="15" fill="#D5C9BC" stroke="none" rx="2" />
+        <rect x="25" y="58" width="130" height="15" fill="#D5C9BC" stroke="none" rx="2" />
+        <rect x="25" y="81" width="130" height="15" fill="#D5C9BC" stroke="none" rx="2" />
+        <rect x="25" y="104" width="130" height="15" fill="#D5C9BC" stroke="none" rx="2" />
+      </g>
+      <g transform="translate(240, 80)">
+        <path d="M0 0 L40 0 M30 -8 L40 0 L30 8" stroke="#E06D53" stroke-width="2.5" />
+      </g>
+      <g transform="translate(310, 20)">
+        <rect x="0" y="0" width="180" height="135" rx="4" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <rect x="20" y="25" width="140" height="28" fill="#2D2723" rx="3" stroke="none" />
+        <text x="90" y="43" font-size="10" font-family="sans-serif" font-weight="bold" fill="#FAF5EB" text-anchor="middle" stroke="none">1. HERO TITLE</text>
+        <rect x="20" y="62" width="90" height="12" fill="#E06D53" rx="2" stroke="none" />
+        <text x="25" y="71" font-size="7" font-family="sans-serif" font-weight="bold" fill="#FAF5EB" stroke="none">2. SUBTITLE</text>
+        <line x1="20" y1="88" x2="160" y2="88" stroke="#8C7E72" stroke-width="1.5" />
+        <line x1="20" y1="98" x2="130" y2="98" stroke="#8C7E72" stroke-width="1.5" />
+        <line x1="20" y1="108" x2="150" y2="108" stroke="#8C7E72" stroke-width="1.5" />
+        <text x="90" y="128" font-size="7.5" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">CLEAR HIERARCHY</text>
+      </g>
+    </svg>
+  

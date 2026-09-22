@@ -1,0 +1,23 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(60, 20)">
+        <rect x="0" y="0" width="180" height="135" rx="4" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <line x1="60" y1="0" x2="60" y2="135" stroke="#E06D53" stroke-width="1" stroke-dasharray="3 3" />
+        <line x1="120" y1="0" x2="120" y2="135" stroke="#E06D53" stroke-width="1" stroke-dasharray="3 3" />
+        <line x1="0" y1="45" x2="180" y2="45" stroke="#E06D53" stroke-width="1" stroke-dasharray="3 3" />
+        <line x1="0" y1="90" x2="180" y2="90" stroke="#E06D53" stroke-width="1" stroke-dasharray="3 3" />
+        <circle cx="60" cy="45" r="5" fill="#E06D53" stroke="none" />
+        <circle cx="120" cy="90" r="5" fill="#E06D53" stroke="none" />
+        <text x="90" y="150" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">RULE OF THIRDS (INTERSECTIONS)</text>
+      </g>
+      <g transform="translate(300, 20)">
+        <rect x="0" y="0" width="180" height="135" rx="4" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <!-- Framing with tree and hero focal circle -->
+        <path d="M0 0 Q30 40 35 135" stroke="#2D2723" stroke-width="4" />
+        <path d="M0 25 Q70 15 110 30" stroke="#2D2723" stroke-width="3" />
+        <circle cx="130" cy="80" r="18" stroke="#E06D53" stroke-width="2.5" fill="#FAF5EB" />
+        <text x="90" y="150" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">NATURAL FRAMING &amp; FOCAL POINT</text>
+      </g>
+    </svg>
+  

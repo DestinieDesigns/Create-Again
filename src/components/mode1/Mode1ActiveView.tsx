@@ -313,6 +313,13 @@ export const Mode1ActiveView: React.FC<Mode1ActiveViewProps> = ({
             {currentPrompt.text}
           </h2>
 
+          {/* Prompt Explanation / Guidance */}
+          {currentPrompt.explanation && (
+            <p className="mt-3 text-sm sm:text-base text-[#55473B] max-w-md mx-auto leading-relaxed font-medium">
+              {currentPrompt.explanation}
+            </p>
+          )}
+
           {/* Subtle subtext encouragement */}
           {currentPrompt.subtext && (
             <p className="mt-4 font-handwriting text-xl sm:text-2xl text-[#6E6054] max-w-md mx-auto font-bold">

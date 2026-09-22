@@ -1,0 +1,36 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(40, 25)">
+        <!-- Palm box + mitten curve -->
+        <rect x="15" y="25" width="40" height="40" rx="6" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <path d="M15 35 C0 35 0 50 15 52" stroke="#E06D53" stroke-width="2.5" />
+        <path d="M18 25 C18 5 52 5 52 25" stroke="#2D2723" stroke-width="2.5" />
+        <text x="35" y="90" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">1. MITTEN BLOCK</text>
+      </g>
+      <g transform="translate(170, 25)">
+        <!-- Pointing finger -->
+        <rect x="15" y="30" width="35" height="35" rx="5" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <line x1="30" y1="30" x2="30" y2="5" stroke="#E06D53" stroke-width="4" stroke-linecap="round" />
+        <circle cx="15" cy="45" r="5" stroke="#2D2723" stroke-width="2" />
+        <text x="35" y="90" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">2. POINTING</text>
+      </g>
+      <g transform="translate(290, 25)">
+        <!-- Clenched fist -->
+        <rect x="15" y="25" width="38" height="35" rx="8" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <path d="M18 42 L50 42" stroke="#2D2723" stroke-width="2" />
+        <path d="M15 35 C10 35 10 50 25 55" stroke="#E06D53" stroke-width="2.5" />
+        <text x="35" y="90" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">3. FIST BLOCK</text>
+      </g>
+      <g transform="translate(410, 25)">
+        <!-- Open fingers spread -->
+        <rect x="18" y="35" width="35" height="30" rx="5" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <line x1="22" y1="35" x2="16" y2="12" stroke="#2D2723" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="28" y1="35" x2="26" y2="8" stroke="#2D2723" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="35" y1="35" x2="36" y2="8" stroke="#2D2723" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="42" y1="35" x2="48" y2="14" stroke="#2D2723" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="18" y1="48" x2="5" y2="40" stroke="#E06D53" stroke-width="3" stroke-linecap="round" />
+        <text x="35" y="90" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">4. SPREAD PALM</text>
+      </g>
+    </svg>
+  

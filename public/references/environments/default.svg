@@ -1,0 +1,18 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <line x1="30" y1="75" x2="510" y2="75" stroke="#8C7E72" stroke-width="1.5" stroke-dasharray="4 4" />
+      <text x="50" y="70" font-size="8" font-family="sans-serif" fill="#8C7E72" stroke="none">Horizon Line (Eye Level)</text>
+      <circle cx="270" cy="75" r="3" fill="#E06D53" stroke="none" />
+      <path d="M40 160 L270 75 L500 160" stroke="#2D2723" stroke-width="2.2" />
+      <line x1="270" y1="75" x2="270" y2="160" stroke="#E06D53" stroke-width="2" stroke-dasharray="6 6" />
+      <!-- Near pole -->
+      <line x1="90" y1="30" x2="90" y2="145" stroke="#2D2723" stroke-width="3.5" />
+      <line x1="75" y1="45" x2="105" y2="45" stroke="#2D2723" stroke-width="2.5" />
+      <text x="115" y="45" font-size="8" font-family="sans-serif" font-weight="bold" fill="#2D2723" stroke="none">NEAR (LARGE)</text>
+      <!-- Far pole -->
+      <line x1="220" y1="65" x2="220" y2="95" stroke="#2D2723" stroke-width="1.8" />
+      <line x1="212" y1="72" x2="228" y2="72" stroke="#2D2723" stroke-width="1.5" />
+      <text x="235" y="72" font-size="7" font-family="sans-serif" fill="#8C7E72" stroke="none">FAR (TINY)</text>
+    </svg>
+  

@@ -3,6 +3,7 @@ import { MASTER_CREATIVE_PROMPTS } from '../data/masterPromptSheet';
 import { getVisualReferenceForPrompt } from './referenceService';
 import { Mode1Session } from '../types/session';
 import { getNextRandomPrompt, getRecentPromptIds } from './promptSelector';
+import { ALL_500_PROMPTS, CATEGORY_DEFINITIONS, getLibraryStats } from '../data/prompts500';
 
 
 export interface TestResult {
@@ -305,6 +306,78 @@ export function runPromptSystemTests(): TestResult[] {
       : `Failed: Only ${validMasterPrompts}/${MASTER_CREATIVE_PROMPTS.length} passed structure validation.`,
   });
 
+  // Test 13: 500-Item Prompt Library Exact Count
+  const libraryStats = getLibraryStats();
+  const test13Passed = libraryStats.totalPrompts === 500;
+  results.push({
+    id: 'test-13',
+    name: '500-Item Prompt Master Library: Count is exactly 500',
+    passed: test13Passed,
+    message: test13Passed
+      ? `Verified: Master Library contains exactly 500 fully structured prompts.`
+      : `Failed: Count is ${libraryStats.totalPrompts}, expected 500.`,
+  });
+
+  // Test 14: 500-Item Prompt Library Unique IDs
+  const idSet = new Set<string>();
+  let hasDuplicateId = false;
+  for (const p of ALL_500_PROMPTS) {
+    if (idSet.has(p.id)) {
+      hasDuplicateId = true;
+      break;
+    }
+    idSet.add(p.id);
+  }
+  const test14Passed = !hasDuplicateId && idSet.size === 500;
+  results.push({
+    id: 'test-14',
+    name: '500-Item Prompt Master Library: 100% Unique IDs',
+    passed: test14Passed,
+    message: test14Passed
+      ? `Verified: All 500 prompt IDs are globally unique across all 24 categories.`
+      : `Failed: Duplicate IDs detected in prompt library.`,
+  });
+
+  // Test 15: 500-Item Prompt Library Category Breakdown
+  let catMismatch = false;
+  for (const cat of CATEGORY_DEFINITIONS) {
+    const actual = ALL_500_PROMPTS.filter((p) => p.category === cat.name).length;
+    if (actual !== cat.expectedCount) {
+      catMismatch = true;
+      break;
+    }
+  }
+  const test15Passed = !catMismatch;
+  results.push({
+    id: 'test-15',
+    name: '500-Item Prompt Master Library: Category Target Distribution',
+    passed: test15Passed,
+    message: test15Passed
+      ? `Verified: All 24 master categories match their designated prompt quotas.`
+      : `Failed: One or more categories do not match target prompt counts.`,
+  });
+
+  // Test 16: 500-Item Prompt Library Visual References & Teaching Aids
+  let missingVisuals = 0;
+  for (const p of ALL_500_PROMPTS) {
+    if (
+      !p.visualReference ||
+      !p.visualReference.altText ||
+      !p.visualReference.svgContent ||
+      !p.visualReference.type
+    ) {
+      missingVisuals++;
+    }
+  }
+  const test16Passed = missingVisuals === 0;
+  results.push({
+    id: 'test-16',
+    name: '500-Item Prompt Master Library: Complete Visual References & Alt Text',
+    passed: test16Passed,
+    message: test16Passed
+      ? `Verified: 100% (500/500) of prompts contain instructional SVG diagrams and accessible alt text.`
+      : `Failed: ${missingVisuals} prompts lack visual references or alt text.`,
+  });
 
   return results;
 }

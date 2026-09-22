@@ -40,9 +40,9 @@ export const getVisualReferenceForPrompt = (prompt: Prompt): VisualReference => 
     ...ref,
     title: ref.title || prompt.text,
     description: ref.description || prompt.explanation || prompt.subtext,
-    explanation: prompt.explanation || ref.explanation || prompt.subtext,
+    explanation: prompt.explanation || ref.explanation || prompt.subtext || '',
     examples: prompt.examples && prompt.examples.length > 0 ? prompt.examples : ref.examples,
-    whatToNotice: prompt.whatToNotice || ref.whatToNotice,
+    whatToNotice: prompt.whatToNotice || ref.whatToNotice || [],
     challenge: prompt.challenge || ref.challenge,
     beginnerTerms: prompt.beginnerTerms || ref.beginnerTerms,
   };

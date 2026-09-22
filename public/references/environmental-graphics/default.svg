@@ -1,0 +1,22 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(50, 25)">
+        <rect x="0" y="0" width="110" height="80" rx="6" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <path d="M30 40 L70 40 M55 25 L70 40 L55 55" stroke="#E06D53" stroke-width="3.5" />
+        <text x="55" y="105" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">DIRECTION SIGN</text>
+      </g>
+      <g transform="translate(210, 25)">
+        <polygon points="55,5 105,75 5,75" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <line x1="55" y1="28" x2="55" y2="52" stroke="#E06D53" stroke-width="3.5" />
+        <circle cx="55" cy="62" r="2.5" fill="#E06D53" stroke="none" />
+        <text x="55" y="105" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">HAZARD SYMBOL</text>
+      </g>
+      <g transform="translate(370, 25)">
+        <circle cx="55" cy="40" r="35" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <circle cx="55" cy="30" r="8" fill="#2D2723" stroke="none" />
+        <path d="M42 45 C42 40 68 40 68 45 L68 62 L42 62 Z" fill="#2D2723" stroke="none" />
+        <text x="55" y="105" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">PICTOGRAM</text>
+      </g>
+    </svg>
+  

@@ -1,0 +1,28 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(40, 30)">
+        <circle cx="35" cy="40" r="30" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <text x="35" y="95" font-size="10" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">SPHERE / CIRCLE</text>
+      </g>
+      <g transform="translate(140, 30)">
+        <polygon points="35,10 65,70 5,70" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <text x="35" y="95" font-size="10" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">WEDGE / CONE</text>
+      </g>
+      <g transform="translate(240, 30)">
+        <rect x="10" y="15" width="55" height="55" rx="3" stroke="#2D2723" stroke-width="2.5" fill="#FAF5EB" />
+        <text x="37" y="95" font-size="10" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">BOX / CUBE</text>
+      </g>
+      <g transform="translate(340, 30)">
+        <ellipse cx="35" cy="22" rx="25" ry="10" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <line x1="10" y1="22" x2="10" y2="60" stroke="#2D2723" stroke-width="2" />
+        <line x1="60" y1="22" x2="60" y2="60" stroke="#2D2723" stroke-width="2" />
+        <ellipse cx="35" cy="60" rx="25" ry="10" stroke="#2D2723" stroke-width="2" fill="#FAF5EB" />
+        <text x="35" y="95" font-size="10" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">CYLINDER</text>
+      </g>
+      <g transform="translate(440, 30)">
+        <path d="M15 30 C5 60 60 70 55 40 C50 15 25 10 15 30 Z" stroke="#E06D53" stroke-width="2.5" fill="#FAF5EB" />
+        <text x="35" y="95" font-size="10" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">ORGANIC BLOB</text>
+      </g>
+    </svg>
+  

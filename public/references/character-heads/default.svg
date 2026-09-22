@@ -1,0 +1,41 @@
+
+    <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-[#2D2723]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="536" height="176" rx="8" fill="#FAF5EB" stroke="#D5C9BC" stroke-width="1.5" />
+      <g transform="translate(30, 25)">
+        <circle cx="35" cy="40" r="28" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <line x1="35" y1="12" x2="35" y2="68" stroke="#E06D53" stroke-width="1.2" stroke-dasharray="3 3" />
+        <circle cx="26" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <circle cx="44" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <path d="M30 52 Q35 57 40 52" stroke="#2D2723" stroke-width="1.8" />
+        <text x="35" y="95" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">ROUND</text>
+      </g>
+      <g transform="translate(135, 25)">
+        <rect x="10" y="15" width="50" height="52" rx="6" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <circle cx="26" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <circle cx="44" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <path d="M28 52 L42 52" stroke="#2D2723" stroke-width="2" />
+        <text x="35" y="95" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">SQUARE JAW</text>
+      </g>
+      <g transform="translate(240, 25)">
+        <path d="M20 20 C10 40 10 65 35 68 C60 65 60 40 50 20 C45 15 25 15 20 20 Z" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <circle cx="28" cy="40" r="2.5" fill="#2D2723" stroke="none" />
+        <circle cx="42" cy="40" r="2.5" fill="#2D2723" stroke="none" />
+        <path d="M30 54 Q35 58 40 54" stroke="#2D2723" stroke-width="1.8" />
+        <text x="35" y="95" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">PEAR / BEAN</text>
+      </g>
+      <g transform="translate(345, 25)">
+        <polygon points="12,18 58,18 35,68" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <circle cx="26" cy="32" r="2.5" fill="#2D2723" stroke="none" />
+        <circle cx="44" cy="32" r="2.5" fill="#2D2723" stroke="none" />
+        <path d="M30 48 Q35 52 40 48" stroke="#2D2723" stroke-width="1.8" />
+        <text x="35" y="95" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">TRIANGLE / CHIN</text>
+      </g>
+      <g transform="translate(445, 25)">
+        <polygon points="35,12 60,40 35,68 10,40" stroke="#2D2723" stroke-width="2.2" fill="#FAF5EB" />
+        <circle cx="26" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <circle cx="44" cy="38" r="2.5" fill="#2D2723" stroke="none" />
+        <line x1="30" y1="52" x2="40" y2="52" stroke="#2D2723" stroke-width="1.8" />
+        <text x="35" y="95" font-size="9" font-family="sans-serif" font-weight="bold" fill="#2D2723" text-anchor="middle" stroke="none">DIAMOND</text>
+      </g>
+    </svg>
+  
