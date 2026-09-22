@@ -298,12 +298,13 @@ export function runPromptSystemTests(): TestResult[] {
   const test12Passed = validMasterPrompts === MASTER_CREATIVE_PROMPTS.length;
   results.push({
     id: 'test-12',
-    name: 'Master Prompt Structure completeness (All 30 Sections)',
+    name: 'Master Prompt Structure completeness (All Foundational & Expanded Sections)',
     passed: test12Passed,
     message: test12Passed
       ? `All ${validMasterPrompts}/${MASTER_CREATIVE_PROMPTS.length} master prompts have prompt text, explanation, visual diagrams, example variations, and "what to notice" insights.`
       : `Failed: Only ${validMasterPrompts}/${MASTER_CREATIVE_PROMPTS.length} passed structure validation.`,
   });
+
 
   return results;
 }

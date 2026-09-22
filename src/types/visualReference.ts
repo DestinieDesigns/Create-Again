@@ -1,20 +1,40 @@
 export type VisualReferenceType =
+  | 'concept'
+  | 'construction'
+  | 'comparison'
+  | 'variation'
+  | 'step-by-step'
+  | 'diagram'
+  | 'pose'
+  | 'expression'
+  | 'shape'
+  | 'line'
+  | 'animal'
+  | 'character'
+  | 'environment'
+  | 'composition'
+  | 'color'
+  | 'object'
+  | 'photo-reference'
   | 'line-art'
   | 'gesture'
-  | 'shape'
-  | 'step-by-step'
-  | 'photo'
-  | 'multiple'
   | 'silhouette'
-  | 'composition'
-  | 'environment'
-  | 'object'
-  | 'diagram';
+  | 'photo'
+  | 'multiple';
 
 export interface BeginnerTerm {
   term: string;
   definition: string;
 }
+
+export interface PromptExample {
+  id: string;
+  label: string;
+  description: string;
+  visualUrl?: string;
+}
+
+export type ReferenceLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export interface VisualReference {
   id: string;
@@ -32,11 +52,15 @@ export interface VisualReference {
   tags?: string[];
   relatedPromptId?: string;
 
-  // Master Prompt Sheet specifications
-  examples?: string[];
-  whatToNotice?: string;
+  // Master Prompt Sheet & Expanded Library fields
+  level?: ReferenceLevel;
   explanation?: string;
+  whatToNotice?: string | string[];
+  examples?: (string | PromptExample)[];
+  moreExamples?: (string | PromptExample)[];
   challenge?: string;
   beginnerTerms?: BeginnerTerm[];
+
 }
+
 

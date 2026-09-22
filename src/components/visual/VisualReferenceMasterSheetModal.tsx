@@ -16,8 +16,10 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedLevel, setSelectedLevel] = useState<string>('ALL');
   const [activePromptId, setActivePromptId] = useState<string>(MASTER_CREATIVE_PROMPTS[0]?.id || '');
   const [showGlossary, setShowGlossary] = useState(false);
+  const [showMoreExamples, setShowMoreExamples] = useState(false);
 
   // Extract categories
   const categories = useMemo(() => {
@@ -30,6 +32,8 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
   const filteredPrompts = useMemo(() => {
     return MASTER_CREATIVE_PROMPTS.filter((p) => {
       const matchesCat = selectedCategory === 'ALL' || p.category === selectedCategory;
+      const promptLevel = p.level || p.visualReference.level || (p.difficulty === 'hard' ? 'advanced' : p.difficulty === 'medium' ? 'intermediate' : 'beginner');
+      const matchesLevel = selectedLevel === 'ALL' || promptLevel.toLowerCase() === selectedLevel.toLowerCase();
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -37,9 +41,10 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
         p.explanation.toLowerCase().includes(q) ||
         p.tags.some((t) => t.toLowerCase().includes(q)) ||
         (p.visualReference.title && p.visualReference.title.toLowerCase().includes(q));
-      return matchesCat && matchesSearch;
+      return matchesCat && matchesLevel && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, selectedLevel, searchQuery]);
+
 
   const activePrompt = useMemo(() => {
     return (
@@ -145,8 +150,27 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
             />
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            <Filter className="w-3.5 h-3.5 text-[#8C7E72] shrink-0 mr-1" />
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            {/* Level filters */}
+            <div className="flex items-center gap-1 border-r border-[#D5C9BC] pr-2 mr-1">
+              {(['ALL', 'beginner', 'intermediate', 'advanced'] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setSelectedLevel(lvl)}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase transition-all shrink-0 ${
+                    selectedLevel === lvl
+                      ? 'bg-[#E06D53] text-white shadow-2xs'
+                      : 'bg-[#EDE5D8] text-[#5C5046] hover:bg-[#E2D8C8]'
+                  }`}
+                >
+                  {lvl}
+                </button>
+              ))}
+            </div>
+
+            {/* Category filters */}
+            <Filter className="w-3.5 h-3.5 text-[#8C7E72] shrink-0 mr-0.5" />
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -163,6 +187,7 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
             ))}
           </div>
         </div>
+
 
         {/* Modal Body: Left sidebar list & Right preview panel */}
         <div className="flex-1 flex overflow-hidden">
@@ -268,24 +293,76 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
                 {activePrompt.visualReference.examples && activePrompt.visualReference.examples.length > 0 && (
                   <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EAE0D2]">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-extrabold uppercase tracking-wider text-[#4A3F35]">
-                        Example Variations (Demonstrating Variety)
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-[#4A3F35]">
+                          Example Variations (Demonstrating Variety)
+                        </span>
+                        {activePrompt.level && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#E5DCCF] text-[#4A3F35]">
+                            {activePrompt.level}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[10px] font-mono-code font-bold text-[#8C7E72]">
-                        {activePrompt.visualReference.examples.length} variations
+                        {activePrompt.visualReference.examples.length + (activePrompt.visualReference.moreExamples ? activePrompt.visualReference.moreExamples.length : 0)} possibilities
                       </span>
                     </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {activePrompt.visualReference.examples.map((ex, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-2 p-2.5 rounded-xl bg-white border border-[#E8DEC8] text-xs text-[#2D2723]"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#E06D53] shrink-0 mt-1.5" />
-                          <span className="font-semibold">{ex}</span>
-                        </div>
-                      ))}
+                      {activePrompt.visualReference.examples.map((ex, i) => {
+                        const isObj = typeof ex === 'object' && ex !== null;
+                        const label = isObj ? (ex as any).label : ex;
+                        const desc = isObj ? (ex as any).description : null;
+
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 p-2.5 rounded-xl bg-white border border-[#E8DEC8] text-xs text-[#2D2723]"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E06D53] shrink-0 mt-1.5" />
+                            <div>
+                              <span className="font-bold">{label}</span>
+                              {desc && <p className="text-[11px] text-[#6B5F54] mt-0.5 leading-snug">{desc}</p>}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Additional Variations when Show More is expanded */}
+                      {showMoreExamples && activePrompt.visualReference.moreExamples && activePrompt.visualReference.moreExamples.map((ex, i) => {
+                        const isObj = typeof ex === 'object' && ex !== null;
+                        const label = isObj ? (ex as any).label : ex;
+                        const desc = isObj ? (ex as any).description : null;
+
+                        return (
+                          <div
+                            key={`more-${i}`}
+                            className="flex items-start gap-2 p-2.5 rounded-xl bg-[#FAF5EB] border border-[#E0D5C3] text-xs text-[#2D2723] animate-in fade-in duration-150"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#2D7F6E] shrink-0 mt-1.5" />
+                            <div>
+                              <span className="font-bold">{label}</span>
+                              {desc && <p className="text-[11px] text-[#6B5F54] mt-0.5 leading-snug">{desc}</p>}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
+
+                    {/* Section 52: Show More Button */}
+                    {activePrompt.visualReference.moreExamples && activePrompt.visualReference.moreExamples.length > 0 && (
+                      <div className="mt-3 pt-2.5 border-t border-[#EAE0D2] flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setShowMoreExamples(!showMoreExamples)}
+                          className="text-xs font-extrabold text-[#E06D53] hover:text-[#C04D33] transition-colors"
+                        >
+                          {showMoreExamples
+                            ? 'Show Fewer Examples'
+                            : `+ Show ${activePrompt.visualReference.moreExamples.length} More Variations & Angles`}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -294,14 +371,42 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
                   <div className="p-4 rounded-2xl bg-[#F0F5F2] border border-[#D0E2D8]">
                     <div className="flex items-start gap-2.5">
                       <span className="text-xl">👁️</span>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-xs font-extrabold uppercase tracking-wider text-[#2D6A4F]">
                           What to notice
                         </p>
-                        <p className="text-xs sm:text-sm font-semibold text-[#1B4332] mt-0.5 leading-relaxed">
-                          {activePrompt.visualReference.whatToNotice}
-                        </p>
+                        {Array.isArray(activePrompt.visualReference.whatToNotice) ? (
+                          <ul className="mt-1 space-y-1.5 text-xs text-[#1B4332]">
+                            {activePrompt.visualReference.whatToNotice.map((note, nIdx) => (
+                              <li key={nIdx} className="flex items-start gap-1.5 font-medium leading-relaxed">
+                                <span className="text-[#2D6A4F] font-bold">•</span>
+                                <span>{note}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs sm:text-sm font-semibold text-[#1B4332] mt-0.5 leading-relaxed">
+                            {activePrompt.visualReference.whatToNotice}
+                          </p>
+                        )}
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Beginner Art Terms attached to this prompt */}
+                {activePrompt.visualReference.beginnerTerms && activePrompt.visualReference.beginnerTerms.length > 0 && (
+                  <div className="p-3.5 rounded-2xl bg-[#F4EFE6] border border-[#E0D5C3]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#8C7E72] block mb-1.5">
+                      Plain Language Definitions
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {activePrompt.visualReference.beginnerTerms.map((bt, bIdx) => (
+                        <div key={bIdx} className="px-2.5 py-1 rounded-lg bg-white border border-[#DDD3C5] text-xs">
+                          <strong className="text-[#2D2723] mr-1">{bt.term}:</strong>
+                          <span className="text-[#6B5F54]">{bt.definition}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -320,6 +425,7 @@ export const VisualReferenceMasterSheetModal: React.FC<VisualReferenceMasterShee
                     </div>
                   </div>
                 )}
+
 
                 {/* Bottom Core Directive Banner */}
                 <div className="p-4 rounded-2xl bg-[#2D2723] text-white flex items-center justify-between gap-3">

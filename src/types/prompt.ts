@@ -34,8 +34,8 @@ export type CreativePathwayId =
   | "animation"
   | "world-builder";
 
-import type { VisualReferenceType, VisualReference, BeginnerTerm } from './visualReference';
-export type { VisualReferenceType, VisualReference, BeginnerTerm };
+import type { VisualReferenceType, VisualReference, BeginnerTerm, PromptExample, ReferenceLevel } from './visualReference';
+export type { VisualReferenceType, VisualReference, BeginnerTerm, PromptExample, ReferenceLevel };
 
 export interface CreativePrompt {
   id: string;
@@ -43,24 +43,37 @@ export interface CreativePrompt {
   explanation: string;
   category: string;
   difficulty: "easy" | "medium" | "hard";
+  level?: ReferenceLevel;
 
   visualReference: {
+    id?: string;
     type: string;
     imageUrl?: string;
     svgContent?: string;
     altText: string;
-    examples: string[];
-    whatToNotice: string;
+    explanation?: string;
+    examples?: (PromptExample | string)[];
+    moreExamples?: (PromptExample | string)[];
+    whatToNotice?: string | string[];
     challenge?: string;
     title?: string;
     description?: string;
     beginnerTerms?: BeginnerTerm[];
+    beginnerFriendly?: boolean;
+    level?: ReferenceLevel;
   };
+
+  examples?: (PromptExample | string)[];
+  moreExamples?: (PromptExample | string)[];
+  whatToNotice?: string | string[];
+  challenge?: string;
+  beginnerTerms?: BeginnerTerm[];
 
   tags: string[];
   themeIds?: string[];
   skillIds?: string[];
 }
+
 
 export interface CharacterSkill {
   id: string;
@@ -96,6 +109,7 @@ export interface Prompt {
   subtext?: string;
   explanation?: string;
   difficulty: PromptDifficulty;
+  level?: ReferenceLevel;
   tags: string[];
   weight: number;
   requiresPreviousDrawing: boolean;
@@ -108,12 +122,14 @@ export interface Prompt {
   maxSessionMinute?: number;
   visualReference?: VisualReference;
   visualReferenceId?: string;
-  examples?: string[];
-  whatToNotice?: string;
+  examples?: (string | PromptExample)[];
+  moreExamples?: (string | PromptExample)[];
+  whatToNotice?: string | string[];
   challenge?: string;
   beginnerTerms?: BeginnerTerm[];
   themeIds?: string[];
   themeTags?: string[];
   skillIds?: string[];
 }
+
 

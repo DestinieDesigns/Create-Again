@@ -1,0 +1,22 @@
+import { CreativePrompt } from '../../types/prompt';
+import { BASICS_AND_LINES_PROMPTS } from './basicsAndLines';
+import { CHARACTER_HEAD_AND_FACE_PROMPTS } from './characterHeadAndFace';
+import { CHARACTER_BODY_AND_POSES_PROMPTS } from './characterBodyAndPoses';
+import { ANIMALS_AND_CREATURES_PROMPTS } from './animalsAndCreatures';
+import { ENVIRONMENTS_AND_DESIGN_PROMPTS } from './environmentsAndDesign';
+
+export const EXPANDED_LIBRARY_PROMPTS: CreativePrompt[] = [
+  ...BASICS_AND_LINES_PROMPTS,
+  ...CHARACTER_HEAD_AND_FACE_PROMPTS,
+  ...CHARACTER_BODY_AND_POSES_PROMPTS,
+  ...ANIMALS_AND_CREATURES_PROMPTS,
+  ...ENVIRONMENTS_AND_DESIGN_PROMPTS,
+];
+
+export {
+  BASICS_AND_LINES_PROMPTS,
+  CHARACTER_HEAD_AND_FACE_PROMPTS,
+  CHARACTER_BODY_AND_POSES_PROMPTS,
+  ANIMALS_AND_CREATURES_PROMPTS,
+  ENVIRONMENTS_AND_DESIGN_PROMPTS,
+};

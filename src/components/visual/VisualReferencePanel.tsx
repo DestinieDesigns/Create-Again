@@ -105,6 +105,7 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
 }) => {
   const activeReference = visualReference || reference;
   const [imgError, setImgError] = useState(false);
+  const [showMoreExamples, setShowMoreExamples] = useState(false);
 
   const handleDismiss = () => {
     if (onHide) onHide();
@@ -230,24 +231,76 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
       {activeReference.examples && activeReference.examples.length > 0 && (
         <div className="mt-3.5 p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#E8DEC8]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#635446]">
-              Example Variations (Notice the variety)
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#635446]">
+                Example Variations (Notice the variety)
+              </span>
+              {activeReference.level && (
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-[#E5DCCF] text-[#4A3F35]">
+                  {activeReference.level}
+                </span>
+              )}
+            </div>
             <span className="text-[10px] text-[#918171] font-mono-code font-bold">
-              {activeReference.examples.length} possibilities
+              {activeReference.examples.length + (activeReference.moreExamples ? activeReference.moreExamples.length : 0)} possibilities
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-            {activeReference.examples.map((ex, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-2 px-2.5 py-1.5 rounded-xl bg-[#F4EFE6] border border-[#E4D9C8] text-xs text-[#3D332A]"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#E06D53] shrink-0 mt-1.5" />
-                <span className="font-medium">{ex}</span>
-              </div>
-            ))}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {activeReference.examples.map((ex, idx) => {
+              const isObj = typeof ex === 'object' && ex !== null;
+              const label = isObj ? (ex as any).label : ex;
+              const desc = isObj ? (ex as any).description : null;
+
+              return (
+                <div
+                  key={idx}
+                  className="flex items-start gap-2 px-2.5 py-2 rounded-xl bg-[#F4EFE6] border border-[#E4D9C8] text-xs text-[#3D332A]"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E06D53] shrink-0 mt-1.5" />
+                  <div>
+                    <span className="font-bold text-[#2D2723]">{label}</span>
+                    {desc && <span className="block text-[11px] text-[#6B5F54] mt-0.5 leading-snug">{desc}</span>}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Additional Variations when Show More is expanded */}
+            {showMoreExamples && activeReference.moreExamples && activeReference.moreExamples.map((ex, idx) => {
+              const isObj = typeof ex === 'object' && ex !== null;
+              const label = isObj ? (ex as any).label : ex;
+              const desc = isObj ? (ex as any).description : null;
+
+              return (
+                <div
+                  key={`more-${idx}`}
+                  className="flex items-start gap-2 px-2.5 py-2 rounded-xl bg-[#FAF5EB] border border-[#E0D5C3] text-xs text-[#3D332A] animate-in fade-in duration-150"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2D7F6E] shrink-0 mt-1.5" />
+                  <div>
+                    <span className="font-bold text-[#2D2723]">{label}</span>
+                    {desc && <span className="block text-[11px] text-[#6B5F54] mt-0.5 leading-snug">{desc}</span>}
+                  </div>
+                </div>
+              );
+            })}
           </div>
+
+          {/* Section 52: Show More Button */}
+          {activeReference.moreExamples && activeReference.moreExamples.length > 0 && (
+            <div className="mt-2.5 pt-2 border-t border-[#EAE0D2] flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowMoreExamples(!showMoreExamples)}
+                className="text-xs font-extrabold text-[#E06D53] hover:text-[#C04D33] transition-colors"
+              >
+                {showMoreExamples
+                  ? 'Show Fewer Examples'
+                  : `+ Show ${activeReference.moreExamples.length} More Examples & Angles`}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -256,13 +309,24 @@ export const VisualReferencePanel: React.FC<VisualReferencePanelProps> = ({
         <div className="mt-3 p-3.5 rounded-2xl bg-[#F0F5F2] border border-[#D0E2D8] text-left">
           <div className="flex items-start gap-2.5">
             <span className="text-base leading-none mt-0.5">👁️</span>
-            <div>
+            <div className="flex-1">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#2D6A4F]">
                 What to notice
               </p>
-              <p className="text-xs sm:text-sm font-semibold text-[#1B4332] mt-0.5 leading-relaxed">
-                {activeReference.whatToNotice}
-              </p>
+              {Array.isArray(activeReference.whatToNotice) ? (
+                <ul className="mt-1 space-y-1 text-xs text-[#1B4332]">
+                  {activeReference.whatToNotice.map((note, nIdx) => (
+                    <li key={nIdx} className="flex items-start gap-1.5 font-medium leading-relaxed">
+                      <span className="text-[#2D6A4F] font-bold">•</span>
+                      <span>{note}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs sm:text-sm font-semibold text-[#1B4332] mt-0.5 leading-relaxed">
+                  {activeReference.whatToNotice}
+                </p>
+              )}
             </div>
           </div>
         </div>

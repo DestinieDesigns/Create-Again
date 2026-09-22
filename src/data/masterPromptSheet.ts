@@ -4,39 +4,48 @@ import { MASTER_PROMPTS_PART_1 } from './masterPromptsPart1';
 import { MASTER_PROMPTS_PART_2 } from './masterPromptsPart2';
 import { MASTER_PROMPTS_PART_3 } from './masterPromptsPart3';
 import { MASTER_PROMPTS_PART_4 } from './masterPromptsPart4';
+import { EXPANDED_LIBRARY_PROMPTS } from './expandedLibrary';
 
-// Complete 30-section Master Prompt list
+// Complete Master Prompt list with foundational + expanded libraries
 export const MASTER_CREATIVE_PROMPTS: CreativePrompt[] = [
   ...MASTER_PROMPTS_PART_1,
   ...MASTER_PROMPTS_PART_2,
   ...MASTER_PROMPTS_PART_3,
   ...MASTER_PROMPTS_PART_4,
+  ...EXPANDED_LIBRARY_PROMPTS,
 ];
 
 // Map of VisualReferences keyed by prompt id or ref-id
 export const MASTER_VISUAL_REFERENCES: Record<string, VisualReference> = {};
 
 MASTER_CREATIVE_PROMPTS.forEach((cp) => {
-  const refId = `ref-${cp.id.replace('master-', '')}`;
+  const cleanId = cp.id.replace('master-', '').replace('exp-', '');
+  const refId = `ref-${cleanId}`;
   const visualRef: VisualReference = {
-    id: refId,
+    id: cp.visualReference.id || refId,
     type: (cp.visualReference.type as any) || 'line-art',
     title: cp.visualReference.title || cp.prompt,
     description: cp.explanation,
     svgContent: cp.visualReference.svgContent,
     altText: cp.visualReference.altText,
-    examples: cp.visualReference.examples,
-    whatToNotice: cp.visualReference.whatToNotice,
-    challenge: cp.visualReference.challenge,
-    beginnerTerms: cp.visualReference.beginnerTerms,
-    beginnerFriendly: true,
+    level: cp.level || cp.visualReference.level || (cp.difficulty === 'hard' ? 'advanced' : cp.difficulty === 'medium' ? 'intermediate' : 'beginner'),
+    examples: cp.visualReference.examples || cp.examples,
+    moreExamples: cp.visualReference.moreExamples || cp.moreExamples,
+    whatToNotice: cp.visualReference.whatToNotice || cp.whatToNotice,
+    challenge: cp.visualReference.challenge || cp.challenge,
+    beginnerTerms: cp.visualReference.beginnerTerms || cp.beginnerTerms,
+    beginnerFriendly: cp.visualReference.beginnerFriendly ?? true,
     tags: cp.tags,
     relatedPromptId: cp.id,
   };
 
   MASTER_VISUAL_REFERENCES[refId] = visualRef;
   MASTER_VISUAL_REFERENCES[cp.id] = visualRef;
+  if (cp.visualReference.id) {
+    MASTER_VISUAL_REFERENCES[cp.visualReference.id] = visualRef;
+  }
 });
+
 
 // Section 33: Beginner Language Glossary
 export const BEGINNER_ART_GLOSSARY: BeginnerTerm[] = [
