@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Center / Right: Desktop & Tablet Nav */}
-        {/* Desktop Nav (1024px+): Home, Create, Practice, Challenges, Collection, Progress */}
+        {/* Desktop Nav (1024px+): Home, Create, Chibi Journey, Practice, Challenges, Collection, Progress */}
         <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-1 xl:gap-1.5">
           <button
             onClick={() => handleNav('home')}
@@ -138,6 +138,21 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
             <span>Create</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (onOpenChibiJourney) onOpenChibiJourney();
+              else handleNav('chibi-journey');
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              currentTab === 'chibi-journey'
+                ? 'bg-[#E06D53] text-white shadow-xs'
+                : 'text-[#E06D53] bg-[#FBEFEA] hover:bg-[#F7DFD6]'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Chibi Journey</span>
           </button>
 
           <button
@@ -194,6 +209,19 @@ export const Header: React.FC<HeaderProps> = ({
             className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#2D2723] bg-[#EFE9DF] hover:bg-[#E5DDCF] transition-all"
           >
             Create
+          </button>
+          <button
+            onClick={() => {
+              if (onOpenChibiJourney) onOpenChibiJourney();
+              else handleNav('chibi-journey');
+            }}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              currentTab === 'chibi-journey'
+                ? 'bg-[#E06D53] text-white'
+                : 'text-[#E06D53] bg-[#FBEFEA] hover:bg-[#F7DFD6]'
+            }`}
+          >
+            Chibi
           </button>
           <button
             onClick={() => handleNav('practice')}

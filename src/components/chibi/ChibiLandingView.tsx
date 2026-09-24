@@ -87,9 +87,11 @@ export const ChibiLandingView: React.FC<ChibiLandingViewProps> = ({
 
       {/* Hero Header */}
       <div className="text-center max-w-2xl mx-auto mb-8 space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#E06D53] text-xs font-bold uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#E06D53] font-mono">
+          <span className="w-2 h-2 rounded-full bg-[#E06D53]" />
           <span>Intentional Character Learning</span>
+          <span aria-hidden="true" className="text-[#8A7D71]">·</span>
+          <span className="text-[#8A7D71]">20 Guided Stages</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#2D2723]">
           CHIBI CHARACTER JOURNEY
@@ -169,11 +171,12 @@ export const ChibiLandingView: React.FC<ChibiLandingViewProps> = ({
           <div className="p-6 rounded-3xl border-3 border-[#2D2723] bg-[#FEF6E4] paper-card subtle-shadow flex flex-col justify-between text-left border-l-8 border-l-[#E06D53]">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full bg-[#E06D53] text-white text-[10px] font-mono font-bold uppercase tracking-wider">
-                  WAITING FOR YOU
-                </span>
+                <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-[#E06D53]">
+                  <span className="w-2 h-2 rounded-full bg-[#E06D53] animate-pulse" />
+                  <span>IN PROGRESS</span>
+                </div>
                 <span className="text-xs text-[#8A7D71] font-mono">
-                  {activeCharacter?.completedStages.length} stages done
+                  {activeCharacter?.completedStages.length} of 20 stages done
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-[#2D2723]">

@@ -27,6 +27,7 @@ import {
   generateChibiName,
 } from '../../data/chibiJourneyData';
 import { ChibiVisualReferenceCard } from '../../data/chibiVisualReferences';
+import { ChibiEvolutionTimelineModal } from './ChibiEvolutionTimelineModal';
 
 interface ChibiActiveJourneyViewProps {
   character: ChibiCharacter;
@@ -313,13 +314,15 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Mobile evolution drawer trigger */}
+          {/* Evolution timeline trigger */}
           <button
-            onClick={() => setIsTimelineDrawerOpen(!isTimelineDrawerOpen)}
-            className="md:hidden px-3 py-1 rounded-xl bg-[#FAF7F2] border border-[#D8CEBE] text-xs font-bold flex items-center gap-1.5"
+            onClick={() => setIsTimelineDrawerOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE9DF] border border-[#D8CEBE] text-xs font-bold flex items-center gap-1.5 transition-all text-[#2D2723]"
+            title="View complete evolution timeline and revisit earlier stages"
           >
             <Layers className="w-3.5 h-3.5 text-[#E06D53]" />
-            <span>CHARACTER RECAP</span>
+            <span className="hidden sm:inline">EVOLUTION</span>
+            <span>TIMELINE</span>
           </button>
 
           <span className="text-xs font-mono font-bold text-[#8A7D71]">
@@ -562,7 +565,7 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
         </div>
 
         {/* RIGHT COLUMN: Visual Reference Card & Live Character Build Recap */}
-        <div className="lg:col-span-5 space-y-5">
+        <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-20">
           {/* Visual Reference Card */}
           {activeChoiceItem && (
             <ChibiVisualReferenceCard
@@ -650,50 +653,13 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
         </div>
       </div>
 
-      {/* Mobile Evolution Recap Drawer Modal */}
-      {isTimelineDrawerOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 bg-[#2D2723]/60 backdrop-blur-xs md:hidden"
-        >
-          <div className="w-full max-w-md bg-[#FAF7F2] rounded-3xl border-3 border-[#2D2723] p-5 text-left shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E8E0D5]">
-              <div className="flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-[#E06D53]" />
-                <h3 className="text-sm font-extrabold text-[#2D2723]">
-                  CHARACTER RECAP
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsTimelineDrawerOpen(false)}
-                className="p-1 rounded-full hover:bg-[#EFE9DF]"
-              >
-                <X className="w-5 h-5 text-[#8A7D71]" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto py-3 space-y-2 text-xs">
-              {CHIBI_JOURNEY_STAGES.slice(0, currentStageIndex + 1).map((s) => (
-                <div
-                  key={s.id}
-                  className="p-2.5 rounded-xl bg-[#FCFAF6] border border-[#E8E0D5] flex items-center justify-between"
-                >
-                  <span className="text-[#8A7D71] font-medium">{s.title}:</span>
-                  <span className="font-bold text-[#2D2723]">Locked</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setIsTimelineDrawerOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-[#2D2723] text-white text-xs font-bold"
-            >
-              CLOSE
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Character Evolution Timeline Modal (Available on mobile & desktop) */}
+      <ChibiEvolutionTimelineModal
+        isOpen={isTimelineDrawerOpen}
+        onClose={() => setIsTimelineDrawerOpen(false)}
+        character={character}
+        onJumpToStage={onJumpToStage}
+      />
     </div>
   );
 };

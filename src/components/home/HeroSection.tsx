@@ -5,18 +5,38 @@ interface HeroSectionProps {
   onStartCreating: () => void;
   onOpenMasterSheet?: () => void;
   onOpenWhatIs?: () => void;
+  onOpenChibiJourney?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onStartCreating,
   onOpenMasterSheet,
   onOpenWhatIs,
+  onOpenChibiJourney,
 }) => {
   return (
     <section className="py-6 sm:py-10 md:py-14 text-left max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10">
         {/* Left Column: Text & Primary CTA */}
         <div className="flex-1">
+          {/* Feature Highlight Pill */}
+          {onOpenChibiJourney && (
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={onOpenChibiJourney}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FBEFEA] hover:bg-[#F7DFD6] border border-[#F5D8CE] text-[#E06D53] transition-all text-xs font-bold text-left group shadow-xs active:scale-98"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#E06D53] animate-pulse shrink-0" />
+                <span className="font-extrabold">NEW: Chibi Character Journey</span>
+                <span className="text-[#8A7D71] font-normal hidden sm:inline">
+                  · 20 guided stages from silhouette to model sheet
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform shrink-0" />
+              </button>
+            </div>
+          )}
+
           {/* Subtle category / descriptor */}
           <div className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#8A7D71] font-mono-code mb-2 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#E06D53]" />

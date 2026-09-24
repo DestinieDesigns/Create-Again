@@ -1,11 +1,26 @@
 import React from 'react';
-import { Sparkles, HelpCircle, Flame, Dices, Trophy, ArrowRight, User } from 'lucide-react';
+import {
+  Sparkles,
+  HelpCircle,
+  Flame,
+  Dices,
+  Trophy,
+  ArrowRight,
+  User,
+  FolderHeart,
+  Palette,
+  CheckCircle2,
+} from 'lucide-react';
 
 interface HomeHubCardsProps {
   onStartWhatComesNext: () => void;
   onOpenDontKnow: () => void;
   onOpenCharacterDesign: () => void;
   onOpenChibiJourney?: () => void;
+  onOpenChibiChallenges?: () => void;
+  onOpenMyCharacters?: () => void;
+  activeChibiCharacterName?: string;
+  activeChibiStageCount?: number;
   onOpenWarmUp: () => void;
   onOpenChaos: () => void;
   onOpenChallenge: () => void;
@@ -16,13 +31,17 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
   onOpenDontKnow,
   onOpenCharacterDesign,
   onOpenChibiJourney,
+  onOpenChibiChallenges,
+  onOpenMyCharacters,
+  activeChibiCharacterName,
+  activeChibiStageCount = 0,
   onOpenWarmUp,
   onOpenChaos,
   onOpenChallenge,
 }) => {
   return (
     <section className="max-w-4xl mx-auto space-y-6 sm:space-y-8 my-6">
-      {/* 1. Two Main Cards: WHAT COMES NEXT? and I DON'T KNOW WHAT TO DRAW */}
+      {/* 1. Two Signature Cards: WHAT COMES NEXT? and I DON'T KNOW WHAT TO DRAW */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Card 1: What Comes Next? */}
         <div
@@ -97,36 +116,114 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
         </div>
       </div>
 
-      {/* 2. Quick Activities Row */}
+      {/* 2. Featured Showcase Card: CHIBI CHARACTER JOURNEY */}
+      {onOpenChibiJourney && (
+        <div
+          onClick={onOpenChibiJourney}
+          className="group relative rounded-3xl bg-gradient-to-br from-[#FFF8F5] via-[#FCFAF6] to-[#FBEFEA] border-2 border-[#E06D53] p-6 sm:p-7 paper-card subtle-shadow cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg text-left"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E06D53] text-white">
+                Major Discipline
+              </span>
+              <span className="text-xs font-mono font-bold text-[#8A7D71]">
+                20-Stage Guided Learning
+              </span>
+            </div>
+
+            {activeChibiCharacterName ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E06D53] bg-white px-2.5 py-1 rounded-full border border-[#F5D8CE] shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-[#E06D53] animate-pulse" />
+                <span>Resume: {activeChibiCharacterName} ({activeChibiStageCount}/20)</span>
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-[#7A6E63] hidden sm:inline">
+                Idea → Silhouette → Head → Style → Model Sheet
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-8 space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#2D2723] tracking-tight group-hover:text-[#E06D53] transition-colors">
+                CHIBI CHARACTER JOURNEY
+              </h2>
+              <p className="font-handwriting text-xl sm:text-2xl text-[#E06D53] font-bold">
+                Build an original character one piece at a time.
+              </p>
+              <p className="text-xs sm:text-sm text-[#5C5249] leading-relaxed max-w-xl">
+                Structured creative journey with zero blank-page anxiety. Pick or randomize each stage, follow the sketchbook instructions, and assemble a complete, shareable character model sheet.
+              </p>
+
+              {/* Progress Milestones Preview */}
+              <div className="pt-2 flex flex-wrap items-center gap-2 text-[11px] font-mono font-bold text-[#655A51]">
+                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">1. Idea</span>
+                <span className="text-[#8A7D71]">→</span>
+                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">3. Silhouette</span>
+                <span className="text-[#8A7D71]">→</span>
+                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">5. Face</span>
+                <span className="text-[#8A7D71]">→</span>
+                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">10. Clothing</span>
+                <span className="text-[#8A7D71]">→</span>
+                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">20. Model Sheet</span>
+              </div>
+            </div>
+
+            <div className="md:col-span-4 flex flex-col sm:flex-row md:flex-col items-stretch justify-center gap-2.5 pt-2 md:pt-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenChibiJourney();
+                }}
+                className="py-3 px-5 rounded-2xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-98"
+              >
+                <span>{activeChibiCharacterName ? 'RESUME JOURNEY' : 'ENTER WORKSHOP'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="flex gap-2">
+                {onOpenChibiChallenges && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenChibiChallenges();
+                    }}
+                    className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8E0D5] text-[#4A3F35] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Trophy className="w-3.5 h-3.5 text-[#E06D53]" />
+                    <span>10 Challenges</span>
+                  </button>
+                )}
+
+                {onOpenMyCharacters && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenMyCharacters();
+                    }}
+                    className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8E0D5] text-[#4A3F35] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <FolderHeart className="w-3.5 h-3.5 text-[#E06D53]" />
+                    <span>My Characters</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Quick Activities Row (Clean 4-column balanced grid) */}
       <div>
         <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code mb-3 text-left">
           QUICK ACTIVITIES & DISCIPLINES
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {/* Chibi Character Journey */}
-          {onOpenChibiJourney && (
-            <button
-              onClick={onOpenChibiJourney}
-              className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E06D53] hover:bg-[#FBEFEA] transition-all text-left group min-h-[56px] shadow-xs"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#E06D53] text-white flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#E06D53]">
-                    Chibi Journey
-                  </span>
-                  <span className="block text-[11px] text-[#7A6E63]">
-                    Build full character
-                  </span>
-                </div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[#E06D53] group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          )}
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Character Design */}
           <button
             onClick={onOpenCharacterDesign}
@@ -141,7 +238,7 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
                   Character Design
                 </span>
                 <span className="block text-[11px] text-[#7A6E63]">
-                  Build personalities
+                  9-stage quick workshop
                 </span>
               </div>
             </div>

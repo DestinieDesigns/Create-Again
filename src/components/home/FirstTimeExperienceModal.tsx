@@ -5,7 +5,7 @@ interface FirstTimeExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenWhatIs: () => void;
-  onSelectFlow: (flowId: 'dont-know' | 'practice' | 'experiment' | 'skills') => void;
+  onSelectFlow: (flowId: 'dont-know' | 'character' | 'practice' | 'experiment' | 'skills') => void;
 }
 
 export const FirstTimeExperienceModal: React.FC<FirstTimeExperienceModalProps> = ({
@@ -91,6 +91,34 @@ export const FirstTimeExperienceModal: React.FC<FirstTimeExperienceModalProps> =
             </div>
 
             <div className="my-5 space-y-2.5">
+              <button
+                onClick={() => {
+                  onClose();
+                  onSelectFlow('character');
+                }}
+                className="w-full p-4 rounded-2xl bg-[#FFF8F5] border-2 border-[#E06D53] hover:bg-[#FBEFEA] transition-all text-left group flex items-center justify-between min-h-[56px] shadow-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#E06D53] text-white flex items-center justify-center shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-extrabold text-[#2D2723] group-hover:text-[#E06D53]">
+                        I WANT TO BUILD A CHARACTER
+                      </span>
+                      <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-[#E06D53] text-white">
+                        Chibi Journey
+                      </span>
+                    </div>
+                    <span className="block text-[11px] text-[#7A6E63]">
+                      Guided 20-stage step-by-step workshop from silhouette to model sheet.
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-[#E06D53] group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />
+              </button>
+
               <button
                 onClick={() => {
                   onClose();

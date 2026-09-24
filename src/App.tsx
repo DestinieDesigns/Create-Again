@@ -116,12 +116,14 @@ export default function App() {
     };
   }, []);
 
-  const handleFirstTimeChoice = (flowId: 'dont-know' | 'practice' | 'experiment' | 'skills') => {
+  const handleFirstTimeChoice = (flowId: 'dont-know' | 'character' | 'practice' | 'experiment' | 'skills') => {
     try {
       localStorage.setItem('create_again_welcomed', 'true');
     } catch {}
     setIsFirstTimeOpen(false);
-    if (flowId === 'dont-know') {
+    if (flowId === 'character') {
+      handleStartNewChibi();
+    } else if (flowId === 'dont-know') {
       setIsDontKnowOpen(true);
     } else if (flowId === 'practice') {
       setIsWarmUpOpen(true);
@@ -974,6 +976,11 @@ export default function App() {
               onStartCreating={() => setIsChooserOpen(true)}
               onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
               onOpenWhatIs={() => setIsWhatIsModalOpen(true)}
+              onOpenChibiJourney={() => {
+                setCurrentTab('chibi-journey');
+                setIsChibiJourneyActive(false);
+                setIsChibiSheetActive(false);
+              }}
             />
 
             {/* 2. Unfinished Session Card (Only shows if unfinished session exists) */}
@@ -983,7 +990,7 @@ export default function App() {
               onStartNew={() => setIsMode1SetupOpen(true)}
             />
 
-            {/* 3. Section 8 Home Hub Cards: WHAT COMES NEXT?, I DON'T KNOW WHAT TO DRAW, QUICK ACTIVITIES */}
+            {/* 3. Section 8 Home Hub Cards: WHAT COMES NEXT?, I DON'T KNOW WHAT TO DRAW, CHIBI JOURNEY, QUICK ACTIVITIES */}
             <HomeHubCards
               onStartWhatComesNext={() => {
                 setSelectedPathway('open');
@@ -996,6 +1003,10 @@ export default function App() {
                 setIsChibiJourneyActive(false);
                 setIsChibiSheetActive(false);
               }}
+              onOpenChibiChallenges={() => setIsChibiChallengesOpen(true)}
+              onOpenMyCharacters={() => setIsMyCharactersOpen(true)}
+              activeChibiCharacterName={activeChibiCharacter?.name || (activeChibiCharacter && activeChibiCharacter.completedStages.length > 0 ? 'Your Character' : undefined)}
+              activeChibiStageCount={activeChibiCharacter?.completedStages.length || 0}
               onOpenWarmUp={() => setIsWarmUpOpen(true)}
               onOpenChaos={() => setIsChaosOpen(true)}
               onOpenChallenge={() => setIsChallengeModalOpen(true)}
@@ -1213,6 +1224,12 @@ export default function App() {
           currentTab={currentTab}
           onNavigate={handleNavigate}
           onOpenCreateChooser={() => setIsChooserOpen(true)}
+          onOpenChibiJourney={() => {
+            setCurrentTab('chibi-journey');
+            setIsChibiJourneyActive(false);
+            setIsChibiSheetActive(false);
+          }}
+          activeChibiExists={!!(activeChibiCharacter && activeChibiCharacter.completedStages.length > 0)}
           unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
         />
       )}
