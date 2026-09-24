@@ -27,6 +27,7 @@ interface HeaderProps {
   onOpenChallenge?: () => void;
   onOpenPathways?: () => void;
   onOpenWhatComesNext?: () => void;
+  onOpenCharacterDesign?: () => void;
   unfinishedSessionExists: boolean;
   mobileMenuOpen?: boolean;
   onToggleMobileMenu?: (open: boolean) => void;
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenChallenge,
   onOpenPathways,
   onOpenWhatComesNext,
+  onOpenCharacterDesign,
   unfinishedSessionExists,
   mobileMenuOpen: controlledMobileMenuOpen,
   onToggleMobileMenu,
@@ -297,6 +299,18 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <span>What Comes Next?</span>
                   <span className="text-[10px] uppercase font-mono-code text-[#E06D53] font-bold">Mystery</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onOpenCharacterDesign) onOpenCharacterDesign();
+                    else handleNav('character-design');
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px]"
+                >
+                  <span>Character Design</span>
+                  <span className="text-[10px] uppercase font-mono-code text-[#C04D33] font-bold">9-Stage</span>
                 </button>
 
                 <button

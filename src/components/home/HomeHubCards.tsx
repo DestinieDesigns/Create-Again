@@ -1,9 +1,10 @@
 import React from 'react';
-import { Sparkles, HelpCircle, Flame, Dices, Trophy, ArrowRight } from 'lucide-react';
+import { Sparkles, HelpCircle, Flame, Dices, Trophy, ArrowRight, User } from 'lucide-react';
 
 interface HomeHubCardsProps {
   onStartWhatComesNext: () => void;
   onOpenDontKnow: () => void;
+  onOpenCharacterDesign: () => void;
   onOpenWarmUp: () => void;
   onOpenChaos: () => void;
   onOpenChallenge: () => void;
@@ -12,6 +13,7 @@ interface HomeHubCardsProps {
 export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
   onStartWhatComesNext,
   onOpenDontKnow,
+  onOpenCharacterDesign,
   onOpenWarmUp,
   onOpenChaos,
   onOpenChallenge,
@@ -96,10 +98,31 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
       {/* 2. Quick Activities Row */}
       <div>
         <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code mb-3 text-left">
-          QUICK ACTIVITIES
+          QUICK ACTIVITIES & DISCIPLINES
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Character Design */}
+          <button
+            onClick={onOpenCharacterDesign}
+            className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] hover:border-[#2D2723] transition-all text-left group min-h-[56px]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#FFEAE5] text-[#C04D33] flex items-center justify-center shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#C04D33]">
+                  Character Design
+                </span>
+                <span className="block text-[11px] text-[#7A6E63]">
+                  Build personalities
+                </span>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-[#8A7D71] group-hover:translate-x-0.5 transition-transform" />
+          </button>
+
           {/* Warm Up */}
           <button
             onClick={onOpenWarmUp}

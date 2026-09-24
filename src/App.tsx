@@ -26,6 +26,16 @@ import { Mode1ActiveView } from './components/mode1/Mode1ActiveView';
 import { Mode1CompletionView } from './components/mode1/Mode1CompletionView';
 import { PathwayChooserModal } from './components/pathway/PathwayChooserModal';
 import { CharacterProgressionModal } from './components/character/CharacterProgressionModal';
+import { CharacterDesignModal } from './components/character/CharacterDesignModal';
+import { CharacterDesignActiveView } from './components/character/CharacterDesignActiveView';
+import { CharacterDesignCompletionView } from './components/character/CharacterDesignCompletionView';
+import {
+  CHARACTER_DESIGN_STAGES,
+  CharacterDesignStage,
+  CharacterSpark,
+} from './data/characterDesignStages';
+import { ChallengeMeModal } from './components/challenge/ChallengeMeModal';
+import { ChallengeItem } from './data/challenges';
 
 // Other modals / views
 import { WarmUpModal } from './components/warmup/WarmUpModal';
@@ -123,6 +133,15 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTestSuiteOpen, setIsTestSuiteOpen] = useState(false);
   const [isMasterSheetOpen, setIsMasterSheetOpen] = useState(false);
+  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
+  const [isCharacterDesignModalOpen, setIsCharacterDesignModalOpen] = useState(false);
+  const [isCharacterDesignActive, setIsCharacterDesignActive] = useState(false);
+  const [characterDesignStageIndex, setCharacterDesignStageIndex] = useState(0);
+  const [characterDesignSpark, setCharacterDesignSpark] = useState<CharacterSpark | null>(null);
+  const [characterDesignTimerDuration, setCharacterDesignTimerDuration] = useState<number | null>(null);
+  const [characterDesignStartedAt, setCharacterDesignStartedAt] = useState<number | null>(null);
+  const [characterDesignFinished, setCharacterDesignFinished] = useState(false);
+  const [isOfflineDismissed, setIsOfflineDismissed] = useState(false);
 
 
   // Active Mode 1 state
@@ -431,6 +450,118 @@ export default function App() {
     setCurrentTab('what-comes-next');
   };
 
+  // Handle starting a challenge drawing session
+  const handleStartChallenge = (challenge: ChallengeItem, timerSeconds: number | null) => {
+    const visualRef = {
+      id: `ref-challenge-${challenge.id}`,
+      type: 'shape' as const,
+      altText: challenge.title,
+      title: challenge.title,
+      description: challenge.description,
+      contextHint: challenge.tip,
+    };
+
+    const challengePrompt: Prompt = {
+      id: `challenge-${challenge.id}-${Date.now()}`,
+      category: 'CHALLENGE',
+      text: challenge.prompt,
+      subtext: challenge.tip,
+      explanation: `${challenge.description}${challenge.visualCue ? ` Starting cue: ${challenge.visualCue}` : ''}`,
+      weight: 1,
+      difficulty: challenge.difficulty === 'easy' ? 'easy' : challenge.difficulty === 'medium' ? 'medium' : 'hard',
+      tags: ['challenge', challenge.difficulty],
+      goodForBeginning: true,
+      goodForMiddle: true,
+      goodForEnding: false,
+      requiresPreviousDrawing: false,
+      visualReference: visualRef,
+    };
+
+    const newSession: Mode1Session = {
+      id: 'session-' + Date.now(),
+      sessionSeed: 'seed-' + Math.random().toString(36).substring(2),
+      startedAt: Date.now(),
+      timerDuration: timerSeconds,
+      timerStartedAt: timerSeconds ? Date.now() : undefined,
+      difficulty: challenge.difficulty === 'easy' ? 'tiny-mystery' : challenge.difficulty === 'medium' ? 'short-adventure' : 'deep-dive',
+      pathway: 'open',
+      themeId: selectedThemeId || 'none',
+      usedPromptIds: [],
+      promptHistory: [],
+      completed: false,
+      stuckUsed: 0,
+      currentPromptId: challengePrompt.id,
+    };
+
+    saveActiveSession(newSession);
+    setCurrentPrompt(challengePrompt);
+    trackSessionStart();
+    setIsChallengeModalOpen(false);
+    setCurrentTab('what-comes-next');
+  };
+
+  // Character Design Mode handlers
+  const handleStartCharacterWorkshop = (timerSeconds: number | null, startingStage: number = 0) => {
+    setCharacterDesignStageIndex(startingStage);
+    setCharacterDesignSpark(null);
+    setCharacterDesignTimerDuration(timerSeconds);
+    setCharacterDesignStartedAt(Date.now());
+    setIsCharacterDesignActive(true);
+    setCharacterDesignFinished(false);
+    setIsCharacterDesignModalOpen(false);
+    trackSessionStart();
+  };
+
+  const handleStartCharacterSpark = (spark: CharacterSpark, timerSeconds: number | null) => {
+    setCharacterDesignStageIndex(0);
+    setCharacterDesignSpark(spark);
+    setCharacterDesignTimerDuration(timerSeconds);
+    setCharacterDesignStartedAt(Date.now());
+    setIsCharacterDesignActive(true);
+    setCharacterDesignFinished(false);
+    setIsCharacterDesignModalOpen(false);
+    trackSessionStart();
+  };
+
+  const handleStartCharacterSpecificStage = (stage: CharacterDesignStage, timerSeconds: number | null) => {
+    setCharacterDesignStageIndex(stage.stageNumber - 1);
+    setCharacterDesignSpark(null);
+    setCharacterDesignTimerDuration(timerSeconds);
+    setCharacterDesignStartedAt(Date.now());
+    setIsCharacterDesignActive(true);
+    setCharacterDesignFinished(false);
+    setIsCharacterDesignModalOpen(false);
+    trackSessionStart();
+  };
+
+  const handleCharacterDesignNextStage = () => {
+    setCharacterDesignStageIndex((prev) => prev + 1);
+  };
+
+  const handleCharacterDesignPrevStage = () => {
+    setCharacterDesignStageIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleCharacterDesignFinish = () => {
+    setIsCharacterDesignActive(false);
+    setCharacterDesignFinished(true);
+  };
+
+  const handleCharacterDesignLeave = () => {
+    setIsCharacterDesignActive(false);
+    setCharacterDesignFinished(false);
+    setCurrentTab('home');
+  };
+
+  const handleSaveCharacterCreation = (creationData: Omit<SavedCreation, 'id' | 'timestamp'>) => {
+    const fullCreation: SavedCreation = {
+      ...creationData,
+      id: 'character-' + Date.now(),
+      timestamp: Date.now(),
+    };
+    saveCreation(fullCreation);
+  };
+
   // Launch a focused drawing session directly from the Master Prompt Sheet
   const handlePracticeMasterPrompt = (prompt: CreativePrompt) => {
     const visualRef = MASTER_VISUAL_REFERENCES[prompt.id] || {
@@ -492,6 +623,7 @@ export default function App() {
   const handleSelectMode = (
     mode:
       | 'what-comes-next'
+      | 'character-design'
       | 'warm-up'
       | 'chaos'
       | 'dont-know'
@@ -501,12 +633,14 @@ export default function App() {
   ) => {
     if (mode === 'what-comes-next') {
       setIsMode1SetupOpen(true);
+    } else if (mode === 'character-design') {
+      setIsCharacterDesignModalOpen(true);
     } else if (mode === 'master-sheet') {
       setIsMasterSheetOpen(true);
     } else if (mode === 'pathways') {
       setIsPathwayChooserOpen(true);
     } else if (mode === 'character-progression') {
-      setIsCharacterProgressionOpen(true);
+      setIsChallengeModalOpen(true);
     } else if (mode === 'warm-up') {
       setIsWarmUpOpen(true);
     } else if (mode === 'chaos') {
@@ -520,6 +654,8 @@ export default function App() {
   const handleNavigate = (tab: string) => {
     if (tab === 'home') {
       setCurrentTab('home');
+    } else if (tab === 'character-design') {
+      setIsCharacterDesignModalOpen(true);
     } else if (tab === 'master-sheet') {
       setIsMasterSheetOpen(true);
     } else if (tab === 'what-comes-next') {
@@ -541,21 +677,30 @@ export default function App() {
     }
   };
 
-  const isDrawingSession = currentTab === 'what-comes-next' && !!(activeSession && currentPrompt);
+  // Check if actively in a drawing session to hide navigation and maximize paper presence
+  const isDrawingSession =
+    (currentTab === 'what-comes-next' && !!(activeSession && currentPrompt)) ||
+    isCharacterDesignActive;
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#2D2723] flex flex-col font-sans selection:bg-[#E06D53] selection:text-white">
       {/* Offline Status Alert Banner (Point 46) */}
-      {!isOnline && (
+      {!isOnline && !isOfflineDismissed && (
         <div
           role="status"
           aria-live="polite"
-          className="bg-[#FEF6E4] border-b border-[#F0BC98] text-[#8A4A28] px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-2"
+          className="bg-[#FEF6E4] border-b border-[#F0BC98] text-[#8A4A28] px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-3"
         >
           <span>YOU'RE OFFLINE</span>
           <span className="font-normal text-[#5C5249]">
-            Your current creative session can still continue locally.
+            Your current creative session can still continue.
           </span>
+          <button
+            onClick={() => setIsOfflineDismissed(true)}
+            className="px-2.5 py-1 rounded-lg bg-[#E06D53] hover:bg-[#CF5E45] text-white text-[11px] font-bold transition-all ml-1"
+          >
+            KEEP CREATING
+          </button>
         </div>
       )}
 
@@ -566,14 +711,56 @@ export default function App() {
           onNavigate={handleNavigate}
           onOpenCreateChooser={() => setIsChooserOpen(true)}
           onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
+          onOpenWarmUp={() => setIsWarmUpOpen(true)}
+          onOpenChaos={() => setIsChaosOpen(true)}
+          onOpenChallenge={() => setIsChallengeModalOpen(true)}
+          onOpenCharacterDesign={() => setIsCharacterDesignModalOpen(true)}
+          onOpenPathways={() => setIsPathwayChooserOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
           unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
         />
       )}
 
       {/* Main Content Area */}
       <main className={isDrawingSession ? 'flex-1' : 'flex-1 pb-16 md:pb-0'}>
-        {/* VIEW 1: Active Mode 1 Drawing Session */}
-        {currentTab === 'what-comes-next' && activeSession && currentPrompt ? (
+        {/* VIEW: Active Character Design Session */}
+        {isCharacterDesignActive ? (
+          <CharacterDesignActiveView
+            currentStageIndex={characterDesignStageIndex}
+            totalStages={CHARACTER_DESIGN_STAGES.length}
+            spark={characterDesignSpark}
+            timerDuration={characterDesignTimerDuration}
+            onNextStage={handleCharacterDesignNextStage}
+            onPrevStage={handleCharacterDesignPrevStage}
+            onFinish={handleCharacterDesignFinish}
+            onLeave={handleCharacterDesignLeave}
+          />
+        ) : characterDesignFinished ? (
+          /* VIEW: Character Design Completion & Reflection */
+          <CharacterDesignCompletionView
+            stagesCompleted={characterDesignStageIndex + 1}
+            totalStages={CHARACTER_DESIGN_STAGES.length}
+            spark={characterDesignSpark}
+            durationMinutes={
+              characterDesignStartedAt
+                ? Math.max(1, Math.round((Date.now() - characterDesignStartedAt) / 60000))
+                : 1
+            }
+            onSaveToCollection={handleSaveCharacterCreation}
+            onTryAnother={() => {
+              setCharacterDesignFinished(false);
+              setIsCharacterDesignModalOpen(true);
+            }}
+            onViewCollection={() => {
+              setCharacterDesignFinished(false);
+              setCurrentTab('collection');
+            }}
+            onDoneForNow={() => {
+              setCharacterDesignFinished(false);
+              setCurrentTab('home');
+            }}
+          />
+        ) : currentTab === 'what-comes-next' && activeSession && currentPrompt ? (
           <Mode1ActiveView
             session={activeSession}
             currentPrompt={currentPrompt}
@@ -643,9 +830,10 @@ export default function App() {
                 setIsMode1SetupOpen(true);
               }}
               onOpenDontKnow={() => setIsDontKnowOpen(true)}
+              onOpenCharacterDesign={() => setIsCharacterDesignModalOpen(true)}
               onOpenWarmUp={() => setIsWarmUpOpen(true)}
               onOpenChaos={() => setIsChaosOpen(true)}
-              onOpenChallenge={() => setIsCharacterProgressionOpen(true)}
+              onOpenChallenge={() => setIsChallengeModalOpen(true)}
             />
 
             {/* 4. Creative Themes Section (Universal Theme System) */}
@@ -723,6 +911,22 @@ export default function App() {
         isOpen={isCharacterProgressionOpen}
         onClose={() => setIsCharacterProgressionOpen(false)}
         onStartSkillSession={handleStartSkillSession}
+      />
+
+      {/* 9-Stage Character Design Workshop & Spark Modal */}
+      <CharacterDesignModal
+        isOpen={isCharacterDesignModalOpen}
+        onClose={() => setIsCharacterDesignModalOpen(false)}
+        onStartFullWorkshop={handleStartCharacterWorkshop}
+        onStartSparkSession={handleStartCharacterSpark}
+        onStartSpecificStage={handleStartCharacterSpecificStage}
+      />
+
+      {/* Challenge Me Modal (Progressive Skill Missions) */}
+      <ChallengeMeModal
+        isOpen={isChallengeModalOpen}
+        onClose={() => setIsChallengeModalOpen(false)}
+        onStartChallenge={handleStartChallenge}
       />
 
       <Mode1SetupModal

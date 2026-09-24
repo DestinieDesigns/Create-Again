@@ -19,6 +19,7 @@ import {
   Shapes,
   MapPin,
   CircleOff,
+  User,
 } from 'lucide-react';
 import { THEMES } from '../../data/themes';
 
@@ -28,6 +29,7 @@ interface CreationChooserModalProps {
   onSelectMode: (
     mode:
       | 'what-comes-next'
+      | 'character-design'
       | 'warm-up'
       | 'chaos'
       | 'dont-know'
@@ -57,6 +59,16 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       badgeColor: 'bg-[#E06D53] text-white',
       buttonLabel: 'START MYSTERY',
       icon: Sparkles,
+    },
+    {
+      id: 'character-design' as const,
+      title: 'CHARACTER DESIGN',
+      subtitle: 'Build personalities from scratch.',
+      description: 'Progressive 9-stage character creator from head shapes and posture to quirks and storytelling.',
+      badge: 'Discipline',
+      badgeColor: 'bg-[#E76F51] text-white',
+      buttonLabel: 'DESIGN CHARACTER',
+      icon: User,
     },
     {
       id: 'warm-up' as const,
