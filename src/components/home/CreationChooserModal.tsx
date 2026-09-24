@@ -29,6 +29,7 @@ interface CreationChooserModalProps {
   onSelectMode: (
     mode:
       | 'what-comes-next'
+      | 'chibi-journey'
       | 'character-design'
       | 'warm-up'
       | 'chaos'
@@ -61,8 +62,18 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       icon: Sparkles,
     },
     {
+      id: 'chibi-journey' as const,
+      title: 'CHIBI CHARACTER JOURNEY',
+      subtitle: 'Build an original character from scratch.',
+      description: 'Guided step-by-step character journey from idea and silhouette to clothing, personality, and master model sheet.',
+      badge: 'Major Feature',
+      badgeColor: 'bg-[#E06D53] text-white',
+      buttonLabel: 'BUILD CHIBI',
+      icon: Sparkles,
+    },
+    {
       id: 'character-design' as const,
-      title: 'CHARACTER DESIGN',
+      title: 'CHARACTER WORKSHOP',
       subtitle: 'Build personalities from scratch.',
       description: 'Progressive 9-stage character creator from head shapes and posture to quirks and storytelling.',
       badge: 'Discipline',

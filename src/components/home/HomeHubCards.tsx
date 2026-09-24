@@ -5,6 +5,7 @@ interface HomeHubCardsProps {
   onStartWhatComesNext: () => void;
   onOpenDontKnow: () => void;
   onOpenCharacterDesign: () => void;
+  onOpenChibiJourney?: () => void;
   onOpenWarmUp: () => void;
   onOpenChaos: () => void;
   onOpenChallenge: () => void;
@@ -14,6 +15,7 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
   onStartWhatComesNext,
   onOpenDontKnow,
   onOpenCharacterDesign,
+  onOpenChibiJourney,
   onOpenWarmUp,
   onOpenChaos,
   onOpenChallenge,
@@ -101,7 +103,30 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
           QUICK ACTIVITIES & DISCIPLINES
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {/* Chibi Character Journey */}
+          {onOpenChibiJourney && (
+            <button
+              onClick={onOpenChibiJourney}
+              className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E06D53] hover:bg-[#FBEFEA] transition-all text-left group min-h-[56px] shadow-xs"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#E06D53] text-white flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#E06D53]">
+                    Chibi Journey
+                  </span>
+                  <span className="block text-[11px] text-[#7A6E63]">
+                    Build full character
+                  </span>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-[#E06D53] group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          )}
+
           {/* Character Design */}
           <button
             onClick={onOpenCharacterDesign}

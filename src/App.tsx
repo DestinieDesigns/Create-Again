@@ -37,6 +37,18 @@ import {
 import { ChallengeMeModal } from './components/challenge/ChallengeMeModal';
 import { ChallengeItem } from './data/challenges';
 
+// Chibi Character Journey system
+import { useChibiStorage } from './hooks/useChibiStorage';
+import { ChibiLandingView } from './components/chibi/ChibiLandingView';
+import { ChibiActiveJourneyView } from './components/chibi/ChibiActiveJourneyView';
+import { ChibiCharacterSheetView } from './components/chibi/ChibiCharacterSheetView';
+import { ChibiStoryContinuationModal } from './components/chibi/ChibiStoryContinuationModal';
+import { MyCharactersModal } from './components/chibi/MyCharactersModal';
+import { ChibiChallengesModal } from './components/chibi/ChibiChallengesModal';
+import { ChibiHowItWorksModal } from './components/chibi/ChibiHowItWorksModal';
+import { ChibiChallenge } from './data/chibiChallenges';
+import { ChibiJourneyStageId } from './types/chibi';
+
 // Other modals / views
 import { WarmUpModal } from './components/warmup/WarmUpModal';
 import { CreativeChaosModal } from './components/chaos/CreativeChaosModal';
@@ -73,7 +85,14 @@ export default function App() {
   } = useCreateAgainStorage();
 
   // Navigation tab state
-  const [currentTab, setCurrentTab] = useState<'home' | 'what-comes-next' | 'what-comes-next-completed' | 'collection' | 'progress'>('home');
+  const [currentTab, setCurrentTab] = useState<
+    | 'home'
+    | 'what-comes-next'
+    | 'what-comes-next-completed'
+    | 'collection'
+    | 'progress'
+    | 'chibi-journey'
+  >('home');
 
   // First-time visit and offline states
   const [isFirstTimeOpen, setIsFirstTimeOpen] = useState(() => {
@@ -142,6 +161,92 @@ export default function App() {
   const [characterDesignStartedAt, setCharacterDesignStartedAt] = useState<number | null>(null);
   const [characterDesignFinished, setCharacterDesignFinished] = useState(false);
   const [isOfflineDismissed, setIsOfflineDismissed] = useState(false);
+
+  // Chibi Character Journey System state & storage
+  const {
+    activeCharacter: activeChibiCharacter,
+    savedCharacters: savedChibiCharacters,
+    stats: chibiStats,
+    preferences: chibiPreferences,
+    startNewCharacter: startNewChibiCharacter,
+    updateActiveCharacter: updateActiveChibiCharacter,
+    advanceToNextStage: advanceChibiStage,
+    jumpToStage: jumpToChibiStage,
+    saveActiveToCollection: saveActiveChibiToCollection,
+    loadCharacter: loadChibiCharacter,
+    deleteCharacter: deleteChibiCharacter,
+    toggleFavorite: toggleChibiFavorite,
+    updatePreferences: updateChibiPreferences,
+  } = useChibiStorage();
+
+  const [isChibiJourneyActive, setIsChibiJourneyActive] = useState(false);
+  const [isChibiSheetActive, setIsChibiSheetActive] = useState(false);
+  const [isMyCharactersOpen, setIsMyCharactersOpen] = useState(false);
+  const [isChibiChallengesOpen, setIsChibiChallengesOpen] = useState(false);
+  const [isChibiHowItWorksOpen, setIsChibiHowItWorksOpen] = useState(false);
+  const [isChibiStoryModalOpen, setIsChibiStoryModalOpen] = useState(false);
+
+  const handleStartNewChibi = () => {
+    startNewChibiCharacter();
+    setIsChibiJourneyActive(true);
+    setIsChibiSheetActive(false);
+    setCurrentTab('chibi-journey');
+  };
+
+  const handleContinueChibi = () => {
+    if (activeChibiCharacter) {
+      if (activeChibiCharacter.completedStages.includes('character-sheet')) {
+        setIsChibiSheetActive(true);
+        setIsChibiJourneyActive(false);
+      } else {
+        setIsChibiJourneyActive(true);
+        setIsChibiSheetActive(false);
+      }
+      setCurrentTab('chibi-journey');
+    } else {
+      handleStartNewChibi();
+    }
+  };
+
+  const handleChibiNextStage = () => {
+    advanceChibiStage();
+  };
+
+  const handleChibiCompleteJourney = () => {
+    advanceChibiStage();
+    setIsChibiJourneyActive(false);
+    setIsChibiSheetActive(true);
+  };
+
+  const handleSaveChibiCreation = (photoDataUrl?: string) => {
+    const saved = saveActiveChibiToCollection(photoDataUrl);
+    if (saved) {
+      saveCreation({
+        id: 'creation-chibi-' + Date.now(),
+        title: (saved.name || 'Original Character') + ' (Chibi Model Sheet)',
+        mode: 'Chibi Character Journey',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        timestamp: Date.now(),
+        completedAt: Date.now(),
+        promptCount: saved.completedStages.length || 20,
+        photoDataUrl: photoDataUrl || saved.photoDataUrl,
+        difficulty: 'character-builder',
+        pathway: 'character-creator',
+        themeId: saved.theme,
+        durationMinutes: 20,
+        reflection: 'fun',
+      });
+    }
+  };
+
+  const handleStartChallengeChibi = (challenge: ChibiChallenge) => {
+    startNewChibiCharacter({
+      customSilhouette: challenge.title,
+    });
+    setIsChibiJourneyActive(true);
+    setIsChibiSheetActive(false);
+    setCurrentTab('chibi-journey');
+  };
 
 
   // Active Mode 1 state
@@ -623,6 +728,7 @@ export default function App() {
   const handleSelectMode = (
     mode:
       | 'what-comes-next'
+      | 'chibi-journey'
       | 'character-design'
       | 'warm-up'
       | 'chaos'
@@ -633,6 +739,10 @@ export default function App() {
   ) => {
     if (mode === 'what-comes-next') {
       setIsMode1SetupOpen(true);
+    } else if (mode === 'chibi-journey') {
+      setCurrentTab('chibi-journey');
+      setIsChibiJourneyActive(false);
+      setIsChibiSheetActive(false);
     } else if (mode === 'character-design') {
       setIsCharacterDesignModalOpen(true);
     } else if (mode === 'master-sheet') {
@@ -654,6 +764,10 @@ export default function App() {
   const handleNavigate = (tab: string) => {
     if (tab === 'home') {
       setCurrentTab('home');
+    } else if (tab === 'chibi-journey') {
+      setCurrentTab('chibi-journey');
+      setIsChibiJourneyActive(false);
+      setIsChibiSheetActive(false);
     } else if (tab === 'character-design') {
       setIsCharacterDesignModalOpen(true);
     } else if (tab === 'master-sheet') {
@@ -680,7 +794,8 @@ export default function App() {
   // Check if actively in a drawing session to hide navigation and maximize paper presence
   const isDrawingSession =
     (currentTab === 'what-comes-next' && !!(activeSession && currentPrompt)) ||
-    isCharacterDesignActive;
+    isCharacterDesignActive ||
+    (currentTab === 'chibi-journey' && isChibiJourneyActive);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#2D2723] flex flex-col font-sans selection:bg-[#E06D53] selection:text-white">
@@ -715,6 +830,11 @@ export default function App() {
           onOpenChaos={() => setIsChaosOpen(true)}
           onOpenChallenge={() => setIsChallengeModalOpen(true)}
           onOpenCharacterDesign={() => setIsCharacterDesignModalOpen(true)}
+          onOpenChibiJourney={() => {
+            setCurrentTab('chibi-journey');
+            setIsChibiJourneyActive(false);
+            setIsChibiSheetActive(false);
+          }}
           onOpenPathways={() => setIsPathwayChooserOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
@@ -723,8 +843,48 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className={isDrawingSession ? 'flex-1' : 'flex-1 pb-16 md:pb-0'}>
-        {/* VIEW: Active Character Design Session */}
-        {isCharacterDesignActive ? (
+        {/* VIEW: Chibi Character Journey System */}
+        {currentTab === 'chibi-journey' && isChibiJourneyActive && activeChibiCharacter ? (
+          <ChibiActiveJourneyView
+            character={activeChibiCharacter}
+            preferences={chibiPreferences}
+            onUpdateCharacter={updateActiveChibiCharacter}
+            onNextStage={handleChibiNextStage}
+            onJumpToStage={jumpToChibiStage}
+            onExitToLanding={() => {
+              setIsChibiJourneyActive(false);
+              setIsChibiSheetActive(false);
+            }}
+            onCompleteJourney={handleChibiCompleteJourney}
+          />
+        ) : currentTab === 'chibi-journey' && isChibiSheetActive && activeChibiCharacter ? (
+          <ChibiCharacterSheetView
+            character={activeChibiCharacter}
+            onSaveToCollection={handleSaveChibiCreation}
+            onContinueStory={() => setIsChibiStoryModalOpen(true)}
+            onCreateAnother={handleStartNewChibi}
+            onBackToHome={() => setCurrentTab('home')}
+            onRevisitStage={(stg) => {
+              jumpToChibiStage(stg);
+              setIsChibiSheetActive(false);
+              setIsChibiJourneyActive(true);
+            }}
+          />
+        ) : currentTab === 'chibi-journey' ? (
+          <ChibiLandingView
+            activeCharacter={activeChibiCharacter}
+            savedCharacters={savedChibiCharacters}
+            stats={chibiStats}
+            preferences={chibiPreferences}
+            onStartNew={handleStartNewChibi}
+            onContinue={handleContinueChibi}
+            onOpenMyCharacters={() => setIsMyCharactersOpen(true)}
+            onOpenChallenges={() => setIsChibiChallengesOpen(true)}
+            onOpenHowItWorks={() => setIsChibiHowItWorksOpen(true)}
+            onUpdatePreferences={updateChibiPreferences}
+            onBackToHome={() => setCurrentTab('home')}
+          />
+        ) : isCharacterDesignActive ? (
           <CharacterDesignActiveView
             currentStageIndex={characterDesignStageIndex}
             totalStages={CHARACTER_DESIGN_STAGES.length}
@@ -831,6 +991,11 @@ export default function App() {
               }}
               onOpenDontKnow={() => setIsDontKnowOpen(true)}
               onOpenCharacterDesign={() => setIsCharacterDesignModalOpen(true)}
+              onOpenChibiJourney={() => {
+                setCurrentTab('chibi-journey');
+                setIsChibiJourneyActive(false);
+                setIsChibiSheetActive(false);
+              }}
               onOpenWarmUp={() => setIsWarmUpOpen(true)}
               onOpenChaos={() => setIsChaosOpen(true)}
               onOpenChallenge={() => setIsChallengeModalOpen(true)}
@@ -921,6 +1086,42 @@ export default function App() {
         onStartSparkSession={handleStartCharacterSpark}
         onStartSpecificStage={handleStartCharacterSpecificStage}
       />
+
+      {/* Chibi Character Journey Modals */}
+      <MyCharactersModal
+        isOpen={isMyCharactersOpen}
+        onClose={() => setIsMyCharactersOpen(false)}
+        characters={savedChibiCharacters}
+        onSelectCharacter={(char) => {
+          loadChibiCharacter(char);
+          setIsChibiSheetActive(true);
+          setIsChibiJourneyActive(false);
+          setCurrentTab('chibi-journey');
+          setIsMyCharactersOpen(false);
+        }}
+        onDeleteCharacter={deleteChibiCharacter}
+        onToggleFavorite={toggleChibiFavorite}
+        onStartNew={handleStartNewChibi}
+      />
+
+      <ChibiChallengesModal
+        isOpen={isChibiChallengesOpen}
+        onClose={() => setIsChibiChallengesOpen(false)}
+        onStartChallengeJourney={handleStartChallengeChibi}
+      />
+
+      <ChibiHowItWorksModal
+        isOpen={isChibiHowItWorksOpen}
+        onClose={() => setIsChibiHowItWorksOpen(false)}
+      />
+
+      {activeChibiCharacter && (
+        <ChibiStoryContinuationModal
+          isOpen={isChibiStoryModalOpen}
+          onClose={() => setIsChibiStoryModalOpen(false)}
+          character={activeChibiCharacter}
+        />
+      )}
 
       {/* Challenge Me Modal (Progressive Skill Missions) */}
       <ChallengeMeModal

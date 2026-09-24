@@ -28,6 +28,7 @@ interface HeaderProps {
   onOpenPathways?: () => void;
   onOpenWhatComesNext?: () => void;
   onOpenCharacterDesign?: () => void;
+  onOpenChibiJourney?: () => void;
   unfinishedSessionExists: boolean;
   mobileMenuOpen?: boolean;
   onToggleMobileMenu?: (open: boolean) => void;
@@ -45,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPathways,
   onOpenWhatComesNext,
   onOpenCharacterDesign,
+  onOpenChibiJourney,
   unfinishedSessionExists,
   mobileMenuOpen: controlledMobileMenuOpen,
   onToggleMobileMenu,
@@ -299,6 +301,18 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <span>What Comes Next?</span>
                   <span className="text-[10px] uppercase font-mono-code text-[#E06D53] font-bold">Mystery</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onOpenChibiJourney) onOpenChibiJourney();
+                    else handleNav('chibi-journey');
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px] bg-[#FBEFEA]/60"
+                >
+                  <span className="font-extrabold text-[#E06D53]">Chibi Character Journey</span>
+                  <span className="text-[10px] uppercase font-mono-code text-white bg-[#E06D53] px-1.5 py-0.5 rounded-full font-bold">New</span>
                 </button>
 
                 <button
