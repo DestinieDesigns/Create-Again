@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Terminal, Heart } from 'lucide-react';
+import { Terminal, Settings } from 'lucide-react';
 
 interface FooterProps {
   onOpenSettings: () => void;
@@ -8,51 +8,52 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onOpenSettings, onOpenTests }) => {
   return (
-    <footer className="border-t border-[#E8E0D5] bg-[#FAF7F2] py-12 mt-16 text-[#6B6158]">
+    <footer className="border-t border-[#E5E5DE] bg-[#FBFBFA] py-12 mt-20 text-[#686862]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-[#E8E0D5]">
-          <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <span className="font-extrabold text-base tracking-tight text-[#2D2723]">
-                CREATE AGAIN
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-[#E5E5DE]">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-display text-lg font-bold text-[#16171A]">
+                Create Again
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#EFE9DF] text-[#70645B] font-medium">
-                Sketchbook Companion
+              <span aria-hidden="true" className="text-[#CDCDC4]">·</span>
+              <span className="text-xs text-[#686862]">
+                Drawing Companion & Atelier
               </span>
             </div>
-            <p className="text-sm font-handwriting text-[#5A5047] text-lg mt-1">
+            <p className="text-xs text-[#8A8A82] mt-1">
               Start somewhere. Add something. See what happens.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-4 text-xs">
             <button
               onClick={onOpenSettings}
-              className="text-[#655A51] hover:text-[#2D2723] transition-colors"
+              className="text-[#686862] hover:text-[#16171A] transition-colors"
             >
-              Settings
+              Preferences
             </button>
-            <span className="text-[#D6CCBF]">•</span>
+            <span aria-hidden="true" className="text-[#CDCDC4]">·</span>
             <button
               onClick={onOpenTests}
-              className="flex items-center gap-1 text-[#655A51] hover:text-[#2D2723] transition-colors"
+              className="flex items-center gap-1 text-[#686862] hover:text-[#16171A] transition-colors"
             >
-              <Terminal className="w-3 h-3 text-[#E06D53]" />
+              <Terminal className="w-3.5 h-3.5" />
               <span>Prompt Test Suite</span>
             </button>
-            <span className="text-[#D6CCBF]">•</span>
-            <span className="text-[#877C72]">
-              Physical Sketchbook First
+            <span aria-hidden="true" className="text-[#CDCDC4]">·</span>
+            <span className="text-[#8A8A82]">
+              Physical-Paper First
             </span>
           </div>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8A7E74]">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8A8A82]">
           <p>
-            Your page is the canvas. The human is always the artist.
+            Your page is the canvas. The human hand is the artist.
           </p>
-          <p className="flex items-center gap-1 font-handwriting text-base">
-            No erasing. No restarting. Just add.
+          <p className="text-[#686862]">
+            No erasing required. Just add the next mark.
           </p>
         </div>
       </div>

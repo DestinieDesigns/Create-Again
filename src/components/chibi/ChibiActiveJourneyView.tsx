@@ -14,6 +14,7 @@ import {
   Bookmark,
   CheckCircle2,
   X,
+  Compass,
 } from 'lucide-react';
 import {
   ChibiCharacter,
@@ -26,8 +27,14 @@ import {
   getCompatibleChoiceForStage,
   generateChibiName,
 } from '../../data/chibiJourneyData';
+import {
+  CHIBI_PART_REFERENCES,
+  getChibiPartReferenceById,
+} from '../../data/chibiPartReferences';
 import { ChibiVisualReferenceCard } from '../../data/chibiVisualReferences';
 import { ChibiEvolutionTimelineModal } from './ChibiEvolutionTimelineModal';
+import { ChibiPartSelector } from './ChibiPartSelector';
+import { ChibiPartLibraryModal } from './ChibiPartLibraryModal';
 
 interface ChibiActiveJourneyViewProps {
   character: ChibiCharacter;
@@ -64,6 +71,9 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
   // Evolution timeline drawer on mobile
   const [isTimelineDrawerOpen, setIsTimelineDrawerOpen] = useState(false);
 
+  // Master Part Library Modal
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
+
   // Revisit notice banner
   const isRevisiting = character.completedStages.includes(activeStage.id);
 
@@ -77,6 +87,22 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
     setIsCustomMode(false);
     setCustomText('');
   }, [activeStage.id]);
+
+  // Stages that have dedicated physical part references in the library
+  const STAGES_WITH_PART_REFERENCES = [
+    'silhouette',
+    'head',
+    'face',
+    'hair',
+    'body',
+    'arms-hands',
+    'legs-feet',
+    'clothing',
+    'accessories',
+    'companion',
+  ];
+
+  const hasPartReferences = STAGES_WITH_PART_REFERENCES.includes(activeStage.id);
 
   // Current choices list (either main stage choices or active substage choices)
   const currentChoices: StageChoiceItem[] =
@@ -140,6 +166,16 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
   // Active choice object for rendering visual reference
   const activeChoiceItem =
     currentChoices.find((c) => c.id === selectedValue) || currentChoices[0] || null;
+
+  // Active isolated part reference (if any)
+  const activePartRef =
+    getChibiPartReferenceById(selectedValue || '') ||
+    CHIBI_PART_REFERENCES.find(
+      (p) =>
+        p.id === selectedValue ||
+        p.id.endsWith(`-${selectedValue}`) ||
+        p.name.toLowerCase() === (selectedValue || '').toLowerCase()
+    );
 
   // Handle choice selection
   const handleSelectChoice = (choiceId: string, customLabel?: string) => {
@@ -242,8 +278,7 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
     }
   };
 
-  // "CHOOSE FOR ME" structured randomness function:
-  // Affects ONLY the current stage or active substage. Never touches past choices!
+  // "CHOOSE FOR ME" (Section 32)
   const handleChooseForMe = () => {
     const recommendation = getCompatibleChoiceForStage(
       activeStage.id,
@@ -252,119 +287,118 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
     );
     handleSelectChoice(recommendation.id, recommendation.label);
 
-    // If on stage 19 (Name & Palette) and name is not entered yet, auto-suggest a name
     if (activeStage.id === 'name-colors' && !character.name) {
       const suggestedName = generateChibiName(character.theme || 'cozy');
       onUpdateCharacter({ name: suggestedName });
     }
   };
 
-  // Submit custom text
+  // Handle custom text apply (Section 31)
   const handleApplyCustom = () => {
     if (!customText.trim()) return;
     handleSelectChoice('custom', customText.trim());
+    setIsCustomMode(false);
   };
 
-  // Navigation to next step
+  // Progression handlers
   const handleNextClick = () => {
-    // If there are remaining substages on this stage, advance to the next substage first
-    if (activeStage.hasSubstages && activeStage.substages) {
-      const subIdx = activeStage.substages.findIndex((s) => s.id === activeSubstageId);
-      if (subIdx >= 0 && subIdx < activeStage.substages.length - 1) {
-        setActiveSubstageId(activeStage.substages[subIdx + 1].id);
-        return;
-      }
+    if (!character.completedStages.includes(activeStage.id)) {
+      onUpdateCharacter({
+        completedStages: [...character.completedStages, activeStage.id],
+      });
     }
 
-    if (currentStageIndex === CHIBI_JOURNEY_STAGES.length - 2) {
-      // Last regular stage before character sheet
+    if (currentStageIndex === CHIBI_JOURNEY_STAGES.length - 1) {
       onCompleteJourney();
     } else {
       onNextStage();
     }
   };
 
-  // Navigation back
   const handlePrevClick = () => {
-    if (activeStage.hasSubstages && activeStage.substages && activeSubstageId) {
-      const subIdx = activeStage.substages.findIndex((s) => s.id === activeSubstageId);
-      if (subIdx > 0) {
-        setActiveSubstageId(activeStage.substages[subIdx - 1].id);
-        return;
-      }
-    }
-
     if (currentStageIndex > 0) {
-      onJumpToStage(CHIBI_JOURNEY_STAGES[currentStageIndex - 1].id);
+      const prevStage = CHIBI_JOURNEY_STAGES[currentStageIndex - 1];
+      onJumpToStage(prevStage.id);
     } else {
       onExitToLanding();
     }
   };
 
   return (
-    <div className="min-h-full py-4 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto text-[#2D2723]">
-      {/* Top Bar: Back & Evolution Drawer Trigger */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#E8E0D5] mb-4">
-        <button
-          onClick={onExitToLanding}
-          className="text-xs font-bold text-[#8A7D71] hover:text-[#2D2723] flex items-center gap-1 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>JOURNEY OVERVIEW</span>
-        </button>
-
-        <div className="flex items-center gap-2">
-          {/* Evolution timeline trigger */}
+    <div className="max-w-6xl mx-auto px-4 py-6 text-[#16171A]">
+      {/* Top Bar: Progress, Title, Library Quick Access */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#E5E5DE]">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsTimelineDrawerOpen(true)}
-            className="px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE9DF] border border-[#D8CEBE] text-xs font-bold flex items-center gap-1.5 transition-all text-[#2D2723]"
-            title="View complete evolution timeline and revisit earlier stages"
+            onClick={onExitToLanding}
+            className="p-2 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-[#686862] hover:text-[#16171A] transition-colors"
+            title="Return to Workshop Hub"
           >
-            <Layers className="w-3.5 h-3.5 text-[#E06D53]" />
-            <span className="hidden sm:inline">EVOLUTION</span>
-            <span>TIMELINE</span>
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#686862]">
+                CHIBI ATELIER WORKSHOP
+              </span>
+              <span className="text-[10px] font-mono-code px-1.5 py-0.5 rounded bg-[#EEEEEC] text-[#686862]">
+                Stage {activeStage.stageNumber} of 20
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-display font-bold text-[#16171A]">
+              {character.name || 'Your Original Character'}
+            </h1>
+          </div>
+        </div>
+
+        {/* Global Reference Library Access */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsLibraryModalOpen(true)}
+            className="px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-xs font-semibold text-[#16171A] flex items-center gap-1.5 transition-colors shadow-2xs"
+            title="Browse all 197+ individual character part references"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#2752E7]" />
+            <span>Part Library</span>
           </button>
 
-          <span className="text-xs font-mono font-bold text-[#8A7D71]">
-            STAGE {activeStage.stageNumber} OF {CHIBI_JOURNEY_STAGES.length}
-          </span>
+          <button
+            onClick={() => setIsTimelineDrawerOpen(true)}
+            className="px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-xs font-semibold text-[#686862] hover:text-[#16171A] flex items-center gap-1.5 transition-colors"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-[#2752E7]" />
+            <span>Stages ({character.completedStages.length}/20)</span>
+          </button>
         </div>
       </div>
 
-      {/* Visual Journey Tracker Bar */}
-      <nav
-        aria-label="Chibi Journey stages"
-        className="overflow-x-auto no-scrollbar pb-3 mb-5"
-      >
-        <div className="flex items-center gap-2 min-w-max">
-          {CHIBI_JOURNEY_STAGES.slice(0, 19).map((stage, idx) => {
+      {/* Stage Roadmap Progress Bar */}
+      <nav aria-label="Stages" className="mb-6 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex items-center gap-1.5 min-w-max">
+          {CHIBI_JOURNEY_STAGES.map((stage, idx) => {
             const isCompleted = character.completedStages.includes(stage.id);
-            const isCurrent = character.currentStage === stage.id;
-            const isLocked =
-              !isCompleted &&
-              !isCurrent &&
-              preferences.journeyMode === 'guided' &&
-              idx > character.completedStages.length;
+            const isCurrent = stage.id === activeStage.id;
+            const isLocked = !isCompleted && !isCurrent && idx > currentStageIndex + 1;
 
             return (
               <button
                 key={stage.id}
                 disabled={isLocked}
                 onClick={() => onJumpToStage(stage.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   isCurrent
-                    ? 'bg-[#E06D53] text-white shadow-sm ring-2 ring-[#E06D53]/30'
+                    ? 'bg-[#16171A] text-white shadow-2xs'
                     : isCompleted
-                    ? 'bg-[#EFE9DF] text-[#2D2723] hover:bg-[#E8E0D5]'
+                    ? 'bg-[#F4F4F0] text-[#16171A] hover:bg-[#EEEEEA]'
                     : isLocked
-                    ? 'bg-[#F5F2ED] text-[#B0A599] cursor-not-allowed opacity-60'
-                    : 'bg-[#FCFAF6] text-[#6B6158] border border-[#E8E0D5] hover:bg-[#FAF7F2]'
+                    ? 'bg-[#FBFBFA] text-[#C4C4BC] cursor-not-allowed opacity-50'
+                    : 'bg-white text-[#686862] border border-[#E5E5DE] hover:bg-[#F4F4F0]'
                 }`}
               >
                 {isCompleted ? (
-                  <Check className="w-3 h-3 text-[#2D2723]" />
+                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
                 ) : (
-                  <span className="text-[10px] opacity-70">#{idx + 1}</span>
+                  <span className="text-[10px] font-mono">{idx + 1}</span>
                 )}
                 <span>{stage.title}</span>
               </button>
@@ -373,19 +407,23 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
         </div>
       </nav>
 
-      {/* Revisiting Choice Notice */}
+      {/* Revisiting Stage Notice */}
       {isRevisiting && (
-        <div className="mb-4 p-3 rounded-2xl bg-[#FEF6E4] border border-[#F0BC98] text-[#8A4A28] text-xs flex items-center justify-between">
+        <div className="mb-5 p-3.5 rounded-xl bg-[#FAF9F5] border border-[#E5E5DE] text-xs flex items-center justify-between text-[#686862]">
           <div className="flex items-center gap-2">
-            <Edit3 className="w-4 h-4 text-[#E06D53] shrink-0" />
+            <Edit3 className="w-4 h-4 text-[#2752E7] shrink-0" />
             <span>
-              <strong>Revisiting {activeStage.title}:</strong> You can change
-              this decision; your other completed choices remain safely preserved.
+              <strong>Revisiting {activeStage.title}:</strong> You can update this part; all other decisions remain preserved.
             </span>
           </div>
           <button
-            onClick={() => onJumpToStage(character.completedStages[character.completedStages.length - 1] as any || 'character-sheet')}
-            className="text-[11px] font-bold text-[#E06D53] underline ml-2 shrink-0"
+            onClick={() =>
+              onJumpToStage(
+                (character.completedStages[character.completedStages.length - 1] as any) ||
+                  'character-sheet'
+              )
+            }
+            className="text-xs font-semibold text-[#2752E7] hover:underline ml-2 shrink-0"
           >
             Jump to Latest
           </button>
@@ -393,36 +431,35 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
       )}
 
       {/* Two-Column Responsive Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
-        {/* LEFT COLUMN: Stage Question, Substage Tabs, Choices Grid, Custom Input, Drawing Prompt */}
-        <div className="lg:col-span-7 space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
+        {/* LEFT COLUMN: Stage Question, Substage Tabs, Isolated Part Selector / Choices */}
+        <div className="lg:col-span-7 space-y-6">
           {/* Stage Heading Box */}
-          <div className="p-5 rounded-3xl border-2 border-[#2D2723] bg-[#FCFAF6] shadow-xs space-y-2">
+          <div className="p-6 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-[#8A7D71]">
-                STAGE {activeStage.stageNumber} — {activeStage.title}
+              <span className="text-[10px] font-mono-code font-bold tracking-widest uppercase text-[#8A8A82]">
+                STAGE {activeStage.stageNumber} OF 20 · {activeStage.title}
               </span>
-              {/* CHOOSE FOR ME Button */}
               <button
                 onClick={handleChooseForMe}
-                className="px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE9DF] border border-[#D8CEBE] text-[#2D2723] text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs hover:border-[#E06D53]"
-                title="Randomly pick a compatible choice for this stage only without altering previous decisions."
+                className="px-2.5 py-1 rounded-md bg-[#F4F4F0] hover:bg-[#EEEEEA] text-xs font-semibold text-[#16171A] flex items-center gap-1.5 transition-colors"
+                title="Randomly pick a compatible choice for this stage only"
               >
-                <Dice5 className="w-3.5 h-3.5 text-[#E06D53]" />
-                <span>CHOOSE FOR ME</span>
+                <Dice5 className="w-3.5 h-3.5 text-[#2752E7]" />
+                <span>Choose For Me</span>
               </button>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-[#2D2723]">
+            <h2 className="text-xl sm:text-2xl font-display font-bold text-[#16171A]">
               {activeStage.friendlyQuestion}
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#6B6158] leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#686862] leading-relaxed">
               {activeStage.artTeacherNote}
             </p>
           </div>
 
-          {/* Substage Navigation Pills (if stage has substages like Face: Eyes, Brows, Nose, Mouth) */}
+          {/* Substage Navigation Tabs (if stage has substages like Face: Eyes, Brows, Nose, Mouth) */}
           {activeStage.hasSubstages && activeStage.substages && (
             <div className="flex flex-wrap gap-2 pb-1">
               {activeStage.substages.map((sub) => {
@@ -431,10 +468,10 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
                   <button
                     key={sub.id}
                     onClick={() => setActiveSubstageId(sub.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                       isSelected
-                        ? 'bg-[#2D2723] text-white shadow-xs'
-                        : 'bg-[#EFE9DF] text-[#6B6158] hover:text-[#2D2723]'
+                        ? 'bg-[#16171A] text-white shadow-2xs'
+                        : 'bg-[#F4F4F0] text-[#686862] hover:bg-[#EEEEEA] hover:text-[#16171A]'
                     }`}
                   >
                     {sub.label}
@@ -444,68 +481,78 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
             </div>
           )}
 
-          {/* Choices Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {currentChoices.map((choice) => {
-              const isSelected = selectedValue === choice.id;
-              return (
+          {/* Visual Reference Selector vs Standard Choices */}
+          {hasPartReferences ? (
+            <div className="p-5 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs">
+              <ChibiPartSelector
+                stageId={activeStage.id}
+                substageId={activeSubstageId}
+                selectedPartId={selectedValue}
+                onSelectPart={(partId, partName) => handleSelectChoice(partId, partName)}
+                onCustomClick={() => setIsCustomMode(true)}
+                characterType={character.type}
+                theme={character.theme}
+              />
+            </div>
+          ) : (
+            /* Choices Grid for Concept Stages (Idea, Theme, World, etc.) */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {currentChoices.map((choice) => {
+                const isSelected = selectedValue === choice.id;
+                return (
+                  <button
+                    key={choice.id}
+                    onClick={() => handleSelectChoice(choice.id)}
+                    className={`p-4 rounded-xl text-left border transition-all flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-[#2752E7] bg-white ring-2 ring-[#2752E7]/20 shadow-xs'
+                        : 'border-[#E5E5DE] bg-white hover:border-[#16171A] hover:bg-[#FDFDFD]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-sm font-semibold text-[#16171A]">
+                        {choice.label}
+                      </span>
+                      {isSelected && (
+                        <span className="w-5 h-5 rounded-full bg-[#2752E7] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    {choice.sublabel && (
+                      <p className="text-[11px] text-[#8A8A82] leading-tight">
+                        {choice.sublabel}
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
+
+              {activeStage.allowCustom && (
                 <button
-                  key={choice.id}
-                  onClick={() => handleSelectChoice(choice.id)}
-                  className={`p-3.5 rounded-2xl text-left border-2 transition-all flex flex-col justify-between ${
-                    isSelected
-                      ? 'border-[#E06D53] bg-[#FAF7F2] ring-2 ring-[#E06D53]/20 shadow-xs'
-                      : 'border-[#E8E0D5] bg-[#FAF7F2] hover:border-[#D8CEBE] hover:bg-[#FCFAF6]'
+                  onClick={() => setIsCustomMode(!isCustomMode)}
+                  className={`p-4 rounded-xl text-left border border-dashed transition-all flex flex-col justify-between ${
+                    isCustomMode || selectedValue === 'custom'
+                      ? 'border-[#2752E7] bg-white'
+                      : 'border-[#D5D5CD] bg-[#FAF9F5] hover:border-[#16171A]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span
-                      className={`text-sm font-extrabold ${
-                        isSelected ? 'text-[#E06D53]' : 'text-[#2D2723]'
-                      }`}
-                    >
-                      {choice.label}
-                    </span>
-                    {isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-[#E06D53] text-white flex items-center justify-center shrink-0">
-                        <Check className="w-3 h-3" />
-                      </span>
-                    )}
+                  <div className="text-sm font-semibold text-[#16171A] flex items-center gap-1.5">
+                    <Pencil className="w-3.5 h-3.5 text-[#2752E7]" />
+                    <span>Custom Direction...</span>
                   </div>
-                  {choice.sublabel && (
-                    <p className="text-[11px] text-[#8A7D71] leading-tight">
-                      {choice.sublabel}
-                    </p>
-                  )}
+                  <p className="text-[11px] text-[#8A8A82]">
+                    Write your own direction
+                  </p>
                 </button>
-              );
-            })}
+              )}
+            </div>
+          )}
 
-            {/* Custom choice tile */}
-            {activeStage.allowCustom && (
-              <button
-                onClick={() => setIsCustomMode(!isCustomMode)}
-                className={`p-3.5 rounded-2xl text-left border-2 border-dashed transition-all flex flex-col justify-between ${
-                  isCustomMode || selectedValue === 'custom'
-                    ? 'border-[#E06D53] bg-[#FAF7F2]'
-                    : 'border-[#D8CEBE] bg-[#FCFAF6] hover:border-[#2D2723]'
-                }`}
-              >
-                <div className="text-sm font-extrabold text-[#2D2723] flex items-center gap-1.5">
-                  <Pencil className="w-3.5 h-3.5 text-[#E06D53]" />
-                  <span>Custom Idea...</span>
-                </div>
-                <p className="text-[11px] text-[#8A7D71]">
-                  Type your own unique concept
-                </p>
-              </button>
-            )}
-          </div>
-
-          {/* Custom Input Field */}
+          {/* Custom Input Field (Section 31) */}
           {isCustomMode && (
-            <div className="p-3.5 rounded-2xl bg-[#EFE9DF] border border-[#D8CEBE] space-y-2">
-              <label className="block text-xs font-bold text-[#2D2723]">
+            <div className="p-4 rounded-xl bg-[#F4F4F0] border border-[#E5E5DE] space-y-2">
+              <label className="block text-xs font-semibold text-[#16171A]">
                 Your Custom Direction:
               </label>
               <div className="flex gap-2">
@@ -514,12 +561,12 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
                   placeholder="e.g. Tiny Cloud Dragon, Steampunk monocle, Mossy scarf..."
-                  className="flex-1 px-3 py-2 rounded-xl bg-[#FAF7F2] border border-[#D8CEBE] text-xs text-[#2D2723] focus:outline-none focus:border-[#E06D53]"
+                  className="flex-1 px-3 py-2 rounded-lg bg-white border border-[#E5E5DE] text-xs text-[#16171A] focus:outline-none focus:border-[#2752E7]"
                   onKeyDown={(e) => e.key === 'Enter' && handleApplyCustom()}
                 />
                 <button
                   onClick={handleApplyCustom}
-                  className="px-4 py-2 rounded-xl bg-[#2D2723] text-white text-xs font-bold hover:bg-[#433A34]"
+                  className="px-4 py-2 rounded-lg bg-[#16171A] text-white text-xs font-semibold hover:bg-[#2752E7] transition-colors"
                 >
                   Apply
                 </button>
@@ -527,20 +574,20 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
             </div>
           )}
 
-          {/* Active Creation UX: "Now on your paper: Draw it" */}
-          <div className="p-5 rounded-3xl border-2 border-[#2D2723] bg-[#FAF7F2] paper-card subtle-shadow space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#E06D53] uppercase tracking-wider">
+          {/* Active Drawing Card: "Now On Your Paper: Draw It" */}
+          <div className="p-6 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs space-y-3">
+            <div className="flex items-center gap-2 text-xs font-mono-code font-bold uppercase tracking-wider text-[#2752E7]">
               <Pencil className="w-4 h-4" />
-              <span>NOW ON YOUR PAPER:</span>
+              <span>NOW ON YOUR PAPER</span>
             </div>
 
-            <p className="text-sm sm:text-base font-semibold text-[#2D2723] leading-relaxed">
+            <p className="text-sm sm:text-base font-medium text-[#16171A] leading-relaxed">
               {activeStage.whatToDrawPrompt}
             </p>
 
-            <div className="pt-1 flex items-center gap-2 text-xs text-[#8A7D71]">
-              <span className="w-2 h-2 rounded-full bg-[#E06D53] animate-pulse" />
-              <span>Put device down • Take your time • Return when ready</span>
+            <div className="pt-2 flex items-center gap-2 text-xs text-[#8A8A82]">
+              <span className="w-2 h-2 rounded-full bg-[#2752E7] animate-pulse" />
+              <span>Put device down · Draw on paper · Return when ready</span>
             </div>
           </div>
 
@@ -548,26 +595,71 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
           <div className="flex items-center justify-between pt-2">
             <button
               onClick={handlePrevClick}
-              className="px-4 py-3 rounded-2xl border-2 border-[#2D2723] bg-[#FAF7F2] hover:bg-[#EFE9DF] text-[#2D2723] text-xs font-extrabold flex items-center gap-1.5 transition-all"
+              className="px-4 py-2.5 rounded-xl border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-[#16171A] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>BACK</span>
+              <span>Back</span>
             </button>
 
             <button
               onClick={handleNextClick}
-              className="px-6 py-3.5 rounded-2xl bg-[#E06D53] hover:bg-[#CF5E45] text-white text-sm font-black flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
+              className="px-6 py-3 rounded-xl bg-[#16171A] hover:bg-[#2752E7] text-white text-sm font-semibold flex items-center gap-2 shadow-sm hover:shadow-md transition-all"
             >
-              <span>I'M READY / NEXT STAGE</span>
+              <span>Ready · Next Stage</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Visual Reference Card & Live Character Build Recap */}
-        <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-20">
-          {/* Visual Reference Card */}
-          {activeChoiceItem && (
+        {/* RIGHT COLUMN: Isolated Visual Reference & Character Build Progress */}
+        <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
+          {/* Isolated Part Reference Card (Section 1: DO NOT DISPLAY FULL SHEETS) */}
+          {activePartRef ? (
+            <div className="p-6 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-[#F0F0EB] pb-2.5">
+                <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#686862]">
+                  ACTIVE PART REFERENCE
+                </span>
+                <span className="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-[#F4F4F0] text-[#686862]">
+                  {activePartRef.category}
+                </span>
+              </div>
+
+              {/* Crisp Isolated Vector Art */}
+              <div className="w-full aspect-square max-h-56 mx-auto rounded-xl bg-[#FAF9F5] border border-[#EEEEEC] flex items-center justify-center p-6">
+                {activePartRef.svgContent ? (
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="w-full h-full max-w-[140px] max-h-[140px] text-[#16171A]"
+                    dangerouslySetInnerHTML={{ __html: activePartRef.svgContent }}
+                  />
+                ) : (
+                  <img
+                    src={activePartRef.imageUrl}
+                    alt={activePartRef.altText}
+                    className="w-full h-full object-contain max-w-[140px] max-h-[140px]"
+                  />
+                )}
+              </div>
+
+              <div>
+                <h4 className="text-lg font-display font-bold text-[#16171A]">
+                  {activePartRef.name}
+                </h4>
+                <p className="text-xs text-[#686862] mt-1 leading-relaxed">
+                  {activePartRef.description}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#FBFBFA] border border-[#E5E5DE] text-xs text-[#686862] space-y-1">
+                <div className="font-semibold text-[#16171A] flex items-center gap-1.5">
+                  <HelpCircle className="w-3.5 h-3.5 text-[#2752E7]" />
+                  <span>Construction Note</span>
+                </div>
+                <p>{activeStage.artTeacherNote}</p>
+              </div>
+            </div>
+          ) : activeChoiceItem ? (
             <ChibiVisualReferenceCard
               refId={activeChoiceItem.visualRefId}
               title={activeChoiceItem.label}
@@ -579,86 +671,104 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
                 'Focus on big masses first before rendering small details.',
               ]}
             />
-          )}
+          ) : null}
 
-          {/* Desktop Live Character Recap Box */}
-          <div className="hidden lg:block p-4 rounded-3xl border-2 border-[#2D2723] bg-[#FCFAF6] shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-[#E8E0D5] pb-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8A7D71] flex items-center gap-1.5">
-                <Bookmark className="w-3.5 h-3.5 text-[#E06D53]" />
-                <span>CHARACTER ACCUMULATION</span>
+          {/* Desktop Character Accumulation Box */}
+          <div className="hidden lg:block p-5 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs space-y-3">
+            <div className="flex items-center justify-between border-b border-[#F0F0EB] pb-2.5">
+              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#686862] flex items-center gap-1.5">
+                <Bookmark className="w-3.5 h-3.5 text-[#2752E7]" />
+                <span>CHARACTER DECISIONS</span>
               </span>
-              <span className="text-[10px] font-mono text-[#8A7D71]">
-                {character.completedStages.length} Stages Locked
+              <span className="text-[10px] font-mono-code text-[#8A8A82]">
+                {character.completedStages.length} Locked
               </span>
             </div>
 
             <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Type:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
+              <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                <span className="text-[#8A8A82]">Type:</span>
+                <span className="font-semibold text-[#16171A] capitalize">
                   {character.customType || character.type || '—'}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Theme:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
+              <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                <span className="text-[#8A8A82]">Theme:</span>
+                <span className="font-semibold text-[#16171A] capitalize">
                   {character.customTheme || character.theme || '—'}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Silhouette:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.silhouette || '—'}
+              <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                <span className="text-[#8A8A82]">Silhouette:</span>
+                <span className="font-semibold text-[#16171A] capitalize">
+                  {character.customSilhouette || character.silhouette || '—'}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Head:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.headShape || '—'} ({character.headAngle || 'front'})
+              <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                <span className="text-[#8A8A82]">Head Shape:</span>
+                <span className="font-semibold text-[#16171A] capitalize">
+                  {character.customHeadShape || character.headShape || '—'}
                 </span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Eyes:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.face?.eyes || '—'}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Clothing:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.clothing?.outfit || '—'}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Accessory:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.accessories?.[0] || '—'}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-[#F0EBE1]">
-                <span className="text-[#8A7D71]">Personality:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.customPersonality || character.personality || '—'}
-                </span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-[#8A7D71]">World:</span>
-                <span className="font-bold text-[#2D2723] capitalize">
-                  {character.customWorld || character.world || '—'}
-                </span>
-              </div>
+              {character.face?.eyes && (
+                <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                  <span className="text-[#8A8A82]">Eyes:</span>
+                  <span className="font-semibold text-[#16171A] capitalize">
+                    {character.face.eyes}
+                  </span>
+                </div>
+              )}
+              {character.hair && (
+                <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                  <span className="text-[#8A8A82]">Hair:</span>
+                  <span className="font-semibold text-[#16171A] capitalize">
+                    {character.hair}
+                  </span>
+                </div>
+              )}
+              {character.body?.shape && (
+                <div className="flex justify-between py-1 border-b border-[#F4F4F0]">
+                  <span className="text-[#8A8A82]">Body Build:</span>
+                  <span className="font-semibold text-[#16171A] capitalize">
+                    {character.body.shape}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Character Evolution Timeline Modal (Available on mobile & desktop) */}
+      {/* Global Part Reference Library Explorer Modal */}
+      <ChibiPartLibraryModal
+        isOpen={isLibraryModalOpen}
+        onClose={() => setIsLibraryModalOpen(false)}
+        initialCategory={
+          activeStage.id === 'head'
+            ? 'head'
+            : activeStage.id === 'face'
+            ? 'eye'
+            : activeStage.id === 'hair'
+            ? 'hair'
+            : activeStage.id === 'body'
+            ? 'body'
+            : 'all'
+        }
+        selectedPartId={selectedValue}
+        onSelectPart={(p) => handleSelectChoice(p.id, p.name)}
+        characterType={character.type}
+        theme={character.theme}
+      />
+
+      {/* Mobile Stages Drawer */}
       <ChibiEvolutionTimelineModal
         isOpen={isTimelineDrawerOpen}
         onClose={() => setIsTimelineDrawerOpen(false)}
         character={character}
-        onJumpToStage={onJumpToStage}
+        onJumpToStage={(stageId) => {
+          onJumpToStage(stageId);
+          setIsTimelineDrawerOpen(false);
+        }}
       />
     </div>
   );

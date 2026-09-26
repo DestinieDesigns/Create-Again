@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #FAF7F2;
-  --paper-card: #FCFAF6;
-  --paper-dark: #EFE9DF;
-  --paper-subtle: #F4EFE6;
-  --ink: #2D2723;
-  --ink-muted: #7A6E63;
-  --ink-light: #9C8E82;
-  --border: #E8E0D5;
-  --border-strong: #D8CEBE;
-  --accent: #E06D53;
-  --accent-hover: #CF5E45;
-  --accent-soft: #FFF2E6;
-  --success: #3B6324;
+  /* Atelier Design System Tokens */
+  --canvas: #FBFBFA;
+  --surface: #FFFFFF;
+  --surface-muted: #F4F4F0;
+  --surface-subtle: #EEEEEA;
+  --ink: #16171A;
+  --ink-muted: #686862;
+  --ink-light: #94948C;
+  --border: #E5E5DE;
+  --border-strong: #CDCDC4;
+  --accent: #2752E7;
+  --accent-hover: #1E40AF;
+  --accent-soft: #EFF3FF;
+  --accent-warm: #D94826;
+  --success: #15803D;
   --warning: #B45309;
+
+  /* Backward-compatible aliases */
+  --paper: #FBFBFA;
+  --paper-card: #FFFFFF;
+  --paper-dark: #F2F2ED;
+  --paper-subtle: #F7F7F4;
 }
 
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: var(--paper);
+    background-color: var(--canvas);
     color: var(--ink);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
@@ -35,35 +43,37 @@
   }
 }
 
+/* Distinctive Typography */
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+  font-optical-sizing: auto;
+}
+
 .font-handwriting {
-  font-family: 'Caveat', cursive;
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
 }
 
 .font-mono-code {
-  font-family: 'Space Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Subtle paper texture */
-.paper-pattern {
-  background-color: #FAF7F2;
-  background-image: radial-gradient(#DCD4C7 0.75px, transparent 0.75px);
-  background-size: 18px 18px;
-}
-
-.sketchbook-paper {
-  background-color: #FCFAF6;
-  background-image: 
-    linear-gradient(#F0EAE1 1px, transparent 1px),
-    linear-gradient(90deg, #F0EAE1 1px, transparent 1px);
-  background-size: 24px 24px;
+/* Crisp Architectural Hairline Card */
+.studio-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5DE;
+  box-shadow: 0 1px 3px 0 rgba(22, 23, 26, 0.03), 0 1px 2px -1px rgba(22, 23, 26, 0.02);
 }
 
 .subtle-shadow {
-  box-shadow: 0 4px 20px -2px rgba(45, 39, 35, 0.06), 0 2px 6px -1px rgba(45, 39, 35, 0.04);
+  box-shadow: 0 4px 16px -2px rgba(22, 23, 26, 0.04), 0 2px 4px -1px rgba(22, 23, 26, 0.02);
 }
 
 .paper-card {
-  box-shadow: 0 10px 30px -4px rgba(45, 39, 35, 0.08), 0 4px 10px -2px rgba(45, 39, 35, 0.04);
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5DE;
+  box-shadow: 0 2px 8px -1px rgba(22, 23, 26, 0.04), 0 1px 3px -1px rgba(22, 23, 26, 0.02);
 }
 
 /* Responsive layout containers */
@@ -98,20 +108,20 @@
   }
 }
 
-/* Custom scrollbar for friendly sketchbook look */
+/* Minimalist Atelier Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAF7F2;
+  background: #FBFBFA;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D8CEBE;
-  border-radius: 4px;
+  background: #D8D8CF;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #BCB09E;
+  background: #B5B5AC;
 }
 
 /* Respect user's motion preferences */
@@ -123,4 +133,3 @@
     scroll-behavior: auto !important;
   }
 }
-

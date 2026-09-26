@@ -3,17 +3,14 @@ import {
   Menu,
   X,
   Settings,
-  Home,
   Sparkles,
-  Flame,
-  Compass,
-  FolderHeart,
-  BarChart3,
-  BookOpen,
-  Palette,
-  ChevronDown,
-  ChevronRight,
   ArrowRight,
+  FolderHeart,
+  Compass,
+  Play,
+  HelpCircle,
+  Trophy,
+  Layers,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -29,6 +26,7 @@ interface HeaderProps {
   onOpenWhatComesNext?: () => void;
   onOpenCharacterDesign?: () => void;
   onOpenChibiJourney?: () => void;
+  onOpenPartLibrary?: () => void;
   unfinishedSessionExists: boolean;
   mobileMenuOpen?: boolean;
   onToggleMobileMenu?: (open: boolean) => void;
@@ -47,12 +45,12 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenWhatComesNext,
   onOpenCharacterDesign,
   onOpenChibiJourney,
+  onOpenPartLibrary,
   unfinishedSessionExists,
   mobileMenuOpen: controlledMobileMenuOpen,
   onToggleMobileMenu,
 }) => {
   const [internalMenuOpen, setInternalMenuOpen] = useState(false);
-  const [createSubmenuExpanded, setCreateSubmenuExpanded] = useState(true);
 
   const isMenuOpen = controlledMobileMenuOpen !== undefined ? controlledMobileMenuOpen : internalMenuOpen;
   const setMenuOpen = (val: boolean) => {
@@ -84,60 +82,52 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E0D5]">
-      <div className="app-container h-15 sm:h-16 flex items-center justify-between">
-        {/* Left Slot: Mobile Menu Trigger (Mobile only) / Brand (Tablet & Desktop) */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Mobile Menu Icon (0–767px) */}
+    <header className="sticky top-0 z-40 bg-[#FBFBFA]/90 backdrop-blur-md border-b border-[#E5E5DE]">
+      <div className="app-container h-16 flex items-center justify-between">
+        {/* Zone 1: Single Text Element Brand Wordmark */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2.5 -ml-2 rounded-xl text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="md:hidden p-2 -ml-2 rounded-lg text-[#16171A] hover:bg-[#F2F2ED] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? <X className="w-5 h-5 stroke-[2.2]" /> : <Menu className="w-5 h-5 stroke-[2.2]" />}
+            {isMenuOpen ? <X className="w-5 h-5 stroke-[2]" /> : <Menu className="w-5 h-5 stroke-[2]" />}
           </button>
 
-          {/* Brand Logo & Name */}
           <button
             onClick={() => handleNav('home')}
-            className="flex items-center gap-2 text-left group transition-transform active:scale-98"
+            className="flex items-center gap-2.5 text-left group transition-opacity hover:opacity-85"
           >
-            {/* Small handmade-style icon badge */}
-            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#2D2723] text-[#FAF7F2] flex items-center justify-center font-bold shadow-xs">
-              <span className="font-handwriting text-lg leading-none -mt-0.5">C</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#16171A]" aria-hidden="true" />
+            <span className="font-display font-bold text-xl sm:text-2xl tracking-tight text-[#16171A]">
+              Create Again
             </span>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-base sm:text-lg tracking-wider text-[#2D2723] font-sans">
-                CREATE AGAIN
-              </span>
-              <span className="text-[10px] font-handwriting text-[#7A6F66] hidden lg:block -mt-1 font-bold">
-                your sketchbook companion
-              </span>
-            </div>
           </button>
         </div>
 
-        {/* Center / Right: Desktop & Tablet Nav */}
-        {/* Desktop Nav (1024px+): Home, Create, Chibi Journey, Practice, Challenges, Collection, Progress */}
-        <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+        {/* Zone 2: 4-6 Clean Text Nav Links with Single-Line Labels */}
+        <nav aria-label="Primary Navigation" className="hidden md:flex items-center gap-1 lg:gap-2">
           <button
             onClick={() => handleNav('home')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               currentTab === 'home'
-                ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+                ? 'text-[#16171A] bg-[#EEEEEA]'
+                : 'text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0]'
             }`}
           >
-            Home
+            Studio
           </button>
 
           <button
-            onClick={() => handleNav('create')}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#2D2723] bg-[#EFE9DF] hover:bg-[#E5DDCF] transition-all flex items-center gap-1"
+            onClick={() => handleNav('what-comes-next')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+              currentTab === 'what-comes-next'
+                ? 'text-[#16171A] bg-[#EEEEEA]'
+                : 'text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0]'
+            }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
-            <span>Create</span>
+            What Comes Next
           </button>
 
           <button
@@ -145,316 +135,165 @@ export const Header: React.FC<HeaderProps> = ({
               if (onOpenChibiJourney) onOpenChibiJourney();
               else handleNav('chibi-journey');
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               currentTab === 'chibi-journey'
-                ? 'bg-[#E06D53] text-white shadow-xs'
-                : 'text-[#E06D53] bg-[#FBEFEA] hover:bg-[#F7DFD6]'
+                ? 'text-[#2752E7] bg-[#EFF3FF] font-bold'
+                : 'text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0]'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Chibi Journey</span>
+            Chibi Atelier
           </button>
 
           <button
-            onClick={() => handleNav('practice')}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
+            onClick={() => {
+              if (onOpenPartLibrary) onOpenPartLibrary();
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0] flex items-center gap-1.5"
+            title="Browse all 197+ individual character part references"
           >
-            Practice
-          </button>
-
-          <button
-            onClick={() => handleNav('challenges')}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
-          >
-            Challenges
+            <Layers className="w-3.5 h-3.5 text-[#2752E7]" />
+            <span>Part Library</span>
           </button>
 
           <button
             onClick={() => handleNav('collection')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               currentTab === 'collection'
-                ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+                ? 'text-[#16171A] bg-[#EEEEEA]'
+                : 'text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0]'
             }`}
           >
-            Collection
+            Archive
           </button>
 
           <button
             onClick={() => handleNav('progress')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               currentTab === 'progress'
-                ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
+                ? 'text-[#16171A] bg-[#EEEEEA]'
+                : 'text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0]'
             }`}
           >
             Progress
           </button>
         </nav>
 
-        {/* Tablet Nav (768–1023px): Compact horizontal tabs + more menu */}
-        <nav aria-label="Tablet Navigation" className="hidden md:flex lg:hidden items-center gap-1">
-          <button
-            onClick={() => handleNav('home')}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              currentTab === 'home'
-                ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
-            }`}
-          >
-            Home
-          </button>
-          <button
-            onClick={() => handleNav('create')}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#2D2723] bg-[#EFE9DF] hover:bg-[#E5DDCF] transition-all"
-          >
-            Create
-          </button>
-          <button
-            onClick={() => {
-              if (onOpenChibiJourney) onOpenChibiJourney();
-              else handleNav('chibi-journey');
-            }}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              currentTab === 'chibi-journey'
-                ? 'bg-[#E06D53] text-white'
-                : 'text-[#E06D53] bg-[#FBEFEA] hover:bg-[#F7DFD6]'
-            }`}
-          >
-            Chibi
-          </button>
-          <button
-            onClick={() => handleNav('practice')}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
-          >
-            Practice
-          </button>
-          <button
-            onClick={() => handleNav('collection')}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              currentTab === 'collection'
-                ? 'bg-[#2D2723] text-[#FAF7F2]'
-                : 'text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF]'
-            }`}
-          >
-            Collection
-          </button>
-          <button
-            onClick={() => setMenuOpen(!isMenuOpen)}
-            className="p-1.5 rounded-xl text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-all"
-            aria-label="More options"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-        </nav>
-
-        {/* Right Slot: Resume button & Settings icon */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Zone 3: 1-2 Primary Actions */}
+        <div className="flex items-center gap-2">
           {unfinishedSessionExists && (
             <button
               onClick={() => handleNav('what-comes-next')}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E06D53] text-white text-xs font-bold hover:bg-[#CF5E45] shadow-xs transition-all active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F4F4F0] hover:bg-[#EAEAE4] text-[#16171A] text-xs font-semibold border border-[#E5E5DE] transition-colors"
               title="Resume drawing session"
             >
-              <span>Resume</span>
+              <span className="w-2 h-2 rounded-full bg-[#2752E7] animate-pulse" />
+              <span className="hidden sm:inline">Resume</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
 
-          {/* Settings Trigger (always accessible) */}
           <button
-            onClick={() => {
-              if (onOpenSettings) onOpenSettings();
-              else handleNav('settings');
-            }}
-            className="p-2 sm:p-2.5 rounded-xl text-[#655A51] hover:text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Settings"
+            onClick={onOpenCreateChooser}
+            className="px-3.5 py-1.5 rounded-lg bg-[#16171A] text-white text-xs font-semibold hover:bg-[#2C2D32] transition-colors shadow-2xs flex items-center gap-1.5 min-h-[36px]"
           >
-            <Settings className="w-5 h-5 stroke-2" />
+            <Sparkles className="w-3.5 h-3.5 text-[#E6EEFF]" />
+            <span>New Session</span>
           </button>
+
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="p-2 rounded-lg text-[#686862] hover:text-[#16171A] hover:bg-[#F2F2ED] transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+              aria-label="Settings"
+              title="Studio Settings"
+            >
+              <Settings className="w-4 h-4 stroke-[1.8]" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Mobile & Collapsed Tablet Drawer Menu */}
+      {/* Mobile Slide-Out Menu */}
       {isMenuOpen && (
-        <div
-          role="dialog"
-          aria-label="Full navigation menu"
-          className="border-b border-[#E8E0D5] bg-[#FAF7F2] px-4 py-4 space-y-1.5 shadow-lg animate-fadeIn max-h-[82vh] overflow-y-auto"
-        >
-          <div className="pb-2 mb-2 border-b border-[#E8E0D5] flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-              Navigation
-            </span>
+        <div className="md:hidden border-t border-[#E5E5DE] bg-[#FBFBFA] px-4 py-4 space-y-3 animate-fadeIn">
+          <div className="flex flex-col space-y-1">
             <button
-              onClick={() => setMenuOpen(false)}
-              className="text-xs font-semibold text-[#8A7D71] hover:text-[#2D2723]"
+              onClick={() => handleNav('home')}
+              className={`px-3 py-2.5 rounded-lg text-left text-sm font-semibold transition-colors ${
+                currentTab === 'home' ? 'bg-[#EEEEEA] text-[#16171A]' : 'text-[#686862] hover:bg-[#F2F2ED]'
+              }`}
             >
-              Close
+              Studio Home
             </button>
-          </div>
-
-          {/* 1. Home */}
-          <button
-            onClick={() => handleNav('home')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
-              currentTab === 'home' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
-            }`}
-          >
-            <Home className="w-4 h-4 text-[#8A7D71]" />
-            <span>Home</span>
-          </button>
-
-          {/* 2. Create Section with Submenu */}
-          <div className="rounded-xl border border-[#E8E0D5] bg-[#FCFAF6] overflow-hidden">
             <button
-              onClick={() => setCreateSubmenuExpanded(!createSubmenuExpanded)}
-              className="w-full flex items-center justify-between px-3.5 py-3 text-sm font-bold text-[#2D2723] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+              onClick={() => handleNav('what-comes-next')}
+              className={`px-3 py-2.5 rounded-lg text-left text-sm font-semibold transition-colors ${
+                currentTab === 'what-comes-next' ? 'bg-[#EEEEEA] text-[#16171A]' : 'text-[#686862] hover:bg-[#F2F2ED]'
+              }`}
             >
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-4 h-4 text-[#E06D53]" />
-                <span>Create</span>
-              </div>
-              {createSubmenuExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              What Comes Next
             </button>
-
-            {createSubmenuExpanded && (
-              <div className="pl-9 pr-3 pb-2 space-y-1 border-t border-[#EFE9DF] pt-1">
-                <button
-                  onClick={() => {
-                    if (onOpenWhatComesNext) onOpenWhatComesNext();
-                    else handleNav('create');
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px]"
-                >
-                  <span>What Comes Next?</span>
-                  <span className="text-[10px] uppercase font-mono-code text-[#E06D53] font-bold">Mystery</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (onOpenChibiJourney) onOpenChibiJourney();
-                    else handleNav('chibi-journey');
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px] bg-[#FBEFEA]/60"
-                >
-                  <span className="font-extrabold text-[#E06D53]">Chibi Character Journey</span>
-                  <span className="text-[10px] uppercase font-mono-code text-white bg-[#E06D53] px-1.5 py-0.5 rounded-full font-bold">New</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (onOpenCharacterDesign) onOpenCharacterDesign();
-                    else handleNav('character-design');
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors flex items-center justify-between min-h-[38px]"
-                >
-                  <span>Character Design</span>
-                  <span className="text-[10px] uppercase font-mono-code text-[#C04D33] font-bold">9-Stage</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (onOpenWarmUp) onOpenWarmUp();
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
-                >
-                  <span>Warm Up</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (onOpenChaos) onOpenChaos();
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
-                >
-                  <span>Creative Chaos</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleNav('challenges');
-                  }}
-                  className="w-full text-left py-2 px-2.5 rounded-lg text-xs font-semibold text-[#5C5045] hover:bg-[#EFE9DF] hover:text-[#2D2723] transition-colors min-h-[38px]"
-                >
-                  <span>Challenge Me</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* 3. Practice */}
-          <button
-            onClick={() => handleNav('practice')}
-            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
-          >
-            <Flame className="w-4 h-4 text-[#E06D53]" />
-            <span>Practice</span>
-          </button>
-
-          {/* 4. Creative Paths */}
-          <button
-            onClick={() => {
-              if (onOpenPathways) onOpenPathways();
-              setMenuOpen(false);
-            }}
-            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
-          >
-            <Compass className="w-4 h-4 text-[#2A9D8F]" />
-            <span>Creative Paths</span>
-          </button>
-
-          {/* 5. Visual Guide */}
-          {onOpenMasterSheet && (
             <button
               onClick={() => {
-                onOpenMasterSheet();
+                if (onOpenChibiJourney) onOpenChibiJourney();
+                else handleNav('chibi-journey');
+              }}
+              className={`px-3 py-2.5 rounded-lg text-left text-sm font-semibold transition-colors ${
+                currentTab === 'chibi-journey' ? 'bg-[#EFF3FF] text-[#2752E7]' : 'text-[#686862] hover:bg-[#F2F2ED]'
+              }`}
+            >
+              Chibi Character Atelier
+            </button>
+            <button
+              onClick={() => {
+                if (onOpenPartLibrary) onOpenPartLibrary();
                 setMenuOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
+              className="px-3 py-2.5 rounded-lg text-left text-sm font-semibold text-[#686862] hover:bg-[#F2F2ED] transition-colors flex items-center justify-between"
             >
-              <Palette className="w-4 h-4 text-[#4F46E5]" />
-              <span>Visual Guide (500 Prompts)</span>
+              <span>Part Reference Library</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#EEEEEC] text-[#686862]">197 parts</span>
             </button>
-          )}
+            <button
+              onClick={() => handleNav('collection')}
+              className={`px-3 py-2.5 rounded-lg text-left text-sm font-semibold transition-colors ${
+                currentTab === 'collection' ? 'bg-[#EEEEEA] text-[#16171A]' : 'text-[#686862] hover:bg-[#F2F2ED]'
+              }`}
+            >
+              Archive & Collection
+            </button>
+            <button
+              onClick={() => handleNav('progress')}
+              className={`px-3 py-2.5 rounded-lg text-left text-sm font-semibold transition-colors ${
+                currentTab === 'progress' ? 'bg-[#EEEEEA] text-[#16171A]' : 'text-[#686862] hover:bg-[#F2F2ED]'
+              }`}
+            >
+              Progress & Stats
+            </button>
+          </div>
 
-          {/* 6. Collection */}
-          <button
-            onClick={() => handleNav('collection')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
-              currentTab === 'collection' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
-            }`}
-          >
-            <FolderHeart className="w-4 h-4 text-[#8A7D71]" />
-            <span>Collection</span>
-          </button>
-
-          {/* 7. Progress */}
-          <button
-            onClick={() => handleNav('progress')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${
-              currentTab === 'progress' ? 'bg-[#2D2723] text-[#FAF7F2]' : 'text-[#4A3F35] hover:bg-[#EFE9DF]'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4 text-[#8A7D71]" />
-            <span>Progress</span>
-          </button>
-
-          {/* 8. Settings */}
-          <button
-            onClick={() => {
-              if (onOpenSettings) onOpenSettings();
-              setMenuOpen(false);
-            }}
-            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold text-[#4A3F35] hover:bg-[#EFE9DF] transition-colors min-h-[44px]"
-          >
-            <Settings className="w-4 h-4 text-[#8A7D71]" />
-            <span>Settings</span>
-          </button>
+          <div className="pt-2 border-t border-[#E5E5DE] flex items-center justify-between text-xs text-[#686862]">
+            <button
+              onClick={() => handleNav('practice')}
+              className="py-1.5 hover:text-[#16171A]"
+            >
+              Warm-Up Practice
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              onClick={() => handleNav('challenges')}
+              className="py-1.5 hover:text-[#16171A]"
+            >
+              Creative Chaos
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              onClick={() => handleNav('master-sheet')}
+              className="py-1.5 hover:text-[#16171A]"
+            >
+              500 Prompts
+            </button>
+          </div>
         </div>
       )}
     </header>

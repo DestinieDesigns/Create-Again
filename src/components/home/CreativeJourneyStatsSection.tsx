@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, Sparkles, Flame, Trophy, Compass, Calendar, ArrowRight } from 'lucide-react';
+import { Palette, Sparkles, Flame, Compass, Calendar, ArrowRight } from 'lucide-react';
 import { CreativeStats } from '../../types/session';
 
 interface CreativeJourneyStatsSectionProps {
@@ -13,83 +13,67 @@ export const CreativeJourneyStatsSection: React.FC<CreativeJourneyStatsSectionPr
 }) => {
   const statCards = [
     {
-      label: 'Things Created',
+      label: 'Creations',
       value: stats.thingsCreated,
       icon: Palette,
-      color: 'text-[#E06D53]',
     },
     {
-      label: 'Mystery Drawings',
+      label: 'Mysteries',
       value: stats.mysteryDrawings,
       icon: Sparkles,
-      color: 'text-[#DDA15E]',
     },
     {
-      label: 'Warmups Done',
+      label: 'Warm-Ups',
       value: stats.warmupsCompleted,
       icon: Flame,
-      color: 'text-[#606C38]',
     },
     {
-      label: 'Creative Sessions',
+      label: 'Sessions',
       value: stats.creativeSessions,
       icon: Compass,
-      color: 'text-[#2D2723]',
     },
     {
-      label: 'Days Creating',
+      label: 'Active Days',
       value: stats.daysCreating,
       icon: Calendar,
-      color: 'text-[#7D5A50]',
     },
   ];
 
   return (
-    <section className="max-w-4xl mx-auto px-4 my-10">
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code">
-            Your Creative Journey
-          </div>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-[#2D2723] tracking-tight">
-            Every mark counts
-          </h3>
+    <section className="max-w-5xl mx-auto my-8">
+      <div className="flex items-center justify-between border-b border-[#E5E5DE] pb-2 text-xs text-[#686862] mb-4">
+        <div className="flex items-center gap-2 font-semibold">
+          <span className="font-mono-code text-[#16171A]">STUDIO LOG</span>
+          <span aria-hidden="true">·</span>
+          <span>Cumulative Metrics</span>
         </div>
         <button
           onClick={onViewDetailedJourney}
-          className="text-xs font-bold text-[#E06D53] hover:text-[#C04D33] flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-[#16171A] hover:text-[#2752E7] flex items-center gap-1 transition-colors"
         >
-          <span>View Progress</span>
+          <span>Full Journey</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <div
               key={i}
-              className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] flex flex-col justify-between text-center subtle-shadow"
+              className="p-4 rounded-xl bg-white border border-[#E5E5DE] flex flex-col justify-between text-left shadow-2xs"
             >
-              <div className="flex items-center justify-center mb-1">
-                <Icon className={`w-4 h-4 ${stat.color}`} />
+              <div className="flex items-center justify-between text-[#8A8A82] mb-2">
+                <span className="text-[11px] font-medium">{stat.label}</span>
+                <Icon className="w-3.5 h-3.5 stroke-[1.8]" />
               </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] my-1 font-mono-code">
+              <div className="text-2xl sm:text-3xl font-bold text-[#16171A] font-mono-code tabular-nums">
                 {stat.value}
-              </div>
-              <div className="text-[11px] font-semibold text-[#73675E] leading-tight">
-                {stat.label}
               </div>
             </div>
           );
         })}
-      </div>
-
-      <div className="mt-3 text-center">
-        <span className="text-xs text-[#8A7D71] font-handwriting text-base">
-          No artist scores. No judging. Just minutes spent making things.
-        </span>
       </div>
     </section>
   );

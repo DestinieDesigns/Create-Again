@@ -7,8 +7,7 @@ import {
   HelpCircle,
   Trophy,
   ArrowRight,
-  Compass,
-  Palette,
+  User,
   Trees,
   Footprints,
   Coffee,
@@ -19,7 +18,6 @@ import {
   Shapes,
   MapPin,
   CircleOff,
-  User,
 } from 'lucide-react';
 import { THEMES } from '../../data/themes';
 
@@ -36,7 +34,8 @@ interface CreationChooserModalProps {
       | 'dont-know'
       | 'pathways'
       | 'character-progression'
-      | 'master-sheet',
+      | 'master-sheet'
+      | 'part-library',
     themeId?: string
   ) => void;
 }
@@ -53,73 +52,66 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
   const modes = [
     {
       id: 'what-comes-next' as const,
-      title: 'WHAT COMES NEXT?',
+      title: 'What Comes Next?',
       subtitle: "Don't know what you're drawing? Good.",
-      description: 'One mystery instruction at a time. Draw it on your paper, then see what comes next.',
-      badge: 'Signature',
-      badgeColor: 'bg-[#E06D53] text-white',
-      buttonLabel: 'START MYSTERY',
+      description: 'One mystery instruction at a time. Draw it on your paper, then discover what comes next.',
+      kicker: '01 · Signature',
+      buttonLabel: 'Start Mystery',
       icon: Sparkles,
     },
     {
       id: 'chibi-journey' as const,
-      title: 'CHIBI CHARACTER JOURNEY',
+      title: 'Chibi Character Atelier',
       subtitle: 'Build an original character from scratch.',
       description: 'Guided step-by-step character journey from idea and silhouette to clothing, personality, and master model sheet.',
-      badge: 'Major Feature',
-      badgeColor: 'bg-[#E06D53] text-white',
-      buttonLabel: 'BUILD CHIBI',
+      kicker: '02 · Workshop',
+      buttonLabel: 'Build Chibi',
       icon: Sparkles,
     },
     {
-      id: 'character-design' as const,
-      title: 'CHARACTER WORKSHOP',
-      subtitle: 'Build personalities from scratch.',
-      description: 'Progressive 9-stage character creator from head shapes and posture to quirks and storytelling.',
-      badge: 'Discipline',
-      badgeColor: 'bg-[#E76F51] text-white',
-      buttonLabel: 'DESIGN CHARACTER',
-      icon: User,
+      id: 'dont-know' as const,
+      title: "I Don't Know What to Draw",
+      subtitle: 'Pick your vibe and start.',
+      description: 'Gentle low-pressure prompts matched to your current energy level and available time.',
+      kicker: '03 · Rescue',
+      buttonLabel: 'Gentle Start',
+      icon: HelpCircle,
     },
     {
       id: 'warm-up' as const,
-      title: 'WARM UP',
+      title: 'Hand Warm-Up',
       subtitle: 'Get your hand moving.',
       description: 'Quick 2-minute physical drawing exercises to loosen up and defeat the blank page.',
-      badge: 'Quick Practice',
-      badgeColor: 'bg-[#DDA15E] text-[#2D2723]',
-      buttonLabel: 'WARM UP',
+      kicker: '04 · Practice',
+      buttonLabel: 'Warm Up',
       icon: Flame,
     },
     {
       id: 'chaos' as const,
-      title: 'CREATIVE CHAOS',
-      subtitle: 'Give me something weird.',
-      description: 'Unexpected combinations (Character + Setting + Object + Mood) to spark ideas.',
-      badge: 'Surprise',
-      badgeColor: 'bg-[#606C38] text-white',
-      buttonLabel: 'SURPRISE ME',
+      title: 'Creative Chaos',
+      subtitle: 'Give me something unpredictable.',
+      description: 'Unexpected combinations (Character + Setting + Object + Mood) to spark fresh ideas.',
+      kicker: '05 · Experiment',
+      buttonLabel: 'Surprise Me',
       icon: Dices,
     },
     {
-      id: 'dont-know' as const,
-      title: "I DON'T KNOW WHAT TO DRAW",
-      subtitle: 'Pick your vibe and start.',
-      description: 'Gentle low-pressure prompts matched to your current energy level and time.',
-      badge: 'Gentle Start',
-      badgeColor: 'bg-[#8F8175] text-white',
-      buttonLabel: 'GENTLE START',
-      icon: HelpCircle,
+      id: 'character-progression' as const,
+      title: 'Skill Challenges',
+      subtitle: 'Step-by-step missions.',
+      description: 'Progressive character and composition lessons with clear visual reference diagrams.',
+      kicker: '06 · Mastery',
+      buttonLabel: 'Explore Skills',
+      icon: Trophy,
     },
     {
-      id: 'character-progression' as const,
-      title: 'CHALLENGE ME',
-      subtitle: 'Step-by-step skill missions.',
-      description: 'Progressive character and composition lessons with clear visual reference diagrams.',
-      badge: 'Skill Lessons',
-      badgeColor: 'bg-[#2A9D8F] text-white',
-      buttonLabel: 'EXPLORE SKILLS',
-      icon: Trophy,
+      id: 'part-library' as const,
+      title: 'Part Reference Library',
+      subtitle: '197+ individual drawing references.',
+      description: 'Explore isolated heads, angles, eyes, ears, mouths, hair textures, bodies, paws, boots, horns, and accessories.',
+      kicker: '07 · Reference',
+      buttonLabel: 'Browse Library',
+      icon: Shapes,
     },
   ];
 
@@ -158,25 +150,25 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Creation Chooser"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#16171A]/60 backdrop-blur-xs animate-fadeIn"
     >
-      <div className="relative w-full max-w-3xl bg-[#FCFAF6] rounded-3xl p-5 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-white rounded-2xl p-6 sm:p-8 border border-[#E5E5DE] max-h-[92vh] overflow-y-auto shadow-xl">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 sm:pb-5 border-b border-[#E8E0D5]">
+        <div className="flex items-start justify-between pb-4 sm:pb-5 border-b border-[#E5E5DE]">
           <div>
-            <div className="text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
-              Choose Your Flow
+            <div className="text-[11px] font-mono-code font-semibold uppercase tracking-wider text-[#686862]">
+              STUDIO FLOW CHOOSER
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight mt-1">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#16171A] tracking-tight mt-1">
               What do you feel like making?
             </h2>
-            <p className="text-xs sm:text-sm text-[#7A6E63] font-handwriting text-lg sm:text-xl mt-0.5">
-              Pick an activity, or set a mood. Then put your device down and draw.
+            <p className="text-xs sm:text-sm text-[#686862] mt-1">
+              Select a discipline or set a mood. Then put your device down and draw on paper.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 -mt-2"
+            className="p-2 rounded-lg hover:bg-[#F4F4F0] text-[#686862] hover:text-[#16171A] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2 -mt-2"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -184,11 +176,11 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
         </div>
 
         {/* 1. Activities Section */}
-        <div className="mt-5">
-          <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] mb-3">
-            WHAT DO YOU FEEL LIKE MAKING?
+        <div className="mt-6">
+          <div className="text-xs font-mono-code font-semibold uppercase tracking-wider text-[#686862] mb-3">
+            DRAWING DISCIPLINES
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {modes.map((mode) => {
               const Icon = mode.icon;
               return (
@@ -198,28 +190,28 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
                     onSelectMode(mode.id, selectedThemeId);
                     onClose();
                   }}
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-[#FAF7F2] border-2 border-[#E8E0D5] hover:border-[#2D2723] hover:bg-white cursor-pointer transition-all subtle-shadow min-h-[140px]"
+                  className="group flex flex-col justify-between p-5 rounded-xl bg-white border border-[#E5E5DE] hover:border-[#16171A] cursor-pointer transition-all shadow-2xs hover:shadow-xs min-h-[140px]"
                 >
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${mode.badgeColor}`}>
-                        {mode.badge}
+                    <div className="flex items-center justify-between text-xs text-[#686862] mb-2">
+                      <span className="font-mono-code text-[11px] font-semibold text-[#16171A]">
+                        {mode.kicker}
                       </span>
-                      <Icon className="w-4 h-4 text-[#8A7D71] group-hover:text-[#E06D53] transition-colors" />
+                      <Icon className="w-4 h-4 text-[#8A8A82] group-hover:text-[#2752E7] transition-colors" />
                     </div>
-                    <h3 className="font-extrabold text-base sm:text-lg text-[#2D2723] group-hover:text-[#E06D53] transition-colors">
+                    <h3 className="font-display font-bold text-lg text-[#16171A] group-hover:text-[#2752E7] transition-colors">
                       {mode.title}
                     </h3>
-                    <p className="text-xs text-[#5C5249] mt-1 leading-relaxed">
+                    <p className="text-xs text-[#686862] mt-1 leading-relaxed">
                       {mode.description}
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-2.5 border-t border-[#EAE2D7] flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#2D2723] group-hover:text-[#E06D53]">
+                  <div className="mt-4 pt-3 border-t border-[#F0F0EB] flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#16171A] group-hover:text-[#2752E7] transition-colors">
                       {mode.buttonLabel}
                     </span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#8A7D71] group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3.5 h-3.5 text-[#8A8A82] group-hover:text-[#2752E7] group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               );
@@ -227,23 +219,23 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
           </div>
         </div>
 
-        {/* 2. Theme Selection Grid (Mobile: 2-col, Tablet: 3-col, Desktop: 4-col) */}
-        <div className="mt-8 pt-6 border-t border-[#E8E0D5]">
+        {/* 2. Theme Selection Grid */}
+        <div className="mt-8 pt-6 border-t border-[#E5E5DE]">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div>
-              <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
-                WHAT ARE YOU IN THE MOOD FOR?
+              <div className="text-xs font-mono-code font-semibold uppercase tracking-wider text-[#686862]">
+                CURATE THEME (OPTIONAL)
               </div>
-              <p className="text-xs text-[#7A6E63] mt-0.5">
-                Select a theme to color your mystery prompts or chaos ideas (optional)
+              <p className="text-xs text-[#8A8A82] mt-0.5">
+                Select a stylistic world to flavor prompts across your session
               </p>
             </div>
             {selectedThemeId !== 'none' && (
               <button
                 onClick={() => setSelectedThemeId('none')}
-                className="text-xs text-[#E06D53] font-bold hover:underline"
+                className="text-xs text-[#2752E7] font-semibold hover:underline"
               >
-                Clear
+                Clear Theme
               </button>
             )}
           </div>
@@ -256,26 +248,20 @@ export const CreationChooserModal: React.FC<CreationChooserModalProps> = ({
                 <button
                   key={theme.id}
                   onClick={() => setSelectedThemeId(theme.id)}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all min-h-[48px] ${
+                  className={`flex items-center gap-2.5 p-3 rounded-lg border text-left transition-all min-h-[46px] ${
                     isSelected
-                      ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-xs'
-                      : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#4A3F35] hover:bg-[#EFE9DF]'
+                      ? 'bg-[#16171A] text-white border-[#16171A] shadow-2xs'
+                      : 'bg-white border-[#E5E5DE] text-[#16171A] hover:bg-[#F4F4F0]'
                   }`}
                 >
-                  <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-[#EFE9DF] text-[#7A6E63]'
-                    }`}
-                  >
-                    <ThemeIcon className="w-4 h-4" />
-                  </div>
+                  <ThemeIcon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-[#686862]'}`} />
                   <div className="truncate">
-                    <span className="block text-xs font-bold truncate leading-tight">
+                    <span className="block text-xs font-semibold truncate leading-tight">
                       {theme.name}
                     </span>
                     <span
-                      className={`block text-[10px] font-handwriting truncate ${
-                        isSelected ? 'text-white/80' : 'text-[#8A7D71]'
+                      className={`block text-[10px] truncate ${
+                        isSelected ? 'text-white/70' : 'text-[#8A8A82]'
                       }`}
                     >
                       {theme.description.split('.')[0]}

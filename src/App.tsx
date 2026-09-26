@@ -46,6 +46,7 @@ import { ChibiStoryContinuationModal } from './components/chibi/ChibiStoryContin
 import { MyCharactersModal } from './components/chibi/MyCharactersModal';
 import { ChibiChallengesModal } from './components/chibi/ChibiChallengesModal';
 import { ChibiHowItWorksModal } from './components/chibi/ChibiHowItWorksModal';
+import { ChibiPartLibraryModal } from './components/chibi/ChibiPartLibraryModal';
 import { ChibiChallenge } from './data/chibiChallenges';
 import { ChibiJourneyStageId } from './types/chibi';
 
@@ -187,6 +188,7 @@ export default function App() {
   const [isChibiChallengesOpen, setIsChibiChallengesOpen] = useState(false);
   const [isChibiHowItWorksOpen, setIsChibiHowItWorksOpen] = useState(false);
   const [isChibiStoryModalOpen, setIsChibiStoryModalOpen] = useState(false);
+  const [isPartLibraryOpen, setIsPartLibraryOpen] = useState(false);
 
   const handleStartNewChibi = () => {
     startNewChibiCharacter();
@@ -738,6 +740,7 @@ export default function App() {
       | 'pathways'
       | 'character-progression'
       | 'master-sheet'
+      | 'part-library'
   ) => {
     if (mode === 'what-comes-next') {
       setIsMode1SetupOpen(true);
@@ -745,6 +748,8 @@ export default function App() {
       setCurrentTab('chibi-journey');
       setIsChibiJourneyActive(false);
       setIsChibiSheetActive(false);
+    } else if (mode === 'part-library') {
+      setIsPartLibraryOpen(true);
     } else if (mode === 'character-design') {
       setIsCharacterDesignModalOpen(true);
     } else if (mode === 'master-sheet') {
@@ -790,6 +795,8 @@ export default function App() {
       setCurrentTab('progress');
     } else if (tab === 'settings') {
       setIsSettingsOpen(true);
+    } else if (tab === 'part-library') {
+      setIsPartLibraryOpen(true);
     }
   };
 
@@ -800,23 +807,23 @@ export default function App() {
     (currentTab === 'chibi-journey' && isChibiJourneyActive);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#2D2723] flex flex-col font-sans selection:bg-[#E06D53] selection:text-white">
-      {/* Offline Status Alert Banner (Point 46) */}
+    <div className="min-h-screen bg-[#FBFBFA] text-[#16171A] flex flex-col font-sans selection:bg-[#2752E7] selection:text-white">
+      {/* Offline Status Alert Banner */}
       {!isOnline && !isOfflineDismissed && (
         <div
           role="status"
           aria-live="polite"
-          className="bg-[#FEF6E4] border-b border-[#F0BC98] text-[#8A4A28] px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-3"
+          className="bg-white border-b border-[#E5E5DE] text-[#16171A] px-4 py-2 text-xs font-semibold text-center flex items-center justify-center gap-3 shadow-2xs"
         >
-          <span>YOU'RE OFFLINE</span>
-          <span className="font-normal text-[#5C5249]">
-            Your current creative session can still continue.
+          <span className="font-mono-code text-[11px] text-[#2752E7]">OFFLINE MODE</span>
+          <span className="font-normal text-[#686862]">
+            Your drawing session continues locally without interruption.
           </span>
           <button
             onClick={() => setIsOfflineDismissed(true)}
-            className="px-2.5 py-1 rounded-lg bg-[#E06D53] hover:bg-[#CF5E45] text-white text-[11px] font-bold transition-all ml-1"
+            className="px-2.5 py-1 rounded-md bg-[#16171A] hover:bg-[#2C2D32] text-white text-[11px] font-semibold transition-colors ml-1"
           >
-            KEEP CREATING
+            Dismiss
           </button>
         </div>
       )}
@@ -837,6 +844,7 @@ export default function App() {
             setIsChibiJourneyActive(false);
             setIsChibiSheetActive(false);
           }}
+          onOpenPartLibrary={() => setIsPartLibraryOpen(true)}
           onOpenPathways={() => setIsPathwayChooserOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           unfinishedSessionExists={!!(activeSession && !activeSession.completed)}
@@ -883,6 +891,7 @@ export default function App() {
             onOpenMyCharacters={() => setIsMyCharactersOpen(true)}
             onOpenChallenges={() => setIsChibiChallengesOpen(true)}
             onOpenHowItWorks={() => setIsChibiHowItWorksOpen(true)}
+            onOpenPartLibrary={() => setIsPartLibraryOpen(true)}
             onUpdatePreferences={updateChibiPreferences}
             onBackToHome={() => setCurrentTab('home')}
           />
@@ -1010,6 +1019,7 @@ export default function App() {
               onOpenWarmUp={() => setIsWarmUpOpen(true)}
               onOpenChaos={() => setIsChaosOpen(true)}
               onOpenChallenge={() => setIsChallengeModalOpen(true)}
+              onOpenPartLibrary={() => setIsPartLibraryOpen(true)}
             />
 
             {/* 4. Creative Themes Section (Universal Theme System) */}
@@ -1124,6 +1134,16 @@ export default function App() {
       <ChibiHowItWorksModal
         isOpen={isChibiHowItWorksOpen}
         onClose={() => setIsChibiHowItWorksOpen(false)}
+      />
+
+      <ChibiPartLibraryModal
+        isOpen={isPartLibraryOpen}
+        onClose={() => setIsPartLibraryOpen(false)}
+        onPracticePart={(part) => {
+          handleStartSpecificPrompt(
+            `Practice drawing this chibi part: ${part.name}. ${part.description}`
+          );
+        }}
       />
 
       {activeChibiCharacter && (

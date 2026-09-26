@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { getChaosPoolForTheme } from '../../data/creativeChaosPools';
 import { getThemeById } from '../../data/themes';
+import { CHIBI_PART_REFERENCES } from '../../data/chibiPartReferences';
+import { ChibiPartReference } from '../../types/chibiReference';
 
 interface CreativeChaosModalProps {
   isOpen: boolean;
@@ -33,6 +35,7 @@ export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
   const [object, setObject] = useState('');
   const [mood, setMood] = useState('');
   const [unexpected, setUnexpected] = useState('');
+  const [chibiPart, setChibiPart] = useState<ChibiPartReference | null>(null);
 
   const objectsPool = [
     'carrying a giant wooden spoon',
@@ -77,12 +80,18 @@ export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
     setUnexpected(pool.rules[Math.floor(Math.random() * pool.rules.length)]);
   };
 
+  const rollChibiPart = () => {
+    const randomPart = CHIBI_PART_REFERENCES[Math.floor(Math.random() * CHIBI_PART_REFERENCES.length)];
+    setChibiPart(randomPart);
+  };
+
   const rollAll = (pool = activePool) => {
     rollCharacter(pool);
     rollLocation(pool);
     rollObject();
     rollMood();
     rollUnexpected(pool);
+    rollChibiPart();
   };
 
   useEffect(() => {
@@ -96,7 +105,8 @@ export const CreativeChaosModal: React.FC<CreativeChaosModalProps> = ({
   if (!isOpen) return null;
 
   const handleStart = () => {
-    const promptSummary = `${character} ${mood}, ${location}, ${object}. Twist: ${unexpected}`;
+    const partNote = chibiPart ? ` Feature: ${chibiPart.name} (${chibiPart.category}).` : '';
+    const promptSummary = `${character} ${mood}, ${location}, ${object}.${partNote} Twist: ${unexpected}`;
     onStartChaosDrawing(promptSummary);
     onClose();
   };

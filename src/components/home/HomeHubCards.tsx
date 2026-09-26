@@ -3,13 +3,11 @@ import {
   Sparkles,
   HelpCircle,
   Flame,
-  Dices,
-  Trophy,
   ArrowRight,
+  BookOpen,
   User,
-  FolderHeart,
-  Palette,
-  CheckCircle2,
+  Trophy,
+  Dices,
 } from 'lucide-react';
 
 interface HomeHubCardsProps {
@@ -24,6 +22,7 @@ interface HomeHubCardsProps {
   onOpenWarmUp: () => void;
   onOpenChaos: () => void;
   onOpenChallenge: () => void;
+  onOpenPartLibrary?: () => void;
 }
 
 export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
@@ -38,276 +37,164 @@ export const HomeHubCards: React.FC<HomeHubCardsProps> = ({
   onOpenWarmUp,
   onOpenChaos,
   onOpenChallenge,
+  onOpenPartLibrary,
 }) => {
   return (
-    <section className="max-w-4xl mx-auto space-y-6 sm:space-y-8 my-6">
-      {/* 1. Two Signature Cards: WHAT COMES NEXT? and I DON'T KNOW WHAT TO DRAW */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        {/* Card 1: What Comes Next? */}
-        <div
-          onClick={onStartWhatComesNext}
-          className="group relative rounded-3xl bg-[#FCFAF6] border-2 border-[#2D2723] p-6 sm:p-7 paper-card subtle-shadow cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg text-left flex flex-col justify-between min-h-[200px]"
-        >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E06D53] text-white">
-                Signature Mode
-              </span>
-              <Sparkles className="w-5 h-5 text-[#E06D53]" />
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#2D2723] tracking-tight group-hover:text-[#E06D53] transition-colors">
-              WHAT COMES NEXT?
-            </h2>
-
-            <p className="font-handwriting text-xl sm:text-2xl font-bold text-[#7A6E63] mt-1">
-              Don't know what you're drawing? Good.
-            </p>
-
-            <p className="text-xs sm:text-sm text-[#5C5249] mt-2 leading-relaxed">
-              Step-by-step mystery instructions. Draw one mark on your paper, then see what comes next.
-            </p>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-[#EAE2D7] flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-extrabold text-[#2D2723] group-hover:text-[#E06D53]">
-              START MYSTERY
-            </span>
-            <div className="w-8 h-8 rounded-full bg-[#2D2723] text-white flex items-center justify-center transition-transform group-hover:translate-x-1">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
+    <section className="max-w-5xl mx-auto space-y-6 my-8">
+      {/* Editorial Section Header */}
+      <div className="flex items-center justify-between border-b border-[#E5E5DE] pb-2 text-xs text-[#686862]">
+        <div className="flex items-center gap-2 font-semibold">
+          <span className="font-mono-code text-[#16171A]">DISCIPLINES</span>
+          <span aria-hidden="true">·</span>
+          <span>Core Drawing Modes</span>
         </div>
-
-        {/* Card 2: I Don't Know What to Draw */}
-        <div
-          onClick={onOpenDontKnow}
-          className="group relative rounded-3xl bg-[#FAF7F2] border-2 border-[#D8CEBE] hover:border-[#2D2723] p-6 sm:p-7 paper-card subtle-shadow cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg text-left flex flex-col justify-between min-h-[200px]"
-        >
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#EFE9DF] text-[#63554A]">
-                Gentle Start
-              </span>
-              <HelpCircle className="w-5 h-5 text-[#8A7D71]" />
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#2D2723] tracking-tight group-hover:text-[#E06D53] transition-colors">
-              I DON'T KNOW WHAT TO DRAW
-            </h2>
-
-            <p className="font-handwriting text-xl sm:text-2xl font-bold text-[#7A6E63] mt-1">
-              No pressure. Just start here.
-            </p>
-
-            <p className="text-xs sm:text-sm text-[#5C5249] mt-2 leading-relaxed">
-              Choose your energy level and time, and we'll give you a calm, single place to put pencil to paper.
-            </p>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-[#EAE2D7] flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-extrabold text-[#63554A] group-hover:text-[#2D2723]">
-              TRY IT
-            </span>
-            <div className="w-8 h-8 rounded-full bg-[#EFE9DF] group-hover:bg-[#2D2723] group-hover:text-white flex items-center justify-center transition-colors">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
+        <span>Select an experience</span>
       </div>
 
-      {/* 2. Featured Showcase Card: CHIBI CHARACTER JOURNEY */}
-      {onOpenChibiJourney && (
+      {/* Main Studio Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Card 1: What Comes Next? (Signature) */}
         <div
-          onClick={onOpenChibiJourney}
-          className="group relative rounded-3xl bg-gradient-to-br from-[#FFF8F5] via-[#FCFAF6] to-[#FBEFEA] border-2 border-[#E06D53] p-6 sm:p-7 paper-card subtle-shadow cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg text-left"
+          onClick={onStartWhatComesNext}
+          className="group relative rounded-2xl bg-white border border-[#E5E5DE] hover:border-[#16171A] p-6 sm:p-7 shadow-xs hover:shadow-sm cursor-pointer transition-all flex flex-col justify-between min-h-[220px]"
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E06D53] text-white">
-                Major Discipline
+          <div>
+            <div className="flex items-center justify-between text-xs text-[#686862] mb-3">
+              <span className="font-mono-code text-[11px] font-semibold text-[#16171A]">
+                01 · SIGNATURE
               </span>
-              <span className="text-xs font-mono font-bold text-[#8A7D71]">
-                20-Stage Guided Learning
-              </span>
+              <span className="text-[#8A8A82]">Blind Step Drawing</span>
             </div>
 
-            {activeChibiCharacterName ? (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E06D53] bg-white px-2.5 py-1 rounded-full border border-[#F5D8CE] shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-[#E06D53] animate-pulse" />
-                <span>Resume: {activeChibiCharacterName} ({activeChibiStageCount}/20)</span>
-              </span>
-            ) : (
-              <span className="text-xs font-medium text-[#7A6E63] hidden sm:inline">
-                Idea → Silhouette → Head → Style → Model Sheet
-              </span>
-            )}
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#16171A] tracking-tight group-hover:text-[#2752E7] transition-colors">
+              What Comes Next?
+            </h2>
+
+            <p className="text-sm text-[#555550] mt-2.5 leading-relaxed font-normal">
+              Step-by-step mystery drawing prompts. Put down one unexpected mark, then discover what to add next.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-8 space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-[#2D2723] tracking-tight group-hover:text-[#E06D53] transition-colors">
-                CHIBI CHARACTER JOURNEY
+          <div className="mt-6 pt-4 border-t border-[#F0F0EB] flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#16171A] group-hover:text-[#2752E7] transition-colors">
+              Begin mystery session
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-[#F4F4F0] text-[#16171A] group-hover:bg-[#16171A] group-hover:text-white flex items-center justify-center transition-colors">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Chibi Character Atelier */}
+        {onOpenChibiJourney && (
+          <div
+            onClick={onOpenChibiJourney}
+            className="group relative rounded-2xl bg-white border border-[#E5E5DE] hover:border-[#2752E7] p-6 sm:p-7 shadow-xs hover:shadow-sm cursor-pointer transition-all flex flex-col justify-between min-h-[220px]"
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs text-[#686862] mb-3">
+                <span className="font-mono-code text-[11px] font-semibold text-[#2752E7]">
+                  02 · WORKSHOP
+                </span>
+                {activeChibiCharacterName ? (
+                  <span className="text-xs font-semibold text-[#2752E7] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2752E7] animate-pulse" />
+                    <span>Resume: {activeChibiCharacterName} ({activeChibiStageCount}/20)</span>
+                  </span>
+                ) : (
+                  <span className="text-[#8A8A82]">20 Guided Milestones</span>
+                )}
+              </div>
+
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#16171A] tracking-tight group-hover:text-[#2752E7] transition-colors">
+                Chibi Character Atelier
               </h2>
-              <p className="font-handwriting text-xl sm:text-2xl text-[#E06D53] font-bold">
-                Build an original character one piece at a time.
-              </p>
-              <p className="text-xs sm:text-sm text-[#5C5249] leading-relaxed max-w-xl">
-                Structured creative journey with zero blank-page anxiety. Pick or randomize each stage, follow the sketchbook instructions, and assemble a complete, shareable character model sheet.
-              </p>
 
-              {/* Progress Milestones Preview */}
-              <div className="pt-2 flex flex-wrap items-center gap-2 text-[11px] font-mono font-bold text-[#655A51]">
-                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">1. Idea</span>
-                <span className="text-[#8A7D71]">→</span>
-                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">3. Silhouette</span>
-                <span className="text-[#8A7D71]">→</span>
-                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">5. Face</span>
-                <span className="text-[#8A7D71]">→</span>
-                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">10. Clothing</span>
-                <span className="text-[#8A7D71]">→</span>
-                <span className="px-2 py-0.5 rounded-md bg-white border border-[#E8E0D5]">20. Model Sheet</span>
-              </div>
+              <p className="text-sm text-[#555550] mt-2.5 leading-relaxed font-normal">
+                Structured character creation from initial silhouette to complete turnaround model sheet.
+              </p>
             </div>
 
-            <div className="md:col-span-4 flex flex-col sm:flex-row md:flex-col items-stretch justify-center gap-2.5 pt-2 md:pt-0">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenChibiJourney();
-                }}
-                className="py-3 px-5 rounded-2xl bg-[#E06D53] hover:bg-[#CF5E45] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-98"
-              >
-                <span>{activeChibiCharacterName ? 'RESUME JOURNEY' : 'ENTER WORKSHOP'}</span>
+            <div className="mt-6 pt-4 border-t border-[#F0F0EB] flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#2752E7]">
+                {activeChibiCharacterName ? 'Continue workshop' : 'Enter atelier'}
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-[#EFF3FF] text-[#2752E7] group-hover:bg-[#2752E7] group-hover:text-white flex items-center justify-center transition-colors">
                 <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <div className="flex gap-2">
-                {onOpenChibiChallenges && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenChibiChallenges();
-                    }}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8E0D5] text-[#4A3F35] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
-                  >
-                    <Trophy className="w-3.5 h-3.5 text-[#E06D53]" />
-                    <span>10 Challenges</span>
-                  </button>
-                )}
-
-                {onOpenMyCharacters && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenMyCharacters();
-                    }}
-                    className="flex-1 py-2 px-3 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8E0D5] text-[#4A3F35] font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
-                  >
-                    <FolderHeart className="w-3.5 h-3.5 text-[#E06D53]" />
-                    <span>My Characters</span>
-                  </button>
-                )}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* 3. Quick Activities Row (Clean 4-column balanced grid) */}
-      <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-[#8A7D71] font-mono-code mb-3 text-left">
-          QUICK ACTIVITIES & DISCIPLINES
-        </div>
+      {/* Secondary Quick Modes Bar */}
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${onOpenPartLibrary ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 pt-2`}>
+        {/* Spark 1: I Don't Know What to Draw */}
+        <button
+          onClick={onOpenDontKnow}
+          className="text-left rounded-xl bg-white border border-[#E5E5DE] hover:border-[#16171A] p-4 transition-all shadow-2xs group"
+        >
+          <div className="text-[11px] font-mono-code text-[#686862] mb-1">
+            03 · RESCUE
+          </div>
+          <div className="font-display font-bold text-base text-[#16171A] group-hover:text-[#2752E7] transition-colors">
+            I Don't Know What to Draw
+          </div>
+          <p className="text-xs text-[#686862] mt-1 leading-snug">
+            Low-friction starter for facing a blank sketchbook page.
+          </p>
+        </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Character Design */}
+        {/* Spark 2: Warm-Up Exercises */}
+        <button
+          onClick={onOpenWarmUp}
+          className="text-left rounded-xl bg-white border border-[#E5E5DE] hover:border-[#16171A] p-4 transition-all shadow-2xs group"
+        >
+          <div className="text-[11px] font-mono-code text-[#686862] mb-1">
+            04 · CALISTHENICS
+          </div>
+          <div className="font-display font-bold text-base text-[#16171A] group-hover:text-[#2752E7] transition-colors">
+            2-Minute Hand Warm-Up
+          </div>
+          <p className="text-xs text-[#686862] mt-1 leading-snug">
+            Quick wrist looseners, continuous line gestures, and textures.
+          </p>
+        </button>
+
+        {/* Spark 3: Creative Chaos */}
+        <button
+          onClick={onOpenChaos}
+          className="text-left rounded-xl bg-white border border-[#E5E5DE] hover:border-[#16171A] p-4 transition-all shadow-2xs group"
+        >
+          <div className="text-[11px] font-mono-code text-[#686862] mb-1">
+            05 · EXPERIMENT
+          </div>
+          <div className="font-display font-bold text-base text-[#16171A] group-hover:text-[#2752E7] transition-colors">
+            Creative Chaos Generator
+          </div>
+          <p className="text-xs text-[#686862] mt-1 leading-snug">
+            Roll unpredictable medium, theme, and constraint dice.
+          </p>
+        </button>
+
+        {/* Spark 4: Part Reference Library */}
+        {onOpenPartLibrary && (
           <button
-            onClick={onOpenCharacterDesign}
-            className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] hover:border-[#2D2723] transition-all text-left group min-h-[56px]"
+            onClick={onOpenPartLibrary}
+            className="text-left rounded-xl bg-white border border-[#E5E5DE] hover:border-[#2752E7] p-4 transition-all shadow-2xs group"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FFEAE5] text-[#C04D33] flex items-center justify-center shrink-0">
-                <User className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#C04D33]">
-                  Character Design
-                </span>
-                <span className="block text-[11px] text-[#7A6E63]">
-                  9-stage quick workshop
-                </span>
-              </div>
+            <div className="text-[11px] font-mono-code text-[#2752E7] mb-1 font-semibold flex items-center justify-between">
+              <span>06 · REFERENCES</span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#EFF3FF]">197+ PIECES</span>
             </div>
-            <ArrowRight className="w-4 h-4 text-[#8A7D71] group-hover:translate-x-0.5 transition-transform" />
-          </button>
-
-          {/* Warm Up */}
-          <button
-            onClick={onOpenWarmUp}
-            className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] hover:border-[#2D2723] transition-all text-left group min-h-[56px]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FFF2E6] text-[#E06D53] flex items-center justify-center shrink-0">
-                <Flame className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#E06D53]">
-                  Warm Up
-                </span>
-                <span className="block text-[11px] text-[#7A6E63]">
-                  2-minute hand looseners
-                </span>
-              </div>
+            <div className="font-display font-bold text-base text-[#16171A] group-hover:text-[#2752E7] transition-colors">
+              Part Reference Library
             </div>
-            <ArrowRight className="w-4 h-4 text-[#8A7D71] group-hover:translate-x-0.5 transition-transform" />
+            <p className="text-xs text-[#686862] mt-1 leading-snug">
+              Isolated black & white shapes for heads, eyes, hair, bodies, and paws.
+            </p>
           </button>
-
-          {/* Creative Chaos */}
-          <button
-            onClick={onOpenChaos}
-            className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] hover:border-[#2D2723] transition-all text-left group min-h-[56px]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#F2F4EB] text-[#606C38] flex items-center justify-center shrink-0">
-                <Dices className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#606C38]">
-                  Creative Chaos
-                </span>
-                <span className="block text-[11px] text-[#7A6E63]">
-                  Weird combo generator
-                </span>
-              </div>
-            </div>
-            <ArrowRight className="w-4 h-4 text-[#8A7D71] group-hover:translate-x-0.5 transition-transform" />
-          </button>
-
-          {/* Challenge Me */}
-          <button
-            onClick={onOpenChallenge}
-            className="flex items-center justify-between p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5] hover:border-[#2D2723] transition-all text-left group min-h-[56px]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FEF6E4] text-[#DDA15E] flex items-center justify-center shrink-0">
-                <Trophy className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="block text-sm font-extrabold text-[#2D2723] group-hover:text-[#B0722A]">
-                  Challenge Me
-                </span>
-                <span className="block text-[11px] text-[#7A6E63]">
-                  Level up your skills
-                </span>
-              </div>
-            </div>
-            <ArrowRight className="w-4 h-4 text-[#8A7D71] group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </div>
+        )}
       </div>
     </section>
   );
