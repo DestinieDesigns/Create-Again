@@ -10,22 +10,53 @@ import { CHIBI_FACIAL } from './chibiParts/facial';
 import { CHIBI_ANATOMY } from './chibiParts/anatomy';
 import { CHIBI_CREATURE_FEATURES } from './chibiParts/creatureFeatures';
 import { CHIBI_CLOTHING_STYLE } from './chibiParts/clothingAndStyle';
+import { PLANNED_MISSING_ASSETS } from './chibiAssetManifest';
 
-// Consolidated master library of individual chibi part references
-export const CHIBI_PART_REFERENCES: ChibiPartReference[] = [
+// Format existing parts with status: 'available'
+const BASE_AVAILABLE_PARTS: ChibiPartReference[] = [
   ...CHIBI_HEADS,
   ...CHIBI_FACIAL,
   ...CHIBI_ANATOMY,
   ...CHIBI_CREATURE_FEATURES,
   ...CHIBI_CLOTHING_STYLE,
+].map((part) => ({
+  ...part,
+  status: part.status || 'available',
+}));
+
+// Format planned missing/upcoming assets from manifest
+const PLANNED_PARTS: ChibiPartReference[] = PLANNED_MISSING_ASSETS.map((asset) => ({
+  id: asset.id,
+  category: asset.category,
+  name: asset.name,
+  imageUrl: asset.path,
+  filename: asset.filename,
+  status: asset.status,
+  tier: asset.tier,
+  priority: asset.priority,
+  required: asset.required,
+  altText: asset.altText,
+  description: asset.description,
+  drawingCue: asset.drawingCue,
+  tags: asset.tags,
+  compatibleTypes: asset.compatibleTypes,
+  compatibleThemes: asset.compatibleThemes,
+  difficulty: asset.difficulty,
+  svgContent: asset.svgContent,
+}));
+
+// Consolidated master library of individual chibi part references
+export const CHIBI_PART_REFERENCES: ChibiPartReference[] = [
+  ...BASE_AVAILABLE_PARTS,
+  ...PLANNED_PARTS,
 ];
 
 // Section 39: Organize by drawing stage
 export const chibiStageReferenceMap: ChibiStageReferenceMap = {
   idea: [],
   theme: [],
-  silhouette: ['body'],
-  head: ['head', 'head-angle'],
+  silhouette: ['body', 'robot'],
+  head: ['head', 'head-angle', 'robot'],
   face: ['eye', 'eyebrow', 'nose', 'mouth'],
   hair: ['hair', 'animal-feature', 'fantasy-feature'],
   definingFeatures: [
@@ -36,10 +67,11 @@ export const chibiStageReferenceMap: ChibiStageReferenceMap = {
     'tail',
     'scale',
     'marking',
+    'robot',
   ],
-  body: ['body'],
-  arms: ['arm', 'hand'],
-  legs: ['leg', 'foot'],
+  body: ['body', 'robot'],
+  arms: ['arm', 'hand', 'robot'],
+  legs: ['leg', 'foot', 'robot'],
   clothing: ['clothing'],
   accessories: ['accessory'],
   personality: [],
@@ -52,7 +84,7 @@ export const chibiStageReferenceMap: ChibiStageReferenceMap = {
   colors: [],
 };
 
-// Section 27: Reference selection query function
+// Section 27 & 34: Reference selection query function
 export function getChibiReferences(options?: ChibiReferenceFilterOptions): ChibiPartReference[] {
   if (!options) return CHIBI_PART_REFERENCES;
 
@@ -88,20 +120,24 @@ export function getChibiPartReferenceById(id: string): ChibiPartReference | unde
   return CHIBI_PART_REFERENCES.find((r) => r.id === id);
 }
 
-// Section 32: CHOOSE FOR ME selection algorithm
-// Selects ONE item from the current category, prioritizing compatible tags/types without changing previous choices
+// Section 25 & 32: CHOOSE FOR ME selection algorithm
+// Selects ONE item from current category, prioritizing AVAILABLE assets first, then compatible tags/types
 export function pickRandomCompatiblePart(
   category: ChibiPartCategory,
   characterType?: string,
   theme?: string
 ): ChibiPartReference {
-  const candidates = CHIBI_PART_REFERENCES.filter((p) => p.category === category);
-  if (candidates.length === 0) {
+  const allCandidates = CHIBI_PART_REFERENCES.filter((p) => p.category === category);
+  if (allCandidates.length === 0) {
     return CHIBI_PART_REFERENCES[0];
   }
 
+  // Section 25: Prefer available assets when picking for the user
+  const availableCandidates = allCandidates.filter((p) => p.status !== 'missing');
+  const poolBase = availableCandidates.length > 0 ? availableCandidates : allCandidates;
+
   // Soft preference match (Section 28: Compatibility should guide, not restrict)
-  const preferred = candidates.filter((p) => {
+  const preferred = poolBase.filter((p) => {
     if (characterType && p.compatibleTypes && p.compatibleTypes.includes(characterType)) {
       return true;
     }
@@ -111,7 +147,7 @@ export function pickRandomCompatiblePart(
     return false;
   });
 
-  const pool = preferred.length > 0 ? preferred : candidates;
+  const pool = preferred.length > 0 ? preferred : poolBase;
   const randomIndex = Math.floor(Math.random() * pool.length);
   return pool[randomIndex];
 }

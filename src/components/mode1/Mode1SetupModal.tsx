@@ -4,18 +4,8 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  HelpCircle,
-  Trees,
-  Footprints,
-  Coffee,
-  Rocket,
-  Ghost,
-  Gamepad2,
-  BookMarked,
-  Shapes,
-  MapPin,
-  Dices,
-  CircleOff,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { AdventureType, CreativePathwayId } from '../../types/prompt';
 import { THEMES, getThemeById } from '../../data/themes';
@@ -34,6 +24,11 @@ interface Mode1SetupModalProps {
   onChangePathway?: () => void;
 }
 
+/**
+ * Section 2: Activity Setup — ONE SCREEN = ONE MAIN DECISION
+ * Main Question: "How much time do you have?"
+ * Advanced controls (Adventure depth, Theme) kept behind progressive disclosure.
+ */
 export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   isOpen,
   onClose,
@@ -44,6 +39,7 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   const [selectedDuration, setSelectedDuration] = useState<number | null>(300); // 5 minutes default
   const [selectedAdventure, setSelectedAdventure] = useState<AdventureType>('full-adventure');
   const [selectedThemeId, setSelectedThemeId] = useState<string>(themeId);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   useEffect(() => {
     if (themeId) {
@@ -54,11 +50,11 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
   if (!isOpen) return null;
 
   const durationOptions = [
-    { label: '2 MIN', value: 120 },
-    { label: '5 MIN', value: 300 },
-    { label: '10 MIN', value: 600 },
-    { label: '20 MIN', value: 1200 },
-    { label: 'NO TIMER', value: null },
+    { label: '2 MIN', value: 120, desc: 'Quick spark' },
+    { label: '5 MIN', value: 300, desc: 'Standard practice' },
+    { label: '10 MIN', value: 600, desc: 'Deep sketch' },
+    { label: '20 MIN', value: 1200, desc: 'Full page' },
+    { label: 'UNTIMED', value: null, desc: 'Draw at your own pace' },
   ];
 
   const adventureOptions: {
@@ -83,142 +79,125 @@ export const Mode1SetupModal: React.FC<Mode1SetupModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="What Comes Next setup"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2723]/60 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#16171A]/50 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="relative w-full max-w-2xl bg-[#FCFAF6] rounded-3xl p-5 sm:p-8 paper-card border-2 border-[#E8E0D5] max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E5DE] shadow-xl text-center max-h-[92vh] overflow-y-auto space-y-6">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#EFE9DF] text-[#6B6158] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F4F0] text-[#8A8A82] hover:text-[#16171A] transition-colors"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="text-left pb-4 border-b border-[#E8E0D5]">
-          <div className="text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#E06D53]" />
-            <span>Signature Mode</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2D2723] tracking-tight mt-1 font-sans">
+        <div className="space-y-1">
+          <div className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#2752E7]">
             WHAT COMES NEXT?
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-display font-bold text-[#16171A] tracking-tight">
+            How much time do you have?
           </h2>
-          <p className="text-sm sm:text-base text-[#5C5249] mt-1 font-medium">
-            You won't know what happens next. Grab your sketchbook or open your drawing tablet, then let the adventure begin.
+          <p className="text-xs sm:text-sm text-[#686862]">
+            Pick a time or draw untimed. You'll receive one mark instruction at a time.
           </p>
         </div>
 
-        {/* Configuration Sections */}
-        <div className="space-y-6 my-6 text-left">
-          {/* 1. TIME */}
-          <div>
-            <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] mb-2.5 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              <span>TIME</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {durationOptions.map((opt) => {
-                const isSelected = selectedDuration === opt.value;
-                return (
-                  <button
-                    key={opt.label}
-                    onClick={() => setSelectedDuration(opt.value)}
-                    className={`py-3 px-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[44px] ${
-                      isSelected
-                        ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-xs'
-                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 2. ADVENTURE LENGTH */}
-          <div>
-            <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71] mb-2.5">
-              ADVENTURE
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {adventureOptions.map((adv) => {
-                const isSelected = selectedAdventure === adv.id;
-                return (
-                  <button
-                    key={adv.id}
-                    onClick={() => setSelectedAdventure(adv.id)}
-                    className={`p-3 rounded-xl border-2 text-left transition-all min-h-[48px] ${
-                      isSelected
-                        ? 'bg-[#2D2723] text-[#FAF7F2] border-[#2D2723] shadow-xs'
-                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
-                    }`}
-                  >
-                    <span className="block text-xs font-bold">{adv.label}</span>
-                    <span
-                      className={`block text-[11px] mt-0.5 ${
-                        isSelected ? 'text-[#FAF7F2]/80' : 'text-[#8A7D71]'
-                      }`}
-                    >
-                      {adv.desc}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3. THEME */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="text-xs font-mono-code font-bold uppercase tracking-wider text-[#8A7D71]">
-                THEME
-              </div>
-              <span className="text-xs text-[#8A7D71]">
-                Active: {getThemeById(selectedThemeId)?.name || 'Surprise Me'}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {THEMES.slice(0, 8).map((thm) => {
-                const isSelected = selectedThemeId === thm.id;
-                return (
-                  <button
-                    key={thm.id}
-                    onClick={() => setSelectedThemeId(thm.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all min-h-[40px] ${
-                      isSelected
-                        ? 'bg-[#2D2723] text-white border-[#2D2723]'
-                        : 'bg-[#FAF7F2] border-[#E8E0D5] text-[#55473B] hover:bg-[#EFE9DF]'
-                    }`}
-                  >
-                    {thm.name}
-                  </button>
-                );
-              })}
+        {/* MAIN DECISION: TIME DURATION OPTIONS */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-left">
+          {durationOptions.map((opt) => {
+            const isSelected = selectedDuration === opt.value;
+            return (
               <button
-                onClick={() => setSelectedThemeId('surprise')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all min-h-[40px] ${
-                  selectedThemeId === 'surprise'
-                    ? 'bg-[#E06D53] text-white border-[#E06D53]'
-                    : 'bg-[#FFF2E6] border-[#F5C7BC] text-[#E06D53] hover:bg-[#FFE6D4]'
+                key={opt.label}
+                onClick={() => setSelectedDuration(opt.value)}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between min-h-[78px] ${
+                  isSelected
+                    ? 'bg-[#16171A] text-white border-[#16171A] shadow-2xs'
+                    : 'bg-white border-[#E5E5DE] text-[#16171A] hover:bg-[#FAF9F5]'
                 }`}
               >
-                Surprise Me
+                <div className="font-mono-code font-bold text-xs">
+                  {opt.label}
+                </div>
+                <div
+                  className={`text-[11px] leading-tight ${
+                    isSelected ? 'text-[#C4C4BC]' : 'text-[#8A8A82]'
+                  }`}
+                >
+                  {opt.desc}
+                </div>
               </button>
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* Start Button */}
-        <div className="pt-4 border-t border-[#E8E0D5]">
+        {/* PRIMARY ACTION */}
+        <div>
           <button
             onClick={handleStart}
-            className="w-full py-4 px-6 rounded-2xl bg-[#2D2723] text-[#FAF7F2] font-extrabold text-base hover:bg-[#433B35] transition-all shadow-md active:scale-98 flex items-center justify-center gap-2.5 min-h-[52px]"
+            className="w-full py-4 px-6 rounded-2xl bg-[#16171A] text-white font-semibold text-base hover:bg-[#2C2D32] transition-colors shadow-2xs flex items-center justify-center gap-2 group min-h-[50px] active:scale-[0.99]"
           >
-            <Sparkles className="w-4 h-4 text-[#E5B574]" />
-            <span>START MYSTERY</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Start Drawing</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
+        </div>
+
+        {/* PROGRESSIVE DISCLOSURE: MORE OPTIONS */}
+        <div className="pt-2 border-t border-[#F0F0EB]">
+          <button
+            onClick={() => setShowMoreOptions(!showMoreOptions)}
+            className="text-xs text-[#8A8A82] hover:text-[#16171A] transition-colors inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-[#F4F4F0]"
+          >
+            <span>More Options (Theme & Length)</span>
+            {showMoreOptions ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+
+          {showMoreOptions && (
+            <div className="mt-4 p-4 rounded-2xl bg-[#FAF9F5] border border-[#E5E5DE] text-left space-y-4 animate-in fade-in duration-100">
+              {/* Adventure Length */}
+              <div>
+                <label className="block text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#686862] mb-1.5">
+                  Length / Depth
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {adventureOptions.slice(0, 4).map((adv) => (
+                    <button
+                      key={adv.id}
+                      onClick={() => setSelectedAdventure(adv.id)}
+                      className={`p-2.5 rounded-xl border text-xs text-left transition-colors ${
+                        selectedAdventure === adv.id
+                          ? 'bg-white border-[#16171A] font-semibold text-[#16171A] shadow-2xs'
+                          : 'bg-white border-[#E5E5DE] text-[#686862] hover:text-[#16171A]'
+                      }`}
+                    >
+                      <div>{adv.label}</div>
+                      <div className="text-[10px] text-[#8A8A82]">{adv.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Theme Picker */}
+              <div>
+                <label className="block text-[11px] font-mono-code font-bold uppercase tracking-wider text-[#686862] mb-1.5">
+                  Theme Flavor
+                </label>
+                <select
+                  value={selectedThemeId}
+                  onChange={(e) => setSelectedThemeId(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-[#E5E5DE] bg-white text-xs font-medium text-[#16171A] focus:outline-none focus:border-[#2752E7]"
+                >
+                  <option value="none">Surprise / Free Drawing</option>
+                  {THEMES.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} — {t.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

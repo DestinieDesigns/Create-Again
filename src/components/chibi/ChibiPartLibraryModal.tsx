@@ -22,6 +22,7 @@ import {
 } from '../../data/chibiPartReferences';
 import { ChibiPartCard } from './ChibiPartCard';
 import { ChibiPartDetailModal } from './ChibiPartDetailModal';
+import { ChibiAssetWorkflowModal } from './ChibiAssetWorkflowModal';
 
 interface ChibiPartLibraryModalProps {
   isOpen: boolean;
@@ -56,6 +57,7 @@ const CATEGORY_TABS: { id: ChibiPartCategory | 'all'; label: string }[] = [
   { id: 'clothing', label: 'Clothing' },
   { id: 'accessory', label: 'Accessories' },
   { id: 'marking', label: 'Markings' },
+  { id: 'robot', label: 'Robot Parts' },
   { id: 'special-feature', label: 'Special Features' },
   { id: 'creature-feature', label: 'Creature Features' },
   { id: 'fantasy-feature', label: 'Fantasy Features' },
@@ -76,7 +78,9 @@ export const ChibiPartLibraryModal: React.FC<ChibiPartLibraryModalProps> = ({
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'available' | 'missing'>('all');
   const [inspectedPart, setInspectedPart] = useState<ChibiPartReference | null>(null);
+  const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
 
   // Sync category if initialCategory changes
   React.useEffect(() => {
@@ -87,14 +91,22 @@ export const ChibiPartLibraryModal: React.FC<ChibiPartLibraryModalProps> = ({
 
   // Filtered pieces
   const filteredParts = useMemo(() => {
-    return getChibiReferences({
+    const list = getChibiReferences({
       category: selectedCategory === 'all' ? undefined : selectedCategory,
       search: searchQuery,
       difficulty: selectedDifficulty === 'all' ? undefined : (selectedDifficulty as any),
       characterType,
       theme,
     });
-  }, [selectedCategory, searchQuery, selectedDifficulty, characterType, theme]);
+
+    if (selectedStatus === 'available') {
+      return list.filter((p) => p.status !== 'missing');
+    }
+    if (selectedStatus === 'missing') {
+      return list.filter((p) => p.status === 'missing');
+    }
+    return list;
+  }, [selectedCategory, searchQuery, selectedDifficulty, selectedStatus, characterType, theme]);
 
   if (!isOpen) return null;
 
@@ -134,6 +146,15 @@ export const ChibiPartLibraryModal: React.FC<ChibiPartLibraryModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setIsWorkflowModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-xs font-semibold text-[#16171A] transition-colors"
+              title="Open Missing Asset Workflow & Quality Review"
+            >
+              <Layers className="w-3.5 h-3.5 text-[#2752E7]" />
+              <span className="hidden sm:inline">Asset Workflow</span>
+            </button>
+
+            <button
               onClick={handleRandomPick}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-xs font-semibold text-[#16171A] transition-colors"
               title="Pick a random compatible piece"
@@ -165,9 +186,18 @@ export const ChibiPartLibraryModal: React.FC<ChibiPartLibraryModalProps> = ({
               />
             </div>
 
-            {/* Difficulty Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-[#8A8A82] shrink-0">Level:</span>
+            {/* Filter Dropdowns */}
+            <div className="flex items-center gap-2 overflow-x-auto">
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as any)}
+                className="text-xs px-2.5 py-1.5 rounded-lg border border-[#E5E5DE] bg-white text-[#16171A] focus:outline-none focus:border-[#2752E7]"
+              >
+                <option value="all">All States</option>
+                <option value="available">✓ Available</option>
+                <option value="missing">○ In Progress</option>
+              </select>
+
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
@@ -265,6 +295,12 @@ export const ChibiPartLibraryModal: React.FC<ChibiPartLibraryModalProps> = ({
           }
         }}
         onPractice={onPracticePart}
+      />
+
+      {/* Missing Asset Workflow & Creator Specification Modal */}
+      <ChibiAssetWorkflowModal
+        isOpen={isWorkflowModalOpen}
+        onClose={() => setIsWorkflowModalOpen(false)}
       />
     </div>
   );

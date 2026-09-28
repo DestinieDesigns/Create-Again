@@ -14,8 +14,10 @@ import {
   Smile,
   Shield,
   Layers,
+  FileCode,
 } from 'lucide-react';
 import { ChibiCharacter, ChibiPreferences, ChibiProgressStats } from '../../types/chibi';
+import { ChibiAssetWorkflowModal } from './ChibiAssetWorkflowModal';
 
 interface ChibiLandingViewProps {
   activeCharacter: ChibiCharacter | null;
@@ -47,6 +49,7 @@ export const ChibiLandingView: React.FC<ChibiLandingViewProps> = ({
   onBackToHome,
 }) => {
   const [confirmNewModal, setConfirmNewModal] = useState(false);
+  const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
 
   const hasActiveSession =
     activeCharacter && activeCharacter.completedStages.length > 0;
@@ -257,14 +260,25 @@ export const ChibiLandingView: React.FC<ChibiLandingViewProps> = ({
             </p>
           </div>
 
-          <button
-            onClick={onOpenPartLibrary}
-            className="px-5 py-3 rounded-xl bg-[#16171A] hover:bg-[#2752E7] text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors shadow-2xs shrink-0"
-          >
-            <Layers className="w-4 h-4 text-[#E6EEFF]" />
-            <span>Browse Part Library</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsWorkflowModalOpen(true)}
+              className="px-4 py-3 rounded-xl border border-[#E5E5DE] bg-white hover:bg-[#F4F4F0] text-[#16171A] font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors shadow-2xs shrink-0"
+              title="Open Missing Asset Workflow, Creation Queue, and QA Checklist"
+            >
+              <FileCode className="w-4 h-4 text-[#2752E7]" />
+              <span>Asset Workflow</span>
+            </button>
+
+            <button
+              onClick={onOpenPartLibrary}
+              className="px-5 py-3 rounded-xl bg-[#16171A] hover:bg-[#2752E7] text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors shadow-2xs shrink-0"
+            >
+              <Layers className="w-4 h-4 text-[#E6EEFF]" />
+              <span>Browse Part Library</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -405,6 +419,12 @@ export const ChibiLandingView: React.FC<ChibiLandingViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Missing Asset Workflow & QA Checklist Modal */}
+      <ChibiAssetWorkflowModal
+        isOpen={isWorkflowModalOpen}
+        onClose={() => setIsWorkflowModalOpen(false)}
+      />
     </div>
   );
 };

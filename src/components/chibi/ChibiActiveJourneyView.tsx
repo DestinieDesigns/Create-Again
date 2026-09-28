@@ -35,6 +35,7 @@ import { ChibiVisualReferenceCard } from '../../data/chibiVisualReferences';
 import { ChibiEvolutionTimelineModal } from './ChibiEvolutionTimelineModal';
 import { ChibiPartSelector } from './ChibiPartSelector';
 import { ChibiPartLibraryModal } from './ChibiPartLibraryModal';
+import { ChibiAssetPlaceholder } from './ChibiAssetPlaceholder';
 
 interface ChibiActiveJourneyViewProps {
   character: ChibiCharacter;
@@ -372,40 +373,25 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
         </div>
       </div>
 
-      {/* Stage Roadmap Progress Bar */}
-      <nav aria-label="Stages" className="mb-6 overflow-x-auto no-scrollbar pb-1">
-        <div className="flex items-center gap-1.5 min-w-max">
-          {CHIBI_JOURNEY_STAGES.map((stage, idx) => {
-            const isCompleted = character.completedStages.includes(stage.id);
-            const isCurrent = stage.id === activeStage.id;
-            const isLocked = !isCompleted && !isCurrent && idx > currentStageIndex + 1;
-
-            return (
-              <button
-                key={stage.id}
-                disabled={isLocked}
-                onClick={() => onJumpToStage(stage.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isCurrent
-                    ? 'bg-[#16171A] text-white shadow-2xs'
-                    : isCompleted
-                    ? 'bg-[#F4F4F0] text-[#16171A] hover:bg-[#EEEEEA]'
-                    : isLocked
-                    ? 'bg-[#FBFBFA] text-[#C4C4BC] cursor-not-allowed opacity-50'
-                    : 'bg-white text-[#686862] border border-[#E5E5DE] hover:bg-[#F4F4F0]'
-                }`}
-              >
-                {isCompleted ? (
-                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
-                ) : (
-                  <span className="text-[10px] font-mono">{idx + 1}</span>
-                )}
-                <span>{stage.title}</span>
-              </button>
-            );
-          })}
+      {/* Subtle Progress Bar (Section 15: ONE SCREEN = ONE MAIN DECISION) */}
+      <div className="flex items-center justify-between py-2 text-xs text-[#686862] border-b border-[#E5E5DE]/70 mb-5">
+        <div className="flex items-center gap-2">
+          <span className="font-mono-code font-bold uppercase tracking-wider text-[#2752E7]">
+            CHIBI CHARACTER
+          </span>
+          <span className="text-[#8A8A82]">·</span>
+          <span className="font-semibold text-[#16171A]">
+            Stage {activeStage.stageNumber} of 20: {activeStage.title}
+          </span>
         </div>
-      </nav>
+
+        <button
+          onClick={() => setIsTimelineDrawerOpen(true)}
+          className="text-xs text-[#686862] hover:text-[#16171A] hover:bg-[#F4F4F0] px-2.5 py-1 rounded-md transition-colors"
+        >
+          View All Stages ({character.completedStages.length}/20)
+        </button>
+      </div>
 
       {/* Revisiting Stage Notice */}
       {isRevisiting && (
@@ -613,8 +599,17 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
 
         {/* RIGHT COLUMN: Isolated Visual Reference & Character Build Progress */}
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
-          {/* Isolated Part Reference Card (Section 1: DO NOT DISPLAY FULL SHEETS) */}
-          {activePartRef ? (
+          {/* Isolated Part Reference Card OR Clean Placeholder (Section 2: NEVER USE FULL SHEETS AS AUTOMATIC FALLBACKS) */}
+          {activePartRef && activePartRef.status === 'missing' ? (
+            <ChibiAssetPlaceholder
+              category={activePartRef.category}
+              name={activePartRef.name}
+              description={activePartRef.description}
+              drawingCue={activePartRef.drawingCue}
+              onContinue={handleNextClick}
+              showContinueButton={true}
+            />
+          ) : activePartRef ? (
             <div className="p-6 rounded-2xl border border-[#E5E5DE] bg-white shadow-2xs space-y-4">
               <div className="flex items-center justify-between border-b border-[#F0F0EB] pb-2.5">
                 <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#686862]">
@@ -659,6 +654,16 @@ export const ChibiActiveJourneyView: React.FC<ChibiActiveJourneyViewProps> = ({
                 <p>{activeStage.artTeacherNote}</p>
               </div>
             </div>
+          ) : hasPartReferences ? (
+            /* Part stage without specific asset: render clean placeholder, NOT full sheet */
+            <ChibiAssetPlaceholder
+              category={activeStage.id}
+              name={activeChoiceItem?.label || 'Custom Decision'}
+              description={activeChoiceItem?.sublabel || activeStage.artTeacherNote}
+              drawingCue={activeStage.artTeacherNote}
+              onContinue={handleNextClick}
+              showContinueButton={true}
+            />
           ) : activeChoiceItem ? (
             <ChibiVisualReferenceCard
               refId={activeChoiceItem.visualRefId}

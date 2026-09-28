@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Info, Sparkles } from 'lucide-react';
 import { ChibiPartReference } from '../../types/chibiReference';
 
 interface ChibiPartCardProps {
@@ -17,6 +17,9 @@ export const ChibiPartCard: React.FC<ChibiPartCardProps> = ({
   onInspect,
   compact = false,
 }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const isMissing = part.status === 'missing' || part.status === 'placeholder' || imageFailed;
+
   return (
     <div
       role="button"
@@ -59,13 +62,24 @@ export const ChibiPartCard: React.FC<ChibiPartCardProps> = ({
         </button>
       )}
 
-      {/* SVG Vector Drawing Canvas / Preview Box */}
+      {/* SVG Vector Drawing Canvas / Preview Box OR Missing Asset Placeholder */}
       <div
-        className={`w-full aspect-square rounded-lg bg-[#FAF9F5] border border-[#EEEEEC] flex items-center justify-center overflow-hidden transition-transform group-hover:scale-[1.02] ${
-          compact ? 'p-2 mb-1.5' : 'p-3 mb-2.5'
-        }`}
+        className={`w-full aspect-square rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-[1.02] ${
+          isMissing
+            ? 'bg-[#FAF9F5] border border-dashed border-[#D5D5CD]'
+            : 'bg-[#FAF9F5] border border-[#EEEEEC]'
+        } ${compact ? 'p-2 mb-1.5' : 'p-3 mb-2.5'}`}
       >
-        {part.svgContent ? (
+        {isMissing ? (
+          <div className="flex flex-col items-center justify-center text-center p-1 space-y-1">
+            <div className="w-7 h-7 rounded-full bg-[#EFEFEA] flex items-center justify-center text-[#8A8A82]">
+              <Sparkles className="w-3.5 h-3.5 text-[#8A8A82]" />
+            </div>
+            <span className="text-[9px] font-mono-code font-bold uppercase tracking-wider text-[#8A8A82]">
+              Ref Soon
+            </span>
+          </div>
+        ) : part.svgContent ? (
           <svg
             viewBox="0 0 100 100"
             className="w-full h-full max-w-[80px] max-h-[80px] text-[#16171A]"
@@ -76,6 +90,7 @@ export const ChibiPartCard: React.FC<ChibiPartCardProps> = ({
           <img
             src={part.imageUrl}
             alt={part.altText}
+            onError={() => setImageFailed(true)}
             className="w-full h-full object-contain max-w-[80px] max-h-[80px]"
             loading="lazy"
           />
@@ -84,9 +99,16 @@ export const ChibiPartCard: React.FC<ChibiPartCardProps> = ({
 
       {/* Piece Information */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-xs font-semibold text-[#16171A] truncate group-hover:text-[#2752E7] transition-colors">
-          {part.name}
-        </h4>
+        <div className="flex items-center gap-1.5">
+          <h4 className="text-xs font-semibold text-[#16171A] truncate group-hover:text-[#2752E7] transition-colors">
+            {part.name}
+          </h4>
+          {isMissing && (
+            <span className="shrink-0 text-[8px] font-mono-code font-medium px-1 py-0.2 rounded bg-[#FFF8EB] text-[#B25E00]">
+              Upcoming
+            </span>
+          )}
+        </div>
         {!compact && (
           <p className="text-[11px] text-[#8A8A82] line-clamp-1 mt-0.5 leading-tight">
             {part.description}
@@ -112,3 +134,4 @@ export const ChibiPartCard: React.FC<ChibiPartCardProps> = ({
     </div>
   );
 };
+

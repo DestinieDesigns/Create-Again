@@ -23,6 +23,7 @@ export type ChibiPartCategory =
   | 'animal-feature'
   | 'fantasy-feature'
   | 'creature-feature'
+  | 'robot'
   | 'special-feature';
 
 export interface ChibiPartReference {
@@ -30,8 +31,14 @@ export interface ChibiPartReference {
   category: ChibiPartCategory;
   name: string;
   imageUrl: string;
+  filename?: string;
+  status?: 'available' | 'missing' | 'optional' | 'placeholder';
+  tier?: 'core' | 'expanded' | 'future';
+  priority?: 'critical' | 'high' | 'medium' | 'low';
+  required?: boolean;
   altText: string;
   description: string;
+  drawingCue?: string;
   tags: string[];
   compatibleTypes?: string[];
   compatibleThemes?: string[];

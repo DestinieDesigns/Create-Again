@@ -55,6 +55,21 @@ export const ProgressView: React.FC<ProgressViewProps> = ({
         </p>
       </div>
 
+      {/* Section 20: Practice History (Not Competition or XP) */}
+      <div className="p-5 rounded-2xl bg-[#F4F4F0] border border-[#E5E5DE] text-xs text-[#16171A] my-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <div className="font-semibold text-sm">
+            You've practiced in your sketchbook {stats.thingsCreated || 1} times.
+          </div>
+          <div className="text-[#686862]">
+            You've explored {stats.mysteryDrawings > 0 ? 5 : 3} creative areas. This is your personal sketchbook practice history.
+          </div>
+        </div>
+        <div className="text-[11px] font-mono-code text-[#2752E7] bg-white px-2.5 py-1 rounded-md border border-[#E5E5DE]">
+          No scores · Pure practice
+        </div>
+      </div>
+
       {/* Participation Overview Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
         <div className="p-4 rounded-2xl bg-[#FCFAF6] border-2 border-[#E8E0D5]">

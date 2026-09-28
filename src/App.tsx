@@ -4,6 +4,7 @@ import { Footer } from './components/layout/Footer';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 
 // Home sections
+import { SimpleSketchbookHome } from './components/home/SimpleSketchbookHome';
 import { HeroSection } from './components/home/HeroSection';
 import { HomeHubCards } from './components/home/HomeHubCards';
 import { CreationChooserModal } from './components/home/CreationChooserModal';
@@ -978,91 +979,38 @@ export default function App() {
             onStartDrawing={() => setIsChooserOpen(true)}
           />
         ) : (
-          /* VIEW 5: Home Screen Central Hub */
-          <div className="app-container space-y-6">
-            {/* 1. Hero Section */}
-            <HeroSection
-              onStartCreating={() => setIsChooserOpen(true)}
-              onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
-              onOpenWhatIs={() => setIsWhatIsModalOpen(true)}
-              onOpenChibiJourney={() => {
-                setCurrentTab('chibi-journey');
-                setIsChibiJourneyActive(false);
-                setIsChibiSheetActive(false);
+          /* VIEW 5: Simple Sketchbook Companion Home (Section 5 & 6) */
+          <div className="app-container">
+            <SimpleSketchbookHome
+              onStartWhatComesNext={(duration) => {
+                handleStartMode1(duration !== undefined ? duration : 300, 'tiny-mystery', selectedPathway, selectedThemeId || 'none');
               }}
-            />
-
-            {/* 2. Unfinished Session Card (Only shows if unfinished session exists) */}
-            <ContinueSessionCard
-              session={activeSession}
-              onContinue={() => setCurrentTab('what-comes-next')}
-              onStartNew={() => setIsMode1SetupOpen(true)}
-            />
-
-            {/* 3. Section 8 Home Hub Cards: WHAT COMES NEXT?, I DON'T KNOW WHAT TO DRAW, CHIBI JOURNEY, QUICK ACTIVITIES */}
-            <HomeHubCards
-              onStartWhatComesNext={() => {
-                setSelectedPathway('open');
-                setIsMode1SetupOpen(true);
-              }}
-              onOpenDontKnow={() => setIsDontKnowOpen(true)}
-              onOpenCharacterDesign={() => setIsCharacterDesignModalOpen(true)}
-              onOpenChibiJourney={() => {
-                setCurrentTab('chibi-journey');
-                setIsChibiJourneyActive(false);
-                setIsChibiSheetActive(false);
-              }}
-              onOpenChibiChallenges={() => setIsChibiChallengesOpen(true)}
-              onOpenMyCharacters={() => setIsMyCharactersOpen(true)}
-              activeChibiCharacterName={activeChibiCharacter?.name || (activeChibiCharacter && activeChibiCharacter.completedStages.length > 0 ? 'Your Character' : undefined)}
-              activeChibiStageCount={activeChibiCharacter?.completedStages.length || 0}
-              onOpenWarmUp={() => setIsWarmUpOpen(true)}
               onOpenChaos={() => setIsChaosOpen(true)}
-              onOpenChallenge={() => setIsChallengeModalOpen(true)}
-              onOpenPartLibrary={() => setIsPartLibraryOpen(true)}
-            />
-
-            {/* 4. Creative Themes Section (Universal Theme System) */}
-            <CreativeThemesSection
-              selectedThemeId={selectedThemeId || 'none'}
-              onSelectTheme={(themeId) => updateSelectedTheme(themeId)}
-              onOpenThemeModal={() => setIsThemeModalOpen(true)}
-              onStartWithTheme={(themeId) => {
-                updateSelectedTheme(themeId);
-                handleStartMode1(300, 'tiny-mystery', selectedPathway, themeId);
+              onOpenChibiJourney={() => {
+                setCurrentTab('chibi-journey');
+                setIsChibiJourneyActive(false);
+                setIsChibiSheetActive(false);
               }}
-            />
-
-            {/* 5. Quick Start / Pick Your Vibe */}
-            <PickYourVibeSection
-              onQuickStart={handleQuickStart}
+              onOpenWarmUp={() => setIsWarmUpOpen(true)}
+              onOpenChallenges={() => setIsChallengeModalOpen(true)}
+              onOpenPathways={() => setIsPathwayChooserOpen(true)}
+              onOpenDontKnow={() => setIsDontKnowOpen(true)}
               onSurpriseMe={handleSurpriseMe}
-              onLetsCreate={handleLetsCreate}
-              onWarmUp={handleWarmUp}
-            />
-
-            {/* 6. Creative Journey User Statistics */}
-            <CreativeJourneyStatsSection
+              onRemix={() => {
+                handleStartMode1(300, 'chaos', 'open', selectedThemeId || 'none');
+              }}
+              onContinueSession={() => setCurrentTab('what-comes-next')}
+              onContinueChibi={handleContinueChibi}
+              onOpenMasterSheet={() => setIsMasterSheetOpen(true)}
+              onOpenPartLibrary={() => setIsPartLibraryOpen(true)}
+              onOpenThemes={() => setIsThemeModalOpen(true)}
+              onOpenCollection={() => setCurrentTab('collection')}
+              onOpenProgress={() => setCurrentTab('progress')}
+              onOpenFaith={settings.enableFaithContent ? () => setIsWhatIsModalOpen(true) : undefined}
+              activeSession={activeSession}
+              activeChibiCharacter={activeChibiCharacter}
               stats={stats}
-              onViewDetailedJourney={() => setCurrentTab('progress')}
             />
-
-            {/* 7. Recent Creations Sketchbook Grid */}
-            <RecentCreationsSection
-              creations={savedCreations}
-              onOpenCreate={() => setIsChooserOpen(true)}
-              onViewAll={() => setCurrentTab('collection')}
-            />
-
-            {/* 8. Unfinished Ideas encouragement */}
-            <UnfinishedIdeasSection
-              session={activeSession}
-              onResume={() => setCurrentTab('what-comes-next')}
-              onNew={() => setIsMode1SetupOpen(true)}
-            />
-
-            {/* 9. Optional Faith Content Card */}
-            <FaithContentCard enabled={settings.enableFaithContent} />
           </div>
         )}
       </main>

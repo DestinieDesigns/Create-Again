@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Check, Pencil, Sparkles, Tag, Layers, HelpCircle } from 'lucide-react';
 import { ChibiPartReference } from '../../types/chibiReference';
 
@@ -19,7 +19,11 @@ export const ChibiPartDetailModal: React.FC<ChibiPartDetailModalProps> = ({
   onPractice,
   isSelected = false,
 }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+
   if (!isOpen || !part) return null;
+
+  const isMissing = part.status === 'missing' || part.status === 'placeholder' || imageFailed;
 
   return (
     <div
@@ -36,6 +40,11 @@ export const ChibiPartDetailModal: React.FC<ChibiPartDetailModalProps> = ({
             <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-[#686862]">
               PART REFERENCE · {part.category.toUpperCase()}
             </span>
+            {isMissing && (
+              <span className="text-[9px] font-mono-code px-2 py-0.5 rounded-full bg-[#FFF8EB] border border-[#FFE8BF] text-[#B25E00] font-semibold">
+                Upcoming
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -45,9 +54,27 @@ export const ChibiPartDetailModal: React.FC<ChibiPartDetailModalProps> = ({
           </button>
         </div>
 
-        {/* Large Vector Drawing Display */}
-        <div className="w-full aspect-square max-h-64 mx-auto rounded-xl bg-[#FAF9F5] border border-[#EEEEEC] flex items-center justify-center p-6 mb-5 relative group">
-          {part.svgContent ? (
+        {/* Large Vector Drawing Display or Clean Placeholder Box */}
+        <div
+          className={`w-full aspect-square max-h-64 mx-auto rounded-xl flex items-center justify-center p-6 mb-5 relative group ${
+            isMissing
+              ? 'bg-[#FAF9F5] border border-dashed border-[#D5D5CD]'
+              : 'bg-[#FAF9F5] border border-[#EEEEEC]'
+          }`}
+        >
+          {isMissing ? (
+            <div className="flex flex-col items-center justify-center text-center p-4 space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E5E5DE] shadow-2xs flex items-center justify-center text-[#2752E7]">
+                <Sparkles className="w-6 h-6 stroke-[1.5]" />
+              </div>
+              <span className="text-xs font-mono-code uppercase font-semibold text-[#8A8A82]">
+                Reference Image Coming Soon
+              </span>
+              <p className="text-xs text-[#686862] max-w-xs">
+                You can still select this feature and draw it your own way on paper!
+              </p>
+            </div>
+          ) : part.svgContent ? (
             <svg
               viewBox="0 0 100 100"
               className="w-full h-full max-w-[180px] max-h-[180px] text-[#16171A]"
@@ -58,6 +85,7 @@ export const ChibiPartDetailModal: React.FC<ChibiPartDetailModalProps> = ({
             <img
               src={part.imageUrl}
               alt={part.altText}
+              onError={() => setImageFailed(true)}
               className="w-full h-full object-contain max-w-[180px] max-h-[180px]"
             />
           )}
@@ -83,14 +111,15 @@ export const ChibiPartDetailModal: React.FC<ChibiPartDetailModalProps> = ({
           </p>
         </div>
 
-        {/* Art Teacher Construction Advice */}
+        {/* Art Teacher Construction Advice & Drawing Cue */}
         <div className="p-3.5 rounded-xl bg-[#FBFBFA] border border-[#E5E5DE] mb-5 space-y-1.5">
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#16171A]">
             <HelpCircle className="w-3.5 h-3.5 text-[#2752E7]" />
             <span>Art Teacher Drawing Cue</span>
           </div>
           <p className="text-xs text-[#686862] leading-relaxed">
-            Keep initial strokes light with a soft 2B pencil. Block in the overall gesture before refining the clean outer outline.
+            {part.drawingCue ||
+              'Keep initial strokes light with a soft 2B pencil. Block in the overall gesture before refining the clean outer outline.'}
           </p>
         </div>
 
