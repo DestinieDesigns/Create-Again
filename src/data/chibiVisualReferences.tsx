@@ -1,5 +1,54 @@
 import React from 'react';
 import { Eye, HelpCircle } from 'lucide-react';
+import { VisualReference } from '../types/visualReference';
+
+export const CHIBI_VISUAL_REFERENCES: Record<string, VisualReference> = {
+  head: {
+    id: 'chibi-ref-head',
+    type: 'construction',
+    title: 'Chibi Head Proportions',
+    altText: 'Guide to drawing large rounded chibi head proportions',
+    explanation: 'Chibi heads are large and round with wide cheeks and a soft chin.',
+    whatToNotice: 'Notice how the head makes up almost half of the total character height.',
+    beginnerFriendly: true,
+  },
+  face: {
+    id: 'chibi-ref-face',
+    type: 'expression',
+    title: 'Chibi Face & Expressive Eyes',
+    altText: 'Low eye placement and tiny mouth for cute chibi expression',
+    explanation: 'Placing eyes along the lower third gives the signature innocent chibi look.',
+    whatToNotice: 'Notice the wide space between the eyes and the tiny mouth positioned close to the chin.',
+    beginnerFriendly: true,
+  },
+  hair: {
+    id: 'chibi-ref-hair',
+    type: 'line-art',
+    title: 'Chunky Hair Strands & Ears',
+    altText: 'Grouped chunky locks of hair and soft animal ears',
+    explanation: 'Draw hair in large simple clumps rather than thin strands.',
+    whatToNotice: 'Notice the bold silhouette of the hair framing the face.',
+    beginnerFriendly: true,
+  },
+  body: {
+    id: 'chibi-ref-body',
+    type: 'construction',
+    title: 'Compact Chibi Body',
+    altText: 'Simple bean-shaped torso with compact rounded limbs',
+    explanation: 'The body is simple and rounded, matching or smaller than the head size.',
+    whatToNotice: 'Notice the stubby arms and legs with minimal joint definition for maximum charm.',
+    beginnerFriendly: true,
+  },
+  accessories: {
+    id: 'chibi-ref-accessories',
+    type: 'object',
+    title: 'Signature Chibi Props & Accessories',
+    altText: 'Delightful oversized or miniature accessory for storytelling',
+    explanation: 'One distinct prop gives your character an instant personality and story.',
+    whatToNotice: 'Notice how a single prop like a mug, scarf, or satchel anchors the theme.',
+    beginnerFriendly: true,
+  },
+};
 
 interface ChibiVisualReferenceCardProps {
   refId: string;

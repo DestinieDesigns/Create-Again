@@ -400,3 +400,32 @@ export function getChaosPoolForTheme(themeId?: string | null): ThemedChaosPool {
     rules: [...themed.rules, ...GENERAL_CHAOS_POOL.rules.slice(0, 3)],
   };
 }
+
+export const CREATIVE_CHAOS_POOLS = {
+  characters: GENERAL_CHAOS_POOL.characters.map((c, i) => ({ id: `char-${i}`, label: c })),
+  settings: GENERAL_CHAOS_POOL.settings.map((s, i) => ({ id: `set-${i}`, label: s })),
+  objects: [
+    'carrying a giant wooden spoon',
+    'wearing mismatched boots',
+    'holding an oversized brass key',
+    'balancing an antique teacup',
+    'clutching a rolled-up star map',
+    'holding an umbrella made of leaves',
+    'carrying a backpack full of clocks',
+    'holding a glowing glass lantern',
+    'balancing on a tiny rolling stool',
+    ...GENERAL_CHAOS_POOL.features,
+  ].map((o, i) => ({ id: `obj-${i}`, label: o })),
+  moods: [
+    'nervous and looking over their shoulder',
+    'curious and tiptoeing forward',
+    'sleepy and yawning',
+    'determined with hands on hips',
+    'mischievous with a sly grin',
+    'wonderstruck with wide eyes',
+    'quiet and observing calmly',
+    'proudly showing something off',
+    'cozy and tranquil',
+    'whimsical and adventurous',
+  ].map((m, i) => ({ id: `mood-${i}`, label: m })),
+};

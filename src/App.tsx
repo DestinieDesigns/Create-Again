@@ -19,7 +19,7 @@ import { CreativeThemesSection } from './components/home/CreativeThemesSection';
 import { ThemeChooserModal } from './components/theme/ThemeChooserModal';
 import { FirstTimeExperienceModal } from './components/home/FirstTimeExperienceModal';
 import { WhatIsCreateAgainModal } from './components/home/WhatIsCreateAgainModal';
-import { getThemeById } from './data/themes';
+import { getThemeById, THEMES } from './data/themes';
 
 // Mode 1 components
 import { Mode1SetupModal } from './components/mode1/Mode1SetupModal';
@@ -70,6 +70,12 @@ import { MODE1_PROMPTS } from './data/mode1Prompts';
 import { AdventureType, CreativePathwayId, Prompt, CharacterSkill } from './types/prompt';
 import { Mode1Session, SavedCreation } from './types/session';
 
+// Listen & Draw (Hands-Free Mode)
+import { ListenDrawSession, ListenDrawConfig } from './types/listenDraw';
+import { ListenDrawActiveView } from './components/creative/ListenDrawActiveView';
+import { ListenDrawSetupModal } from './components/creative/ListenDrawSetupModal';
+import { generateListenDrawSteps } from './utils/listenDrawGenerator';
+
 export default function App() {
   const {
     activeSession,
@@ -94,7 +100,12 @@ export default function App() {
     | 'collection'
     | 'progress'
     | 'chibi-journey'
+    | 'listen-and-draw'
   >('home');
+
+  // Listen & Draw Session State
+  const [isListenDrawSetupOpen, setIsListenDrawSetupOpen] = useState(false);
+  const [activeListenDrawSession, setActiveListenDrawSession] = useState<ListenDrawSession | null>(null);
 
   // First-time visit and offline states
   const [isFirstTimeOpen, setIsFirstTimeOpen] = useState(() => {
@@ -431,13 +442,54 @@ export default function App() {
     saveCreation(creation);
   };
 
+  // Listen & Draw handlers
+  const handleStartListenDraw = (config: ListenDrawConfig) => {
+    const steps = generateListenDrawSteps(config.activityType, config.totalDurationSeconds, config.themeId || selectedThemeId || undefined);
+    const newSession: ListenDrawSession = {
+      id: 'lnd-' + Date.now(),
+      activityType: config.activityType,
+      voiceStyle: config.voiceStyle,
+      warningProfile: config.warningProfile,
+      totalDurationSeconds: config.totalDurationSeconds,
+      steps,
+      currentStepIndex: 0,
+      currentState: 'intro',
+      startedAt: Date.now(),
+      isPaused: false,
+      isCompleted: false,
+    };
+    setActiveListenDrawSession(newSession);
+    setCurrentTab('listen-and-draw');
+  };
+
+  const handleFinishListenDraw = (savedData?: Partial<SavedCreation>) => {
+    if (savedData) {
+      saveCreation(savedData as SavedCreation);
+    }
+    setActiveListenDrawSession(null);
+    setCurrentTab('home');
+  };
+
+  const handleExitListenDraw = () => {
+    setActiveListenDrawSession(null);
+    setCurrentTab('home');
+  };
+
   // Quick Start Actions from Vibe section
   const handleQuickStart = () => {
     handleStartMode1(120, 'tiny-mystery');
   };
 
   const handleSurpriseMe = () => {
-    setIsChaosOpen(true);
+    // Section 4: Pick something for me using the existing randomization systems
+    const randomTheme = THEMES && THEMES.length > 0
+      ? THEMES[Math.floor(Math.random() * THEMES.length)]
+      : null;
+    const randomDifficulties: AdventureType[] = ['tiny-mystery', 'short-adventure', 'chaos'];
+    const randomDifficulty = randomDifficulties[Math.floor(Math.random() * randomDifficulties.length)];
+    const randomDurations = [120, 300, 600];
+    const randomDuration = randomDurations[Math.floor(Math.random() * randomDurations.length)];
+    handleStartMode1(randomDuration, randomDifficulty, 'open', randomTheme ? randomTheme.id : 'none');
   };
 
   const handleLetsCreate = () => {
@@ -805,7 +857,8 @@ export default function App() {
   const isDrawingSession =
     (currentTab === 'what-comes-next' && !!(activeSession && currentPrompt)) ||
     isCharacterDesignActive ||
-    (currentTab === 'chibi-journey' && isChibiJourneyActive);
+    (currentTab === 'chibi-journey' && isChibiJourneyActive) ||
+    (currentTab === 'listen-and-draw' && !!activeListenDrawSession);
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] text-[#16171A] flex flex-col font-sans selection:bg-[#2752E7] selection:text-white">
@@ -978,8 +1031,16 @@ export default function App() {
             onBackToHome={() => setCurrentTab('home')}
             onStartDrawing={() => setIsChooserOpen(true)}
           />
+        ) : currentTab === 'listen-and-draw' && activeListenDrawSession ? (
+          /* VIEW 5: Hands-Free Listen & Draw Active Experience */
+          <ListenDrawActiveView
+            session={activeListenDrawSession}
+            onFinishSession={handleFinishListenDraw}
+            onExitToHome={handleExitListenDraw}
+            onSaveToCollection={handleSaveCreation}
+          />
         ) : (
-          /* VIEW 5: Simple Sketchbook Companion Home (Section 5 & 6) */
+          /* VIEW 6: Simple Sketchbook Companion Home (Section 5 & 6) */
           <div className="app-container">
             <SimpleSketchbookHome
               onStartWhatComesNext={(duration) => {
@@ -996,6 +1057,7 @@ export default function App() {
               onOpenPathways={() => setIsPathwayChooserOpen(true)}
               onOpenDontKnow={() => setIsDontKnowOpen(true)}
               onSurpriseMe={handleSurpriseMe}
+              onOpenListenDraw={() => setIsListenDrawSetupOpen(true)}
               onRemix={() => {
                 handleStartMode1(300, 'chaos', 'open', selectedThemeId || 'none');
               }}
@@ -1009,7 +1071,9 @@ export default function App() {
               onOpenFaith={settings.enableFaithContent ? () => setIsWhatIsModalOpen(true) : undefined}
               activeSession={activeSession}
               activeChibiCharacter={activeChibiCharacter}
+              savedCreations={savedCreations}
               stats={stats}
+              enableFaithContent={settings.enableFaithContent}
             />
           </div>
         )}
